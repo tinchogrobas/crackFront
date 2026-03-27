@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(npx vite:*)",
+      "Bash(npm run:*)",
+      "Bash(cd /c/Users/Martin/Desktop/crackfrontend && npx create-next-app@latest . --js --no-tailwind --no-eslint --no-turbopack --app --src-dir --no-import-alias 2>&1)",
+      "Bash(node:*)",
+      "Bash(nvm list:*)",
+      "Bash(nvm install:*)",
+      "Bash(nvm use:*)",
+      "Bash(cd /c/Users/Martin/Desktop/crackfrontend && echo \"No\" | npx create-next-app@latest . --js --no-tailwind --no-eslint --no-turbopack --app --src-dir --no-import-alias 2>&1)",
+      "Bash(cd /c/Users/Martin/Desktop/crackfrontend && printf \"No\\\\nNo\\\\n\" | npx create-next-app@latest . --js --no-tailwind --no-eslint --no-turbopack --app --src-dir --no-import-alias 2>&1)",
+      "Bash(cd /c/Users/Martin/Desktop/crackfrontend && yes \"\" | npx create-next-app@latest . --js --no-tailwind --no-eslint --no-turbopack --app --src-dir --no-import-alias 2>&1)",
+      "Bash(timeout 30 npx next build)",
+      "Bash(npm uninstall:*)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(find /c/Users/Martin/Desktop/crackfrontend/src -name *.css -o -name globals.css)",
+      "Bash(cd:*)",
+      "Bash(npx create-next-app@latest . --js --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm)",
+      "Bash(mv \"C:/Users/Martin/Desktop/crackfrontend/CLAUDE.md\" \"C:/Users/Martin/Desktop/CLAUDE.md.bak\")",
+      "Bash(timeout 15 npx next dev --port 3000)",
+      "Bash(timeout 20 npx next dev --port 3000)",
+      "Bash(timeout 25 npx next dev --port 3001)",
+      "Bash(rm -rf .next)",
+      "Bash(npx next:*)",
+      "WebFetch(domain:unsobremas.com)",
+      "Bash(xargs sed:*)",
+      "Bash(npm list:*)",
+      "Bash(xargs wc:*)",
+      "Bash(curl:*)",
+      "Bash(git config:*)",
+      "Bash(npx --no-install next build)",
+      "Bash(\"\"dependencies\"\" \")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ]
+  }
+}
