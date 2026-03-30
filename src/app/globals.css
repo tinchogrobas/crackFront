@@ -47,6 +47,14 @@ body {
   animation-play-state: paused;
 }
 
+@keyframes marquee-slow {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee-slow {
+  animation: marquee-slow 12s linear infinite;
+}
+
 .swiper-button-prev,
 .swiper-button-next {
   color: #1A1A1A !important;

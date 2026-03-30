@@ -33,10 +33,21 @@ export default function Navbar() {
   return (
     <>
       {/* Top announcement bar */}
-      <div className="bg-gradient-to-r from-[#C8972E] to-[#B8851F] text-white text-center py-2 fixed top-0 left-0 right-0 z-[60] px-4">
-        <span className="sm:hidden text-[10px] tracking-[0.08em] font-bold uppercase">
-          15% OFF · Código <span className="underline underline-offset-2">CRACK15</span>
-        </span>
+      <div className="bg-gradient-to-r from-[#C8972E] to-[#B8851F] text-white text-center py-2 fixed top-0 left-0 right-0 z-[60] px-4 overflow-hidden">
+        {/* Mobile: rota entre dos mensajes */}
+        <div className="sm:hidden">
+          <div className="animate-marquee-slow whitespace-nowrap inline-flex gap-16 text-[10px] tracking-[0.08em] font-bold uppercase">
+            <span>Envíos a todo el país</span>
+            <span>·</span>
+            <span>15% OFF · Código <span className="underline underline-offset-2">CRACK15</span></span>
+            <span>·</span>
+            <span>Envíos a todo el país</span>
+            <span>·</span>
+            <span>15% OFF · Código <span className="underline underline-offset-2">CRACK15</span></span>
+            <span>·</span>
+          </div>
+        </div>
+        {/* Desktop: texto completo estático */}
         <span className="hidden sm:inline text-[11px] tracking-[0.15em] font-bold uppercase">
           Envíos a todo el país — 15% OFF con código CRACK15
         </span>
