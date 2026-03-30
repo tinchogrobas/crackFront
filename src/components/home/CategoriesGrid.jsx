@@ -6,9 +6,9 @@ import { getCategories } from '@/lib/api';
 
 // Imagen por slug  agregá las tuyas acá
 const CATEGORY_IMAGES = {
-  'single':       'https://res.cloudinary.com/di7baglxg/image/upload/v1774460749/gemini-watermark-removed_9_i977nm.png',
-  'slab':         'https://res.cloudinary.com/di7baglxg/image/upload/v1774461207/Gemini_Generated_Image_qwjtqhqwjtqhqwjt_rcuo6r.png',
-  'sellado':      'https://zardocards.com/cdn/shop/files/Carousel_Tins_3d29024b-abf0-4f81-8859-037884551ddb.png?v=1762190773&width=400',
+  'singles':       'https://res.cloudinary.com/di7baglxg/image/upload/v1774460749/gemini-watermark-removed_9_i977nm.png',
+  'slabs':         'https://res.cloudinary.com/di7baglxg/image/upload/v1774461207/Gemini_Generated_Image_qwjtqhqwjtqhqwjt_rcuo6r.png',
+  'sellados':      'https://zardocards.com/cdn/shop/files/Carousel_Tins_3d29024b-abf0-4f81-8859-037884551ddb.png?v=1762190773&width=400',
   'accesorio':    'https://zardocards.com/cdn/shop/files/Carousel_SleevedPacks.png?v=1762270653&width=400',
   'mystery-pack': 'https://zardocards.com/cdn/shop/files/Carousel_SleevedPacks.png?v=1762270653&width=400',
 };
