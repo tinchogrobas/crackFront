@@ -33,8 +33,13 @@ export default function Navbar() {
   return (
     <>
       {/* Top announcement bar */}
-      <div className="bg-gradient-to-r from-[#C8972E] to-[#B8851F] text-white text-center py-2 text-[11px] tracking-[0.15em] font-bold uppercase fixed top-0 left-0 right-0 z-[60]">
-        Envíos a todo el país — 15% OFF con código CRACK15
+      <div className="bg-gradient-to-r from-[#C8972E] to-[#B8851F] text-white text-center py-2 fixed top-0 left-0 right-0 z-[60] px-4">
+        <span className="sm:hidden text-[10px] tracking-[0.08em] font-bold uppercase">
+          15% OFF · Código <span className="underline underline-offset-2">CRACK15</span>
+        </span>
+        <span className="hidden sm:inline text-[11px] tracking-[0.15em] font-bold uppercase">
+          Envíos a todo el país — 15% OFF con código CRACK15
+        </span>
       </div>
 
       {/* Main navbar */}
