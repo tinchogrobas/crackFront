@@ -35,7 +35,8 @@
       "Bash(npx --no-install next build)",
       "Bash(\"\"dependencies\"\" \")",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(grep:*)"
     ]
   }
 }

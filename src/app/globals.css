@@ -162,15 +162,17 @@ details.accordion[open] .icon-minus { display: block; }
 
 .accordion__body {
   font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
+  font-weight: 400;
+  text-transform: none;
 }
 
 .accordion__content {
   padding: 0 0 14px;
 }
 
-.accordion__content p   { margin-bottom: 8px; }
-.accordion__content ul  { padding-left: 20px; list-style: disc; margin-bottom: 8px; }
+.accordion__content p   { margin-bottom: 10px; }
+.accordion__content ul  { padding-left: 20px; list-style: disc; margin-bottom: 10px; }
+.accordion__content ol  { padding-left: 20px; list-style: decimal; margin-bottom: 10px; }
 .accordion__content li  { margin-bottom: 4px; }
-.accordion__content strong { font-weight: 800; }
+.accordion__content strong { font-weight: 700; }
+.accordion__content em  { font-style: italic; }
