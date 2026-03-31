@@ -137,7 +137,22 @@ export default function ProductDetailPage({ params }) {
             </p>
 
             {product.description && (
-              <p className="text-[13px] text-[#6B6560]/80 leading-relaxed mb-8">{product.description}</p>
+              <div className="product__block product__block--accordion block-padding mb-8">
+                <details className="accordion" open>
+                  <summary className="accordion__title">
+                    Descripción
+                    <svg className="icon icon-plus" viewBox="0 0 24 24" fill="none">
+                      <path d="M6 12h6m6 0h-6m0 0V6m0 6v6" stroke="#000" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <svg className="icon icon-minus" viewBox="0 0 24 24" fill="none">
+                      <path d="M6 12h12" stroke="#000" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </summary>
+                  <div className="accordion__body">
+                    <div className="accordion__content" dangerouslySetInnerHTML={{ __html: product.description }} />
+                  </div>
+                </details>
+              </div>
             )}
 
             {product.in_stock !== false && (

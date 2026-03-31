@@ -132,3 +132,45 @@ input:focus, select:focus, textarea:focus {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* Accordion – product detail */
+.product__block--accordion {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 0;
+}
+
+.accordion__title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 30px 14px 0;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.accordion__title::-webkit-details-marker { display: none; }
+.accordion__title::marker { display: none; }
+
+details.accordion .icon-plus  { display: block; width: 18px; height: 18px; }
+details.accordion .icon-minus { display: none;  width: 18px; height: 18px; }
+details.accordion[open] .icon-plus  { display: none; }
+details.accordion[open] .icon-minus { display: block; }
+
+.accordion__body {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.accordion__content {
+  padding: 0 0 14px;
+}
+
+.accordion__content p   { margin-bottom: 8px; }
+.accordion__content ul  { padding-left: 20px; list-style: disc; margin-bottom: 8px; }
+.accordion__content li  { margin-bottom: 4px; }
+.accordion__content strong { font-weight: 800; }
