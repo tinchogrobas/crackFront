@@ -94,35 +94,37 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 12px 32px rgba(200, 151, 46, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
-/* === Contact Shadow — subtle warm ground shadow beneath product === */
+/* === Contact Shadow — warm ground shadow beneath product === */
 .contact-shadow {
   position: absolute;
-  bottom: 4%;
+  bottom: 12%;
   left: 50%;
   transform: translateX(-50%);
-  width: 55%;
-  height: 10px;
+  width: 65%;
+  height: 16px;
   border-radius: 50%;
   background: radial-gradient(ellipse at center,
-    rgba(80, 60, 40, 0.18) 0%,
-    rgba(80, 60, 40, 0.07) 45%,
+    rgba(60, 45, 25, 0.35) 0%,
+    rgba(60, 45, 25, 0.15) 40%,
+    rgba(60, 45, 25, 0.04) 70%,
     transparent 100%
   );
-  filter: blur(4px);
+  filter: blur(3px);
   z-index: 0;
   pointer-events: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .group:hover .contact-shadow {
-  width: 60%;
-  height: 12px;
+  width: 70%;
+  height: 18px;
   background: radial-gradient(ellipse at center,
-    rgba(80, 60, 40, 0.24) 0%,
-    rgba(80, 60, 40, 0.09) 45%,
+    rgba(60, 45, 25, 0.42) 0%,
+    rgba(60, 45, 25, 0.18) 40%,
+    rgba(60, 45, 25, 0.05) 70%,
     transparent 100%
   );
-  filter: blur(5px);
-  bottom: 3%;
+  filter: blur(4px);
+  bottom: 11%;
 }
 
 /* === Discount Badge === */
