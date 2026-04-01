@@ -42,7 +42,7 @@ export default function ProductCard({ product }) {
 
         {product.image_url ? (
           <>
-            <Image src={product.image_url} alt={product.name} fill className="object-contain p-8 sm:p-11 pb-20 sm:pb-24 product-image-zoom relative z-[1]" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
+            <Image src={product.image_url} alt={product.name} fill className="object-contain p-5 sm:p-7 product-image-zoom relative z-[1]" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
             {/* Contact shadow — elliptical ground shadow beneath product */}
             <div className="contact-shadow" />
           </>
@@ -59,16 +59,11 @@ export default function ProductCard({ product }) {
           </span>
         )}
 
-        {/* Add to cart slide-up button */}
-        <div className="absolute bottom-0 left-0 right-0 z-10 add-to-cart-slide">
-          <button onClick={handleAddToCart} className="w-full py-2.5 bg-[#1A1A1A] text-white text-[11px] font-semibold uppercase tracking-[0.1em] flex items-center justify-center gap-2 hover:bg-[#2A2A2A] transition-colors duration-200">
-            <ShoppingBag size={13} />
-            Agregar al carrito
+        {/* Hover actions */}
+        <div className="absolute bottom-3 right-3 flex flex-col gap-1.5 z-10">
+          <button onClick={handleAddToCart} className="w-9 h-9 bg-[#C8972E] text-white rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300 hover:bg-[#B8851F] shadow-md hover:shadow-lg hover:scale-105">
+            <ShoppingBag size={14} />
           </button>
-        </div>
-
-        {/* Quick view button */}
-        <div className="absolute bottom-12 right-3 z-10">
           <button onClick={(e) => { e.stopPropagation(); router.push(`/tienda/${product.slug}`); }} className="w-9 h-9 bg-white/90 backdrop-blur-sm text-[#1A1A1A] rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300 delay-75 hover:bg-white shadow-md border border-[#E8E4DD]/50">
             <Eye size={14} />
           </button>
