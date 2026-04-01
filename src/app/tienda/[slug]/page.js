@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ShoppingBag, ChevronLeft, Shield, Award } from 'lucide-react';
-import { useCartStore } from '@/store/cartStore';
+import { getProductMaxQuantity, useCartStore } from '@/store/cartStore';
 import { formatPrice } from '@/lib/formatPrice';
 import QuantitySelector from '@/components/ui/QuantitySelector';
 import { getProductBySlug } from '@/lib/api';
@@ -54,12 +54,13 @@ export default function ProductDetailPage({ params }) {
   const categoryName = typeof product.category === 'object' ? product.category.name : product.category;
   const conditionName = product.condition ? (typeof product.condition === 'object' ? product.condition.name : product.condition) : null;
   const certEntity = product.certification_entity ? (typeof product.certification_entity === 'object' ? product.certification_entity.abbreviation || product.certification_entity.name : product.certification_entity) : null;
-  const maxQty = categoryName === 'Slab' || categoryName === 'Single' ? 1 : (product.stock_quantity || 99);
+  const maxQty = getProductMaxQuantity(product);
+  const canAddToCart = maxQty > 0;
 
   const handleAddToCart = () => {
     const success = addToCart(product, quantity);
     if (success) openCart();
-    else toast.error('Stock máximo alcanzado');
+    else toast.error(canAddToCart ? 'Stock máximo alcanzado' : 'Sin stock');
   };
 
   return (
@@ -155,7 +156,7 @@ export default function ProductDetailPage({ params }) {
               </div>
             )}
 
-            {product.in_stock !== false && (
+            {canAddToCart && (
               <div className="flex flex-col sm:flex-row gap-3 mb-8">
                 {maxQty > 1 && (
                   <QuantitySelector quantity={quantity} onIncrease={() => setQuantity(Math.min(quantity + 1, maxQty))} onDecrease={() => setQuantity(Math.max(quantity - 1, 1))} max={maxQty} />

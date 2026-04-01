@@ -2,6 +2,47 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+const UNIQUE_CATEGORIES = new Set(['Slab', 'Single']);
+
+export function getProductCategoryName(product) {
+  return typeof product?.category === 'object' ? product.category?.name : product?.category;
+}
+
+export function isUniqueProduct(product) {
+  return UNIQUE_CATEGORIES.has(getProductCategoryName(product));
+}
+
+export function getProductMaxQuantity(product) {
+  if (!product || product.in_stock === false) return 0;
+  if (isUniqueProduct(product)) return 1;
+  if (Number.isInteger(product.stock_quantity)) return product.stock_quantity;
+  return Number.POSITIVE_INFINITY;
+}
+
+function normalizeCartItem(product, quantity, currentItem = {}) {
+  const categoryName = getProductCategoryName(product);
+  const maxQty = getProductMaxQuantity(product);
+  const nextQuantity = Number.isFinite(maxQty) && maxQty > 0
+    ? Math.min(quantity, maxQty)
+    : quantity;
+
+  return {
+    ...currentItem,
+    id: product.id,
+    name: product.name,
+    slug: product.slug,
+    price: product.price_ars,
+    final_price: product.final_price,
+    discount_percent: product.discount_percent,
+    image_url: product.image_url,
+    category: categoryName,
+    stock_quantity: product.stock_quantity ?? null,
+    in_stock: product.in_stock !== false,
+    is_unique: isUniqueProduct(product),
+    quantity: nextQuantity,
+  };
+}
+
 export const useCartStore = create(
   persist(
     (set, get) => ({
@@ -18,34 +59,27 @@ export const useCartStore = create(
       addToCart: (product, qty = 1) => {
         const items = get().items;
         const existing = items.find((item) => item.id === product.id);
-        const categoryName = typeof product.category === 'object' ? product.category.name : product.category;
-        const isUnique = categoryName === 'Slab' || categoryName === 'Single';
-        const maxQty = isUnique ? 1 : (product.stock_quantity || 99);
+        const maxQty = getProductMaxQuantity(product);
+
+        if (maxQty === 0) return false;
 
         if (existing) {
           if (existing.quantity >= maxQty) return false;
-          const newQty = Math.min(existing.quantity + qty, maxQty);
+          const newQty = Number.isFinite(maxQty)
+            ? Math.min(existing.quantity + qty, maxQty)
+            : existing.quantity + qty;
           if (newQty === existing.quantity) return false;
           set({
             items: items.map((item) =>
-              item.id === product.id ? { ...item, quantity: newQty } : item
+              item.id === product.id ? normalizeCartItem(product, newQty, item) : item
             ),
           });
         } else {
+          const initialQuantity = Number.isFinite(maxQty) ? Math.min(qty, maxQty) : qty;
+          if (initialQuantity <= 0) return false;
+
           set({
-            items: [...items, {
-              id: product.id,
-              name: product.name,
-              slug: product.slug,
-              price: product.price_ars,
-              final_price: product.final_price,
-              discount_percent: product.discount_percent,
-              image_url: product.image_url,
-              category: categoryName,
-              stock_quantity: product.stock_quantity,
-              is_unique: isUnique,
-              quantity: Math.min(qty, maxQty),
-            }],
+            items: [...items, normalizeCartItem(product, initialQuantity)],
           });
         }
         return true;
@@ -60,11 +94,41 @@ export const useCartStore = create(
           get().removeFromCart(productId);
           return;
         }
+
         set({
           items: get().items.map((item) => {
             if (item.id !== productId) return item;
-            const maxQty = item.is_unique ? 1 : (item.stock_quantity || 99);
-            return { ...item, quantity: Math.min(quantity, maxQty) };
+            const maxQty = getProductMaxQuantity(item);
+            if (maxQty === 0) return item;
+            return {
+              ...item,
+              quantity: Number.isFinite(maxQty) ? Math.min(quantity, maxQty) : quantity,
+            };
+          }),
+        });
+      },
+
+      syncCartProducts: (products) => {
+        const productsMap = new Map(products.map((product) => [product.id, product]));
+
+        set({
+          items: get().items.map((item) => {
+            const product = productsMap.get(item.id);
+
+            if (!product) {
+              return {
+                ...item,
+                in_stock: false,
+                stock_quantity: 0,
+              };
+            }
+
+            const maxQty = getProductMaxQuantity(product);
+            const nextQuantity = Number.isFinite(maxQty) && maxQty > 0
+              ? Math.min(item.quantity, maxQty)
+              : item.quantity;
+
+            return normalizeCartItem(product, nextQuantity, item);
           }),
         });
       },

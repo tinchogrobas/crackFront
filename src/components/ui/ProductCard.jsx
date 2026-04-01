@@ -3,7 +3,7 @@ import { useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { ShoppingBag, Eye } from 'lucide-react';
-import { useCartStore } from '@/store/cartStore';
+import { getProductMaxQuantity, useCartStore } from '@/store/cartStore';
 import { formatPrice } from '@/lib/formatPrice';
 import toast from 'react-hot-toast';
 
@@ -12,9 +12,14 @@ export default function ProductCard({ product }) {
   const addToCart = useCartStore((s) => s.addToCart);
   const openCart = useCartStore((s) => s.openCart);
   const cardRef = useRef(null);
+  const canAddToCart = getProductMaxQuantity(product) > 0;
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
+    if (!canAddToCart) {
+      toast.error('Sin stock');
+      return;
+    }
     const success = addToCart(product);
     if (success) openCart();
     else toast.error('Stock máximo alcanzado');
@@ -61,7 +66,7 @@ export default function ProductCard({ product }) {
 
         {/* Hover actions */}
         <div className="absolute bottom-3 right-3 flex flex-col gap-1.5 z-10">
-          <button onClick={handleAddToCart} className="w-9 h-9 bg-[#C8972E] text-white rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300 hover:bg-[#B8851F] shadow-md hover:shadow-lg hover:scale-105">
+          <button onClick={handleAddToCart} disabled={!canAddToCart} className="w-9 h-9 bg-[#C8972E] text-white rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300 hover:bg-[#B8851F] shadow-md hover:shadow-lg hover:scale-105 disabled:opacity-40 disabled:translate-y-0 disabled:cursor-not-allowed">
             <ShoppingBag size={14} />
           </button>
           <button onClick={(e) => { e.stopPropagation(); router.push(`/tienda/${product.slug}`); }} className="w-9 h-9 bg-white/90 backdrop-blur-sm text-[#1A1A1A] rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300 delay-75 hover:bg-white shadow-md border border-[#E8E4DD]/50">

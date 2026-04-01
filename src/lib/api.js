@@ -50,6 +50,14 @@ export async function getProductBySlug(slug) {
   return apiFetch(`/products/${slug}/`);
 }
 
+export async function getProductsByIds(ids = []) {
+  const normalizedIds = [...new Set(ids.map((id) => Number(id)).filter((id) => Number.isInteger(id) && id > 0))];
+  if (normalizedIds.length === 0) return [];
+
+  const qs = new URLSearchParams({ ids: normalizedIds.join(',') });
+  return apiFetch(`/products/by-ids/?${qs}`).then(unwrapList);
+}
+
 export async function getNewArrivals() {
   return apiFetch('/products/new-arrivals/').then(unwrapList);
 }

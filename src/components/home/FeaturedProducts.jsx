@@ -5,14 +5,24 @@ import Link from 'next/link';
 import { ShoppingBag } from 'lucide-react';
 import { getFeaturedProducts } from '@/lib/api';
 import { formatPrice } from '@/lib/formatPrice';
-import { useCartStore } from '@/store/cartStore';
+import { getProductMaxQuantity, useCartStore } from '@/store/cartStore';
 import toast from 'react-hot-toast';
 
 function FeaturedCard({ product }) {
   const addToCart = useCartStore((s) => s.addToCart);
   const openCart = useCartStore((s) => s.openCart);
   const cat = typeof product.category === 'object' ? product.category.name : product.category;
-  const onAdd = (e) => { e.preventDefault(); e.stopPropagation(); if (addToCart(product)) openCart(); else toast.error('Stock maximo'); };
+  const canAddToCart = getProductMaxQuantity(product) > 0;
+  const onAdd = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!canAddToCart) {
+      toast.error('Sin stock');
+      return;
+    }
+    if (addToCart(product)) openCart();
+    else toast.error('Stock maximo');
+  };
   return (
     <Link href={`/tienda/${product.slug}`} className="group block">
       <div className="relative aspect-[3/4] bg-[#F8F6F2] rounded-xl overflow-hidden border border-[#E8E4DD]/80 group-hover:border-[#C8972E]/25 card-glow product-card-elevated">
@@ -25,7 +35,7 @@ function FeaturedCard({ product }) {
         )}
         {product.discount_percent > 0 && <span className="absolute top-3 left-3 bg-[#C8972E] text-white text-[10px] font-bold px-2.5 py-1 rounded-md z-10 discount-badge">-{product.discount_percent}%</span>}
         <div className="absolute bottom-3 right-3 flex flex-col gap-1.5 z-10">
-          <button onClick={onAdd} className="w-9 h-9 bg-[#C8972E] text-white rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300 hover:bg-[#B8851F] shadow-md hover:shadow-lg hover:scale-105"><ShoppingBag size={14} /></button>
+          <button onClick={onAdd} disabled={!canAddToCart} className="w-9 h-9 bg-[#C8972E] text-white rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300 hover:bg-[#B8851F] shadow-md hover:shadow-lg hover:scale-105 disabled:opacity-40 disabled:translate-y-0 disabled:cursor-not-allowed"><ShoppingBag size={14} /></button>
         </div>
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#F8F6F2]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>

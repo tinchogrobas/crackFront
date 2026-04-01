@@ -1,11 +1,12 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/cartStore';
+import { syncCartWithBackend } from '@/lib/cartSync';
 import { formatPrice } from '@/lib/formatPrice';
-import { createOrder, validateDiscount, getProductBySlug } from '@/lib/api';
+import { createOrder, validateDiscount } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Tag, AlertTriangle, Loader2, X, ShoppingBag } from 'lucide-react';
 
@@ -27,6 +28,7 @@ export default function CheckoutPage() {
   const setDiscount = useCartStore((s) => s.setDiscount);
   const removeFromCart = useCartStore((s) => s.removeFromCart);
   const clearCart = useCartStore((s) => s.clearCart);
+  const syncCartProducts = useCartStore((s) => s.syncCartProducts);
 
   const [form, setForm] = useState({
     customer_name: '',
@@ -48,9 +50,15 @@ export default function CheckoutPage() {
   // Validación de stock al cargar
   const [stockChecking, setStockChecking] = useState(true);
   const [stockIssues, setStockIssues] = useState([]); // [{ id, name, issue}]
+  const cartSignature = items.map((item) => `${item.id}:${item.quantity}`).join('|');
+  const cartItemsSnapshot = useMemo(
+    () => items.map((item) => ({ ...item })),
+    [cartSignature]
+  );
 
   useEffect(() => {
-    if (items.length === 0) {
+    if (cartItemsSnapshot.length === 0) {
+      setStockIssues([]);
       setStockChecking(false);
       return;
     }
@@ -59,44 +67,28 @@ export default function CheckoutPage() {
 
     async function checkStock() {
       setStockChecking(true);
-      const issues = [];
-
-      await Promise.allSettled(
-        items.map(async (item) => {
-          try {
-            const product = await getProductBySlug(item.slug);
-            if (!product.in_stock) {
-              issues.push({ id: item.id, name: item.name, issue: 'sin stock' });
-            } else if (
-              product.stock_quantity !== null &&
-              product.stock_quantity < item.quantity
-            ) {
-              issues.push({
-                id: item.id,
-                name: item.name,
-                issue: product.stock_quantity === 0
-                  ? 'sin stock'
-                  : `solo quedan ${product.stock_quantity} unidades`,
-              });
-            }
-          } catch {
-            // Si falla la consulta, dejamos pasar — el backend lo validará igual
+      try {
+        const issues = await syncCartWithBackend(cartItemsSnapshot, syncCartProducts);
+        if (!cancelled) {
+          setStockIssues(issues);
+          if (issues.length > 0) {
+            toast.error('Algunos productos ya no están disponibles', { duration: 4000 });
           }
-        })
-      );
-
-      if (!cancelled) {
-        setStockIssues(issues);
-        setStockChecking(false);
-        if (issues.length > 0) {
-          toast.error('Algunos productos ya no están disponibles', { duration: 4000 });
+        }
+      } catch {
+        if (!cancelled) {
+          setStockIssues([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setStockChecking(false);
         }
       }
     }
 
     checkStock();
     return () => { cancelled = true; };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [cartItemsSnapshot, syncCartProducts]);
 
   const updateForm = (field, value) => setForm((f) => ({ ...f, [field]: value }));
 
@@ -338,7 +330,7 @@ export default function CheckoutPage() {
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-[#1A1A1A] truncate">{item.name}</p>
                           <p className="text-[11px] text-[#6B6560]">x{item.quantity}</p>
-                          {hasIssue && <p className="text-[10px] text-red-500">Sin stock</p>}
+                          {hasIssue && <p className="text-[10px] text-red-500">{stockIssues.find((issue) => issue.id === item.id)?.issue || 'Sin stock'}</p>}
                         </div>
                         <p className="text-xs font-medium text-[#1A1A1A]">{formatPrice(parseFloat(item.final_price || item.price) * item.quantity)}</p>
                       </div>
