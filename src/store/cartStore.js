@@ -2,14 +2,14 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-const UNIQUE_CATEGORIES = new Set(['Slab', 'Single']);
+const UNIQUE_CATEGORIES = new Set(['slab', 'slabs', 'single', 'singles']);
 
 export function getProductCategoryName(product) {
   return typeof product?.category === 'object' ? product.category?.name : product?.category;
 }
 
 export function isUniqueProduct(product) {
-  return UNIQUE_CATEGORIES.has(getProductCategoryName(product));
+  return UNIQUE_CATEGORIES.has((getProductCategoryName(product) || '').trim().toLowerCase());
 }
 
 export function getProductMaxQuantity(product) {
