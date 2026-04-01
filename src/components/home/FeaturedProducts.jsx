@@ -14,15 +14,27 @@ function FeaturedCard({ product }) {
   const cat = typeof product.category === 'object' ? product.category.name : product.category;
   const onAdd = (e) => { e.preventDefault(); e.stopPropagation(); if (addToCart(product)) openCart(); else toast.error('Stock maximo'); };
   return (
-    <Link href={`/tienda/`} className="group block">
-      <div className="relative aspect-[3/4] bg-[#F8F6F2] rounded-xl overflow-hidden border border-[#E8E4DD]/80 group-hover:border-[#C8972E]/25 transition-all duration-500">
-        {product.image_url && <Image src={product.image_url} alt={product.name} fill className="object-contain p-6 sm:p-8 transition-transform duration-500 group-hover:scale-105" sizes="160px" />}
-        {product.discount_percent > 0 && <span className="absolute top-3 left-3 bg-[#C8972E] text-white text-[10px] font-bold px-2.5 py-1 rounded-md z-10">-{product.discount_percent}%</span>}
-        <button onClick={onAdd} className="absolute top-3 right-3 w-9 h-9 bg-white/90 text-[#C8972E] rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-[#C8972E] hover:text-white shadow-md z-10"><ShoppingBag size={14} /></button>
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white via-white/95 to-transparent z-10">
-          <p className="text-[9px] text-[#C8972E]/70 uppercase tracking-[0.15em] font-medium mb-1">{cat}</p>
-          <h3 className="text-[13px] font-bold text-[#1A1A1A] mb-1.5 group-hover:text-[#C8972E] transition-colors line-clamp-2">{product.name}</h3>
-          <div className="flex items-center gap-2"><span className="text-sm font-bold text-[#C8972E]">{formatPrice(product.final_price)}</span>{product.discount_percent > 0 && <span className="text-[11px] text-[#6B6560]/35 line-through">{formatPrice(product.price_ars)}</span>}</div>
+    <Link href={`/tienda/${product.slug}`} className="group block">
+      <div className="relative aspect-[3/4] bg-[#F8F6F2] rounded-xl overflow-hidden border border-[#E8E4DD]/80 group-hover:border-[#C8972E]/25 card-glow product-card-elevated">
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #C8972E 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+        {product.image_url && (
+          <>
+            <Image src={product.image_url} alt={product.name} fill className="object-contain p-8 sm:p-11 pb-20 sm:pb-24 product-image-zoom relative z-[1]" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
+            <div className="contact-shadow" />
+          </>
+        )}
+        {product.discount_percent > 0 && <span className="absolute top-3 left-3 bg-[#C8972E] text-white text-[10px] font-bold px-2.5 py-1 rounded-md z-10 discount-badge">-{product.discount_percent}%</span>}
+        <div className="absolute bottom-3 right-3 flex flex-col gap-1.5 z-10">
+          <button onClick={onAdd} className="w-9 h-9 bg-[#C8972E] text-white rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300 hover:bg-[#B8851F] shadow-md hover:shadow-lg hover:scale-105"><ShoppingBag size={14} /></button>
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#F8F6F2]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      </div>
+      <div className="mt-3.5 space-y-1 px-0.5">
+        <p className="text-[10px] text-[#C8972E]/70 uppercase tracking-[0.15em] font-medium">{cat}</p>
+        <h3 className="text-[13px] font-semibold text-[#1A1A1A]/75 truncate group-hover:text-[#1A1A1A] transition-colors duration-300">{product.name}</h3>
+        <div className="flex items-center gap-2 pt-0.5">
+          <span className="text-[14px] font-bold text-[#C8972E]">{formatPrice(product.final_price)}</span>
+          {product.discount_percent > 0 && <span className="text-[11px] text-[#6B6560]/35 line-through">{formatPrice(product.price_ars)}</span>}
         </div>
       </div>
     </Link>
