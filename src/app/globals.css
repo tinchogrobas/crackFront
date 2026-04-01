@@ -97,24 +97,22 @@ input:focus, select:focus, textarea:focus {
 /* === Contact Shadow — elliptical ground shadow beneath product === */
 .contact-shadow {
   position: absolute;
-  bottom: 3%;
+  bottom: 5%;
   left: 50%;
   transform: translateX(-50%);
-  width: 70%;
-  height: 24px;
+  width: 65%;
+  height: 30px;
   border-radius: 50%;
-  background: radial-gradient(ellipse 50% 50% at center, rgba(0, 0, 0, 0.30) 0%, rgba(0, 0, 0, 0.12) 40%, transparent 100%);
-  filter: blur(6px);
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.10) 35%, rgba(0, 0, 0, 0.03) 65%, transparent 100%);
   z-index: 0;
   pointer-events: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .group:hover .contact-shadow {
-  width: 75%;
-  height: 28px;
-  filter: blur(8px);
-  background: radial-gradient(ellipse 50% 50% at center, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.14) 40%, transparent 100%);
-  bottom: 1%;
+  width: 70%;
+  height: 34px;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.30) 0%, rgba(0, 0, 0, 0.12) 35%, rgba(0, 0, 0, 0.04) 65%, transparent 100%);
+  bottom: 4%;
 }
 
 /* === Discount Badge === */
