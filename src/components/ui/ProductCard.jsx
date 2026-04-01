@@ -42,7 +42,7 @@ export default function ProductCard({ product }) {
 
         {product.image_url ? (
           <>
-            <Image src={product.image_url} alt={product.name} fill className="object-contain p-8 sm:p-11 pb-14 sm:pb-16 product-image-zoom relative z-[1]" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
+            <Image src={product.image_url} alt={product.name} fill className="object-contain p-8 sm:p-11 pb-20 sm:pb-24 product-image-zoom relative z-[1]" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
             {/* Contact shadow — elliptical ground shadow beneath product */}
             <div className="contact-shadow" />
           </>
