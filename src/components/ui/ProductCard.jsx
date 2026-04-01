@@ -41,7 +41,11 @@ export default function ProductCard({ product }) {
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, #C8972E 1px, transparent 0)', backgroundSize: '24px 24px' }} />
 
         {product.image_url ? (
-          <Image src={product.image_url} alt={product.name} fill className="object-contain p-5 sm:p-7 product-image-zoom relative z-0 product-image-shadow" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
+          <>
+            <Image src={product.image_url} alt={product.name} fill className="object-contain p-5 sm:p-7 product-image-zoom relative z-0" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
+            {/* Contact shadow — elliptical ground shadow beneath product */}
+            <div className="contact-shadow" />
+          </>
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <ShoppingBag size={28} className="text-[#6B6560]/15" />

@@ -94,12 +94,25 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 12px 32px rgba(200, 151, 46, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
-/* === Product Image Shadow === */
-.product-image-shadow {
-  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.12));
+/* === Contact Shadow — elliptical ground shadow beneath product === */
+.contact-shadow {
+  position: absolute;
+  bottom: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 28px 14px rgba(0, 0, 0, 0.10);
+  opacity: 0.7;
+  z-index: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.group:hover .product-image-shadow {
-  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.18));
+.group:hover .contact-shadow {
+  box-shadow: 0 0 36px 18px rgba(0, 0, 0, 0.13);
+  opacity: 0.85;
+  bottom: 6%;
 }
 
 /* === Discount Badge === */
@@ -120,7 +133,7 @@ input:focus, select:focus, textarea:focus {
 
 /* === Product Image Zoom === */
 .product-image-zoom {
-  transition: filter 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .group:hover .product-image-zoom {
   transform: scale(1.05);
