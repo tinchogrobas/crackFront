@@ -36,7 +36,8 @@
       "Bash(\"\"dependencies\"\" \")",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(find /c/Users/Martin/Desktop/crackfront -maxdepth 3 -type f \\\\\\(-name *.md -o -name *.txt -o -name *.yml -o -name *.yaml \\\\\\))"
     ]
   }
 }

@@ -45,7 +45,8 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [code, setCode] = useState('');
   const [validating, setValidating] = useState(false);
-  const [orderError, setOrderError] = useState(null); // { removedItems: [], otherErrors: [] }
+  const [orderErrors, setOrderErrors] = useState([]); // mensajes de error del backend
+  const [fieldErrors, setFieldErrors] = useState({}); // errores de validación por campo
 
   // Validación de stock al cargar
   const [stockChecking, setStockChecking] = useState(true);
@@ -90,7 +91,13 @@ export default function CheckoutPage() {
     return () => { cancelled = true; };
   }, [cartItemsSnapshot, syncCartProducts]);
 
-  const updateForm = (field, value) => setForm((f) => ({ ...f, [field]: value }));
+  const updateForm = (field, value) => {
+    setForm((f) => ({ ...f, [field]: value }));
+    // Limpiar error del campo al editar
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => { const next = { ...prev }; delete next[field]; return next; });
+    }
+  };
 
   const handleValidateDiscount = async () => {
     if (!code.trim()) return;
@@ -121,9 +128,74 @@ export default function CheckoutPage() {
     }
   };
 
+  // Validación frontend completa
+  const validateForm = () => {
+    const errors = {};
+
+    // Nombre
+    const name = form.customer_name.trim();
+    if (!name) {
+      errors.customer_name = 'El nombre es obligatorio';
+    } else if (name.length < 3) {
+      errors.customer_name = 'El nombre debe tener al menos 3 caracteres';
+    }
+
+    // Email
+    const email = form.customer_email.trim();
+    if (!email) {
+      errors.customer_email = 'El email es obligatorio';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errors.customer_email = 'Ingresá un email válido';
+    }
+
+    // Teléfono
+    const phone = form.customer_phone.trim();
+    if (!phone) {
+      errors.customer_phone = 'El teléfono es obligatorio';
+    } else if (!/^[\d\s\-+().]{7,20}$/.test(phone)) {
+      errors.customer_phone = 'Ingresá un teléfono válido';
+    }
+
+    // Campos de envío
+    if (form.shipping_type === 'delivery') {
+      if (!form.shipping_address.trim()) {
+        errors.shipping_address = 'La dirección es obligatoria';
+      }
+      if (!form.shipping_city.trim()) {
+        errors.shipping_city = 'La ciudad es obligatoria';
+      }
+      if (!form.shipping_province) {
+        errors.shipping_province = 'Seleccioná una provincia';
+      }
+      const zip = form.shipping_zip.trim();
+      if (!zip) {
+        errors.shipping_zip = 'El código postal es obligatorio';
+      } else if (!/^\d{4}$/.test(zip)) {
+        errors.shipping_zip = 'El código postal debe tener 4 dígitos';
+      }
+    } else {
+      if (!form.shipping_branch.trim()) {
+        errors.shipping_branch = 'La sucursal es obligatoria';
+      }
+    }
+
+    return errors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (items.length === 0) return;
+
+    // Limpiar errores previos
+    setOrderErrors([]);
+
+    // Validación frontend
+    const errors = validateForm();
+    setFieldErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      toast.error('Revisá los campos marcados en rojo');
+      return;
+    }
 
     // Bloquear si hay problemas de stock conocidos
     if (stockIssues.length > 0) {
@@ -134,15 +206,15 @@ export default function CheckoutPage() {
     setSubmitting(true);
     try {
       const order = await createOrder({
-        customer_name: form.customer_name,
-        customer_email: form.customer_email,
-        customer_phone: form.customer_phone,
+        customer_name: form.customer_name.trim(),
+        customer_email: form.customer_email.trim(),
+        customer_phone: form.customer_phone.trim(),
         shipping_type: form.shipping_type === 'delivery' ? 'home' : 'pickup',
-        shipping_address: form.shipping_address,
-        shipping_city: form.shipping_city,
+        shipping_address: form.shipping_address.trim(),
+        shipping_city: form.shipping_city.trim(),
         shipping_province: form.shipping_province,
-        shipping_zip: form.shipping_zip,
-        shipping_branch: form.shipping_branch,
+        shipping_zip: form.shipping_zip.trim(),
+        shipping_branch: form.shipping_branch.trim(),
         discount_code: discountCode || '',
         items: items.map((item) => ({ product_id: item.id, quantity: item.quantity })),
       });
@@ -165,11 +237,7 @@ export default function CheckoutPage() {
             if (removedItem) toRemove.push(removedItem.id);
             errorMessages.push(msg);
           });
-          // Redirigir primero, luego limpiar carrito
-          const params = encodeURIComponent(JSON.stringify(errorMessages));
-          router.push(`/checkout/error?msgs=${params}`);
           toRemove.forEach((id) => removeFromCart(id));
-          return;
         } else {
           const firstKey = Object.keys(data)[0];
           if (firstKey) {
@@ -181,15 +249,19 @@ export default function CheckoutPage() {
         errorMessages.push(err?.message || 'Error al crear el pedido. Intentá de nuevo.');
       }
 
-      const params = encodeURIComponent(JSON.stringify(errorMessages));
-      router.push(`/checkout/error?msgs=${params}`);
+      setOrderErrors(errorMessages);
+      toast.error('No pudimos procesar tu pedido');
+      // Scroll al banner de error
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setSubmitting(false);
     }
   };
 
-  const inputClass = "w-full bg-white border border-[#E8E4DD] rounded-lg px-4 py-3 text-sm text-[#1A1A1A] outline-none focus:border-[#C8972E]/40 placeholder:text-[#6B6560]/40 transition-all";
+  const inputBase = "w-full bg-white border rounded-lg px-4 py-3 text-sm text-[#1A1A1A] outline-none placeholder:text-[#6B6560]/40 transition-all";
+  const inputClass = (field) => `${inputBase} ${fieldErrors[field] ? 'border-red-400 focus:border-red-400' : 'border-[#E8E4DD] focus:border-[#C8972E]/40'}`;
   const labelClass = "block text-[11px] tracking-[0.1em] text-[#6B6560] uppercase mb-1.5 font-medium";
+  const FieldError = ({ field }) => fieldErrors[field] ? <p className="text-[11px] text-red-500 mt-1">{fieldErrors[field]}</p> : null;
 
   if (items.length === 0) {
     return (
@@ -240,6 +312,30 @@ export default function CheckoutPage() {
           </motion.div>
         )}
 
+        {/* Banner de errores del servidor */}
+        {orderErrors.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 border border-red-200 bg-red-50 rounded-xl p-4"
+          >
+            <div className="flex items-start gap-3">
+              <AlertTriangle size={18} className="text-red-500 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-red-700 mb-2">No pudimos procesar tu pedido</p>
+                <ul className="space-y-1">
+                  {orderErrors.map((msg, i) => (
+                    <li key={i} className="text-xs text-red-600">{msg}</li>
+                  ))}
+                </ul>
+              </div>
+              <button type="button" onClick={() => setOrderErrors([])} className="text-red-400 hover:text-red-600">
+                <X size={16} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* ── Datos del comprador ── */}
           <div className="lg:col-span-2 space-y-8">
@@ -248,15 +344,18 @@ export default function CheckoutPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
                   <label className={labelClass}>Nombre completo *</label>
-                  <input type="text" required value={form.customer_name} onChange={(e) => updateForm('customer_name', e.target.value)} className={inputClass} placeholder="Tu nombre completo" />
+                  <input type="text" value={form.customer_name} onChange={(e) => updateForm('customer_name', e.target.value)} className={inputClass('customer_name')} placeholder="Tu nombre completo" />
+                  <FieldError field="customer_name" />
                 </div>
                 <div>
                   <label className={labelClass}>Email *</label>
-                  <input type="email" required value={form.customer_email} onChange={(e) => updateForm('customer_email', e.target.value)} className={inputClass} placeholder="tu@email.com" />
+                  <input type="email" value={form.customer_email} onChange={(e) => updateForm('customer_email', e.target.value)} className={inputClass('customer_email')} placeholder="tu@email.com" />
+                  <FieldError field="customer_email" />
                 </div>
                 <div>
                   <label className={labelClass}>Teléfono *</label>
-                  <input type="tel" required value={form.customer_phone} onChange={(e) => updateForm('customer_phone', e.target.value)} className={inputClass} placeholder="+54 11 1234-5678" />
+                  <input type="tel" value={form.customer_phone} onChange={(e) => updateForm('customer_phone', e.target.value)} className={inputClass('customer_phone')} placeholder="+54 11 1234-5678" />
+                  <FieldError field="customer_phone" />
                 </div>
               </div>
             </motion.div>
@@ -280,28 +379,33 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
                     <label className={labelClass}>Dirección *</label>
-                    <input type="text" required value={form.shipping_address} onChange={(e) => updateForm('shipping_address', e.target.value)} className={inputClass} placeholder="Calle y número" />
+                    <input type="text" value={form.shipping_address} onChange={(e) => updateForm('shipping_address', e.target.value)} className={inputClass('shipping_address')} placeholder="Calle y número" />
+                    <FieldError field="shipping_address" />
                   </div>
                   <div>
                     <label className={labelClass}>Ciudad *</label>
-                    <input type="text" required value={form.shipping_city} onChange={(e) => updateForm('shipping_city', e.target.value)} className={inputClass} placeholder="Ciudad" />
+                    <input type="text" value={form.shipping_city} onChange={(e) => updateForm('shipping_city', e.target.value)} className={inputClass('shipping_city')} placeholder="Ciudad" />
+                    <FieldError field="shipping_city" />
                   </div>
                   <div>
                     <label className={labelClass}>Provincia *</label>
-                    <select required value={form.shipping_province} onChange={(e) => updateForm('shipping_province', e.target.value)} className={inputClass}>
+                    <select value={form.shipping_province} onChange={(e) => updateForm('shipping_province', e.target.value)} className={inputClass('shipping_province')}>
                       <option value="" className="bg-white">Seleccionar</option>
                       {provinces.map((p) => (<option key={p} value={p} className="bg-white">{p}</option>))}
                     </select>
+                    <FieldError field="shipping_province" />
                   </div>
                   <div>
                     <label className={labelClass}>Código postal *</label>
-                    <input type="text" required value={form.shipping_zip} onChange={(e) => updateForm('shipping_zip', e.target.value)} className={inputClass} placeholder="1234" />
+                    <input type="text" value={form.shipping_zip} onChange={(e) => updateForm('shipping_zip', e.target.value)} className={inputClass('shipping_zip')} placeholder="1234" />
+                    <FieldError field="shipping_zip" />
                   </div>
                 </div>
               ) : (
                 <div>
                   <label className={labelClass}>Sucursal / Punto de entrega *</label>
-                  <input type="text" required value={form.shipping_branch} onChange={(e) => updateForm('shipping_branch', e.target.value)} className={inputClass} placeholder="Nombre o dirección de la sucursal" />
+                  <input type="text" value={form.shipping_branch} onChange={(e) => updateForm('shipping_branch', e.target.value)} className={inputClass('shipping_branch')} placeholder="Nombre o dirección de la sucursal" />
+                  <FieldError field="shipping_branch" />
                 </div>
               )}
             </motion.div>
