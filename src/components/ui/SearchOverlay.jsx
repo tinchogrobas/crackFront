@@ -8,11 +8,11 @@ import { searchProducts, getFeaturedProducts } from '@/lib/api';
 import { formatPrice } from '@/lib/formatPrice';
 
 const POPULAR_LINKS = [
-  { label: 'Singles', href: '/tienda?category=Single' },
-  { label: 'Slabs', href: '/tienda?category=Slab' },
-  { label: 'Sellados', href: '/tienda?category=Sellado' },
-  { label: 'Accesorios', href: '/tienda?category=Accesorio' },
-  { label: 'Mystery Packs', href: '/tienda?category=Mystery Pack' },
+  { label: 'Singles', href: '/tienda?category=single' },
+  { label: 'Slabs', href: '/tienda?category=slab' },
+  { label: 'Sellados', href: '/tienda?category=sellado' },
+  { label: 'Accesorios', href: '/tienda?category=accesorio' },
+  { label: 'Mystery Packs', href: '/tienda?category=mystery-pack' },
   { label: 'Ver todo', href: '/tienda' },
 ];
 

@@ -46,7 +46,6 @@ function TiendaContent() {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [hasDiscount, setHasDiscount] = useState(false);
-  const [inStock, setInStock] = useState(true);
 
   const [tcgs, setTcgs] = useState([]);
   const [categoriesList, setCategoriesList] = useState([]);
@@ -75,12 +74,12 @@ function TiendaContent() {
     if (minPrice) params.min_price = minPrice;
     if (maxPrice) params.max_price = maxPrice;
     if (hasDiscount) params.has_discount = true;
-    if (inStock) params.in_stock = true;
+    params.in_stock = true;
     const data = await getProducts(params);
     setProducts(data.results || []);
     setTotal(data.count || 0);
     setLoading(false);
-  }, [search, ordering, selectedTcgs, selectedCategories, selectedConditions, selectedCertEntities, minPrice, maxPrice, hasDiscount, inStock]);
+  }, [search, ordering, selectedTcgs, selectedCategories, selectedConditions, selectedCertEntities, minPrice, maxPrice, hasDiscount]);
 
   useEffect(() => {
     const t = setTimeout(() => fetchProducts(), 250);
@@ -88,7 +87,7 @@ function TiendaContent() {
   }, [fetchProducts]);
 
   const toggle = (arr, setArr, v) => setArr(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
-  const clearAll = () => { setSearch(''); setSelectedTcgs([]); setSelectedCategories([]); setSelectedConditions([]); setSelectedCertEntities([]); setMinPrice(''); setMaxPrice(''); setHasDiscount(false); setInStock(true); };
+  const clearAll = () => { setSearch(''); setSelectedTcgs([]); setSelectedCategories([]); setSelectedConditions([]); setSelectedCertEntities([]); setMinPrice(''); setMaxPrice(''); setHasDiscount(false); };
   const activeCount = selectedTcgs.length + selectedCategories.length + selectedConditions.length + selectedCertEntities.length + (minPrice ? 1 : 0) + (maxPrice ? 1 : 0) + (hasDiscount ? 1 : 0);
 
   const Check = ({ label, checked, onChange }) => (
@@ -123,12 +122,7 @@ function TiendaContent() {
             <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${hasDiscount ? 'left-[18px]' : 'left-0.5'}`} />
           </button>
         </label>
-        <label className="flex items-center justify-between cursor-pointer">
-          <span className="text-[13px] text-[#6B6560]">En stock</span>
-          <button onClick={() => setInStock(!inStock)} className={`w-9 h-5 rounded-full transition-all relative ${inStock ? 'bg-[#C8972E]' : 'bg-[#E8E4DD]'}`}>
-            <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${inStock ? 'left-[18px]' : 'left-0.5'}`} />
-          </button>
-        </label>
+
       </div>
       {activeCount > 0 && (
         <button onClick={clearAll} className="w-full mt-4 text-[11px] text-[#6B6560]/50 hover:text-[#1A1A1A] transition-colors py-2 border border-[#E8E4DD] hover:border-[#D4CFC6]">
