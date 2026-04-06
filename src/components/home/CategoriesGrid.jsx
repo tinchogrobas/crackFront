@@ -6,11 +6,11 @@ import { getCategories } from '@/lib/api';
 
 // Imagen por slug  agregá las tuyas acá
 const CATEGORY_IMAGES = {
-  'singles':       'https://res.cloudinary.com/di7baglxg/image/upload/v1774460749/gemini-watermark-removed_9_i977nm.png',
-  'slabs':         'https://res.cloudinary.com/di7baglxg/image/upload/v1774461207/Gemini_Generated_Image_qwjtqhqwjtqhqwjt_rcuo6r.png',
-  'sellados':      'https://zardocards.com/cdn/shop/files/Carousel_Tins_3d29024b-abf0-4f81-8859-037884551ddb.png?v=1762190773&width=400',
-  'accesorios':    'https://zardocards.com/cdn/shop/files/Carousel_SleevedPacks.png?v=1762270653&width=400',
-  'mystery-packs': 'https://zardocards.com/cdn/shop/files/Carousel_SleevedPacks.png?v=1762270653&width=400',
+  'singles':       'https://res.cloudinary.com/di7baglxg/image/upload/v1775481449/gemini-watermark-removed_1_c5ortl.png',
+  'slabs':         'https://res.cloudinary.com/di7baglxg/image/upload/v1775482601/gemini-watermark-removed_5_q4y4ah.png',
+  'sellados':      'https://res.cloudinary.com/di7baglxg/image/upload/v1775481578/gemini-watermark-removed_2_trzslg.png',
+  'accesorios':    'https://res.cloudinary.com/di7baglxg/image/upload/v1775481876/gemini-watermark-removed_3_bnjt57.png',
+  'mystery-packs': 'https://res.cloudinary.com/di7baglxg/image/upload/v1775481855/gemini-watermark-removed_4_tvragc.png',
 };
 
 function CategoryCard({ cat, size }) {
