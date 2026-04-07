@@ -96,7 +96,7 @@ export default function ProductDetailPage({ params }) {
                 ref={cardRef}
                 onMouseMove={handleMouseMove}
                 onMouseLeave={handleMouseLeave}
-                className="relative aspect-[3/4] bg-white overflow-hidden rounded-lg border border-[#E8E4DD]/80 shadow-sm transition-transform duration-200 ease-out"
+                className="relative aspect-[3/4] overflow-hidden rounded-lg transition-transform duration-200 ease-out"
                 style={{
                   transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
                   transformStyle: 'preserve-3d',
@@ -111,7 +111,7 @@ export default function ProductDetailPage({ params }) {
                   }}
                 />
                 {images[selectedImage] ? (
-                  <Image src={images[selectedImage]} alt={product.name} fill className="object-contain p-8 sm:p-10" sizes="(max-width: 1024px) 100vw, 420px" priority />
+                  <Image src={images[selectedImage]} alt={product.name} fill className="object-cover rounded-lg" sizes="(max-width: 1024px) 100vw, 420px" priority />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center"><ShoppingBag size={48} className="text-[#6B6560]/20" /></div>
                 )}
