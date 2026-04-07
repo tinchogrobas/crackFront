@@ -219,7 +219,7 @@ export default function CheckoutPage() {
         items: items.map((item) => ({ product_id: item.id, quantity: item.quantity })),
       });
       clearCart();
-      router.push(`/checkout/confirmacion?order=${order.id}`);
+      router.push(`/checkout/confirmacion?order=${order.id}&code=${order.order_code}&email=${encodeURIComponent(order.customer_email)}`);
     } catch (err) {
       const data = err?.data;
       const errorMessages = [];
