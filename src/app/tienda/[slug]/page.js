@@ -2,7 +2,7 @@
 import { useState, useEffect, use } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, ChevronLeft, Award, Truck, BadgeCheck, PackageCheck } from 'lucide-react';
 import ConditionBadge from '@/components/ui/ConditionBadge';
 import { getProductMaxQuantity, useCartStore } from '@/store/cartStore';
@@ -17,6 +17,7 @@ export default function ProductDetailPage({ params }) {
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [descOpen, setDescOpen] = useState(false);
   const addToCart = useCartStore((s) => s.addToCart);
   const openCart = useCartStore((s) => s.openCart);
 
@@ -184,21 +185,35 @@ export default function ProductDetailPage({ params }) {
             <div className="h-px bg-gradient-to-r from-transparent via-[#E8E4DD] to-transparent mb-6" />
 
             {product.description && (
-              <div className="product__block product__block--accordion block-padding mb-8">
-                <details className="accordion" open>
-                  <summary className="accordion__title">
-                    Descripción
-                    <svg className="icon icon-plus" viewBox="0 0 24 24" fill="none">
-                      <path d="M6 12h6m6 0h-6m0 0V6m0 6v6" stroke="#000" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    <svg className="icon icon-minus" viewBox="0 0 24 24" fill="none">
-                      <path d="M6 12h12" stroke="#000" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </summary>
-                  <div className="accordion__body">
-                    <div className="accordion__content" dangerouslySetInnerHTML={{ __html: product.description }} />
-                  </div>
-                </details>
+              <div className="mb-8">
+                <button
+                  type="button"
+                  onClick={() => setDescOpen((v) => !v)}
+                  className="w-full flex items-center justify-between py-3 text-left"
+                >
+                  <span className="text-[13px] font-semibold tracking-[0.05em] uppercase text-[#3A3530]">Descripción</span>
+                  <motion.svg
+                    animate={{ rotate: descOpen ? 0 : -90 }}
+                    transition={{ duration: 0.25, ease: 'easeInOut' }}
+                    width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3A3530" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                  >
+                    <path d="M6 9l6 6 6-6" />
+                  </motion.svg>
+                </button>
+                <AnimatePresence initial={false}>
+                  {descOpen && (
+                    <motion.div
+                      key="desc"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <div className="pb-4 text-[13px] text-[#6B6560] leading-relaxed" dangerouslySetInnerHTML={{ __html: product.description }} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
 
