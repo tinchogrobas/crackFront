@@ -3,7 +3,8 @@ import { useState, useEffect, use } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ShoppingBag, ChevronLeft, Shield, Award, Truck, BadgeCheck, PackageCheck } from 'lucide-react';
+import { ShoppingBag, ChevronLeft, Award, Truck, BadgeCheck, PackageCheck } from 'lucide-react';
+import ConditionBadge from '@/components/ui/ConditionBadge';
 import { getProductMaxQuantity, useCartStore } from '@/store/cartStore';
 import { formatPrice } from '@/lib/formatPrice';
 import QuantitySelector from '@/components/ui/QuantitySelector';
@@ -140,9 +141,7 @@ export default function ProductDetailPage({ params }) {
                 </span>
               )}
               {conditionName && (
-                <span className="inline-flex items-center gap-1.5 text-[11px] bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-sm font-medium">
-                  <Shield size={12} />{conditionName}
-                </span>
+                <ConditionBadge conditionName={conditionName} />
               )}
             </div>
 

@@ -3,6 +3,7 @@ import { useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { ShoppingBag, Eye } from 'lucide-react';
+import ConditionBadge from '@/components/ui/ConditionBadge';
 import { getProductMaxQuantity, useCartStore } from '@/store/cartStore';
 import { formatPrice } from '@/lib/formatPrice';
 import toast from 'react-hot-toast';
@@ -34,6 +35,7 @@ export default function ProductCard({ product }) {
 
   const hasDiscount = product.discount_percent > 0;
   const categoryName = typeof product.category === 'object' ? product.category.name : product.category;
+  const conditionName = product.condition ? (typeof product.condition === 'object' ? product.condition.name : product.condition) : null;
 
   return (
     <div onClick={() => router.push(`/tienda/${product.slug}`)} className="cursor-pointer group">
@@ -61,6 +63,13 @@ export default function ProductCard({ product }) {
         {hasDiscount && (
           <span className="absolute top-3 left-3 bg-[#C8972E] text-white text-[10px] font-bold px-2.5 py-1 rounded-md z-10 discount-badge">
             -{product.discount_percent}%
+          </span>
+        )}
+
+        {/* Condition badge */}
+        {conditionName && (
+          <span className="absolute top-3 right-3 z-10">
+            <ConditionBadge conditionName={conditionName} size="compact" />
           </span>
         )}
 
