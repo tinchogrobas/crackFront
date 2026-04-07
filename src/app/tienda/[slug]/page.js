@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, use, useRef } from 'react';
+import { useState, useEffect, use } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -16,8 +16,6 @@ export default function ProductDetailPage({ params }) {
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
-  const cardRef = useRef(null);
   const addToCart = useCartStore((s) => s.addToCart);
   const openCart = useCartStore((s) => s.openCart);
 
@@ -26,16 +24,6 @@ export default function ProductDetailPage({ params }) {
       .then((data) => setProduct(data))
       .finally(() => setLoading(false));
   }, [slug]);
-
-  const handleMouseMove = (e) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-    setTilt({ x: (y - 0.5) * -12, y: (x - 0.5) * 12 });
-  };
-
-  const handleMouseLeave = () => setTilt({ x: 0, y: 0 });
 
   if (loading) {
     return (
@@ -91,25 +79,8 @@ export default function ProductDetailPage({ params }) {
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col items-center sticky top-28"
           >
-            <div className="relative w-full max-w-[420px]" style={{ perspective: '1000px' }}>
-              <div
-                ref={cardRef}
-                onMouseMove={handleMouseMove}
-                onMouseLeave={handleMouseLeave}
-                className="relative aspect-[3/4] overflow-hidden rounded-lg transition-transform duration-200 ease-out"
-                style={{
-                  transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-                  transformStyle: 'preserve-3d',
-                }}
-              >
-                {/* Shine overlay */}
-                <div
-                  className="absolute inset-0 z-10 pointer-events-none rounded-lg transition-opacity duration-200"
-                  style={{
-                    background: `radial-gradient(circle at ${50 + tilt.y * 4}% ${50 + tilt.x * 4}%, rgba(255,255,255,0.18) 0%, transparent 60%)`,
-                    opacity: Math.abs(tilt.x) + Math.abs(tilt.y) > 0 ? 1 : 0,
-                  }}
-                />
+            <div className="relative w-full max-w-[420px]">
+              <div className="relative aspect-[3/4] overflow-hidden rounded-lg">
                 {images[selectedImage] ? (
                   <Image src={images[selectedImage]} alt={product.name} fill className="object-cover rounded-lg" sizes="(max-width: 1024px) 100vw, 420px" priority />
                 ) : (
@@ -120,14 +91,16 @@ export default function ProductDetailPage({ params }) {
                 )}
               </div>
 
-              {/* Contact shadow — same golden shadow as other pages */}
+              {/* Contact shadow — golden ground shadow */}
               <div
-                className="mx-auto mt-1 pointer-events-none"
+                className="mx-auto pointer-events-none"
                 style={{
-                  width: '75%',
-                  height: '24px',
+                  marginTop: '14px',
+                  width: '80%',
+                  height: '32px',
                   borderRadius: '50%',
-                  background: 'radial-gradient(ellipse at center, rgba(200,151,46,0.45) 0%, rgba(200,151,46,0.18) 40%, rgba(200,151,46,0.05) 70%, transparent 100%)',
+                  background: 'radial-gradient(ellipse at center, rgba(200,151,46,0.5) 0%, rgba(200,151,46,0.25) 35%, rgba(200,151,46,0.08) 65%, transparent 100%)',
+                  filter: 'blur(2px)',
                 }}
               />
             </div>
