@@ -78,7 +78,7 @@ export default function ProductDetailPage({ params }) {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col items-center sticky top-28"
+            className="flex flex-col items-center"
           >
             <div className="relative w-full max-w-[420px]">
               <div className="relative aspect-[3/4] overflow-hidden rounded-lg">
