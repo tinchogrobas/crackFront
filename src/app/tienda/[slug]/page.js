@@ -148,7 +148,16 @@ export default function ProductDetailPage({ params }) {
             <p className="text-[11px] tracking-[0.2em] text-[#6B6560]/60 uppercase mb-3">
               {product.tcg?.name} — {categoryName}
             </p>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-[-0.02em] text-[#1A1A1A] mb-5">{product.name}</h1>
+            <div className="overflow-hidden mb-5">
+              <motion.h1
+                initial={{ y: '100%', opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                className="text-2xl sm:text-3xl font-black tracking-[-0.02em] text-[#3A3530]"
+              >
+                {product.name}
+              </motion.h1>
+            </div>
 
             {/* Badges */}
             <div className="flex flex-wrap gap-2 mb-6">
@@ -168,12 +177,26 @@ export default function ProductDetailPage({ params }) {
             <div className="flex items-baseline gap-3 mb-2">
               {hasDiscount ? (
                 <>
-                  <span className="text-3xl font-black text-[#1A1A1A]">{formatPrice(product.final_price)}</span>
+                  <motion.span
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                    className="text-3xl font-black gradient-text-shimmer"
+                  >
+                    {formatPrice(product.final_price)}
+                  </motion.span>
                   <span className="text-lg text-[#6B6560]/40 line-through">{formatPrice(product.price_ars)}</span>
                   <span className="text-[12px] text-[#C8972E] font-bold bg-[#C8972E]/10 px-2 py-0.5 rounded">-{product.discount_percent}%</span>
                 </>
               ) : (
-                <span className="text-3xl font-black text-[#1A1A1A]">{formatPrice(product.final_price || product.price_ars)}</span>
+                <motion.span
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  className="text-3xl font-black gradient-text-shimmer"
+                >
+                  {formatPrice(product.final_price || product.price_ars)}
+                </motion.span>
               )}
             </div>
 

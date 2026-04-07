@@ -177,6 +177,30 @@ input:focus, select:focus, textarea:focus {
   background-clip: text;
 }
 
+/* === Shimmer on gradient text === */
+.gradient-text-shimmer {
+  background: linear-gradient(
+    105deg,
+    #C8972E 0%,
+    #B8851F 30%,
+    #E8C96E 48%,
+    #FFF5D6 50%,
+    #E8C96E 52%,
+    #B8851F 70%,
+    #C8972E 100%
+  );
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer-text 4s ease-in-out infinite;
+}
+
+@keyframes shimmer-text {
+  0%, 100% { background-position: 100% center; }
+  50% { background-position: 0% center; }
+}
+
 .glass {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(20px);
