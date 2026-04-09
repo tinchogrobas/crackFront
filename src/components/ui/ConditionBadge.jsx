@@ -93,27 +93,21 @@ export default function ConditionBadge({ conditionName, size = 'default' }) {
 
   return (
     <span className="relative inline-flex items-center gap-1.5" ref={badgeRef}>
-      {/* Pill badge */}
-      <span className={`inline-flex items-center gap-1 ${isCompact ? 'px-2 py-0.5 text-[9px]' : 'px-2.5 py-1 text-[11px]'} ${config.color} ${config.textColor} rounded-full font-bold tracking-wide`}>
-        {config.abbr}
+      <span className={`inline-flex items-center ${isCompact ? 'max-w-[132px] sm:max-w-[148px] px-2.5 py-1 text-[10px]' : 'px-3 py-1.5 text-[11px]'} ${config.color} ${config.textColor} rounded-full font-bold tracking-wide`}>
+        <span className={isCompact ? 'truncate' : ''}>{config.label}</span>
       </span>
 
-      {!isCompact && (
-        <>
-          <span className="text-[12px] font-medium text-[#3A3530]">{config.label}</span>
-          {config.description && (
-            <button
-              type="button"
-              className="text-[#6B6560]/50 hover:text-[#6B6560] transition-colors"
-              onMouseEnter={() => setShowTooltip(true)}
-              onMouseLeave={() => setShowTooltip(false)}
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowTooltip((v) => !v); }}
-              aria-label="Info sobre estado"
-            >
-              <HelpCircle size={14} />
-            </button>
-          )}
-        </>
+      {!isCompact && config.description && (
+        <button
+          type="button"
+          className="text-[#6B6560]/50 hover:text-[#6B6560] transition-colors"
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowTooltip((v) => !v); }}
+          aria-label="Info sobre estado"
+        >
+          <HelpCircle size={14} />
+        </button>
       )}
 
       {/* Tooltip */}
