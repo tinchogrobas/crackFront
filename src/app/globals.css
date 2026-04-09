@@ -258,3 +258,59 @@ details.accordion[open] .icon-minus { display: block; }
 .accordion__content li  { margin-bottom: 4px; }
 .accordion__content strong { font-weight: 700; }
 .accordion__content em  { font-style: italic; }
+
+/* ============================================
+   Lupita (SearchOverlay) — premium entry animation
+   Mimics unsobremas.com nav dropdown:
+   1) Container fade + visibility
+   2) Inner items slide-in from top (staggered)
+   3) Product images zoom-out + fade (cinematic)
+   ============================================ */
+
+.lupita-panel {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.2s cubic-bezier(0.215, 0.61, 0.355, 1),
+    visibility 0.2s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+.lupita-panel.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Internal items: slide-in from -5px with stagger */
+.lupita-item {
+  opacity: 0;
+  transform: translateY(-5px);
+  transition:
+    transform 0.15s cubic-bezier(0.215, 0.61, 0.355, 1),
+    opacity 0.35s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+.lupita-panel.is-open .lupita-item {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Product images / cards: zoom-out + fade (cinematic) */
+.lupita-image {
+  opacity: 0;
+  transform: scale(1.06);
+  transform-origin: center bottom;
+  transition:
+    opacity 0.75s cubic-bezier(0.215, 0.61, 0.355, 1),
+    transform 1.5s cubic-bezier(0.215, 0.61, 0.355, 1);
+  will-change: transform, opacity;
+}
+.lupita-panel.is-open .lupita-image {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* On close: drop all stagger delays so the panel collapses together */
+.lupita-panel:not(.is-open) .lupita-item,
+.lupita-panel:not(.is-open) .lupita-image {
+  transition-delay: 0s !important;
+}

@@ -129,11 +129,7 @@ export default function SearchOverlay({ isOpen, onClose }) {
       {/* Panel dropdown */}
       <div
         ref={panelRef}
-        className={`fixed top-0 left-0 right-0 z-[6000] transition-all duration-500 ease-out ${
-          isOpen
-            ? 'opacity-100 translate-y-0 visible'
-            : 'opacity-0 -translate-y-4 invisible pointer-events-none'
-        }`}
+        className={`lupita-panel fixed top-0 left-0 right-0 z-[6000] ${isOpen ? 'is-open' : ''}`}
         role="dialog"
         aria-modal="true"
         aria-label="Búsqueda"
@@ -141,7 +137,10 @@ export default function SearchOverlay({ isOpen, onClose }) {
         <div className="bg-[#FAFAF7] border-b border-[#E8E4DD] shadow-xl">
           <div className="w-full max-w-[1200px] mx-auto px-5 sm:px-8 pt-6 pb-6">
             {/* Header: logo + close */}
-            <div className="flex items-center justify-between mb-5">
+            <div
+              className="lupita-item flex items-center justify-between mb-5"
+              style={{ transitionDelay: '0ms' }}
+            >
               <Link
                 href="/"
                 onClick={handleLinkClick}
@@ -161,7 +160,8 @@ export default function SearchOverlay({ isOpen, onClose }) {
             {/* Search form */}
             <form
               onSubmit={goToSearch}
-              className="flex items-center border-b-2 border-[#C8972E]/40 focus-within:border-[#C8972E] pb-2 gap-3 mb-5 transition-colors"
+              className="lupita-item flex items-center border-b-2 border-[#C8972E]/40 focus-within:border-[#C8972E] pb-2 gap-3 mb-5 transition-colors"
+              style={{ transitionDelay: '50ms' }}
             >
               <Search size={20} className="text-[#C8972E] flex-shrink-0" />
               <input
@@ -211,7 +211,10 @@ export default function SearchOverlay({ isOpen, onClose }) {
               {showInitial && (
                 <div className="grid grid-cols-1 md:grid-cols-[minmax(0,0.5fr)_minmax(0,3.5fr)] gap-5 md:gap-8">
                   {/* Sidebar - popular links */}
-                  <div>
+                  <div
+                    className="lupita-item"
+                    style={{ transitionDelay: '100ms' }}
+                  >
                     <h3 className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#C8972E] mb-3">
                       Populares
                     </h3>
@@ -232,7 +235,10 @@ export default function SearchOverlay({ isOpen, onClose }) {
 
                   {/* Popular products */}
                   <div>
-                    <h3 className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#C8972E] mb-3">
+                    <h3
+                      className="lupita-item text-[11px] font-bold uppercase tracking-[0.15em] text-[#C8972E] mb-3"
+                      style={{ transitionDelay: '150ms' }}
+                    >
                       Productos populares
                     </h3>
                     {loadingPopular ? (
@@ -241,40 +247,47 @@ export default function SearchOverlay({ isOpen, onClose }) {
                       </div>
                     ) : (
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        {popularProducts.map((product) => (
-                          <button
-                            key={product.id}
-                            onClick={() => goToProduct(product.slug)}
-                            className="text-left group/card"
-                          >
-                            <div className="aspect-square bg-[#F5F1EA] rounded-lg relative overflow-hidden border border-[#E8E4DD]/60">
-                              {product.image_url ? (
-                                <Image
-                                  src={product.image_url}
-                                  alt={product.name}
-                                  fill
-                                  className="object-contain p-3 group-hover/card:scale-105 transition-transform duration-300"
-                                  sizes="(max-width: 640px) 50vw, 25vw"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <Search size={20} className="text-[#6B6560]/15" />
-                                </div>
-                              )}
-                            </div>
-                            <div className="pt-2 px-0.5">
-                              <p className="text-[12px] font-semibold text-[#1A1A1A] truncate group-hover/card:text-[#C8972E] transition-colors">
-                                {product.name}
-                              </p>
-                              <p className="text-[10px] uppercase tracking-[0.1em] text-[#6B6560]/60 truncate">
-                                {categoryName(product)}
-                              </p>
-                              <p className="text-[13px] font-bold text-[#C8972E] mt-0.5">
-                                {formatPrice(product.final_price || product.price_ars)}
-                              </p>
-                            </div>
-                          </button>
-                        ))}
+                        {popularProducts.map((product, idx) => {
+                          const delay = `${200 + idx * 50}ms`;
+                          return (
+                            <button
+                              key={product.id}
+                              onClick={() => goToProduct(product.slug)}
+                              className="lupita-item text-left group/card"
+                              style={{ transitionDelay: delay }}
+                            >
+                              <div
+                                className="lupita-image aspect-square bg-[#F5F1EA] rounded-lg relative overflow-hidden border border-[#E8E4DD]/60"
+                                style={{ transitionDelay: delay }}
+                              >
+                                {product.image_url ? (
+                                  <Image
+                                    src={product.image_url}
+                                    alt={product.name}
+                                    fill
+                                    className="object-contain p-3 group-hover/card:scale-105 transition-transform duration-300"
+                                    sizes="(max-width: 640px) 50vw, 25vw"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <Search size={20} className="text-[#6B6560]/15" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="pt-2 px-0.5">
+                                <p className="text-[12px] font-semibold text-[#1A1A1A] truncate group-hover/card:text-[#C8972E] transition-colors">
+                                  {product.name}
+                                </p>
+                                <p className="text-[10px] uppercase tracking-[0.1em] text-[#6B6560]/60 truncate">
+                                  {categoryName(product)}
+                                </p>
+                                <p className="text-[13px] font-bold text-[#C8972E] mt-0.5">
+                                  {formatPrice(product.final_price || product.price_ars)}
+                                </p>
+                              </div>
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -284,49 +297,64 @@ export default function SearchOverlay({ isOpen, onClose }) {
               {/* Search results */}
               {showResults && (
                 <div>
-                  <h3 className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#C8972E] mb-3">
+                  <h3
+                    className="lupita-item text-[11px] font-bold uppercase tracking-[0.15em] text-[#C8972E] mb-3"
+                    style={{ transitionDelay: '100ms' }}
+                  >
                     Productos
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {results.slice(0, 8).map((product) => (
-                      <button
-                        key={product.id}
-                        onClick={() => goToProduct(product.slug)}
-                        className="text-left group/card"
-                        role="option"
-                      >
-                        <div className="aspect-square bg-[#F5F1EA] rounded-lg relative overflow-hidden border border-[#E8E4DD]/60">
-                          {product.image_url ? (
-                            <Image
-                              src={product.image_url}
-                              alt={product.name}
-                              fill
-                              className="object-contain p-3 group-hover/card:scale-105 transition-transform duration-300"
-                              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <Search size={20} className="text-[#6B6560]/15" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="pt-2 px-0.5">
-                          <p className="text-[12px] font-semibold text-[#1A1A1A] truncate group-hover/card:text-[#C8972E] transition-colors">
-                            {product.name}
-                          </p>
-                          <p className="text-[10px] uppercase tracking-[0.1em] text-[#6B6560]/60 truncate">
-                            {categoryName(product)}
-                          </p>
-                          <p className="text-[13px] font-bold text-[#C8972E] mt-0.5">
-                            {formatPrice(product.final_price || product.price_ars)}
-                          </p>
-                        </div>
-                      </button>
-                    ))}
+                    {results.slice(0, 8).map((product, idx) => {
+                      const delay = `${150 + idx * 50}ms`;
+                      return (
+                        <button
+                          key={product.id}
+                          onClick={() => goToProduct(product.slug)}
+                          className="lupita-item text-left group/card"
+                          style={{ transitionDelay: delay }}
+                          role="option"
+                        >
+                          <div
+                            className="lupita-image aspect-square bg-[#F5F1EA] rounded-lg relative overflow-hidden border border-[#E8E4DD]/60"
+                            style={{ transitionDelay: delay }}
+                          >
+                            {product.image_url ? (
+                              <Image
+                                src={product.image_url}
+                                alt={product.name}
+                                fill
+                                className="object-contain p-3 group-hover/card:scale-105 transition-transform duration-300"
+                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Search size={20} className="text-[#6B6560]/15" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="pt-2 px-0.5">
+                            <p className="text-[12px] font-semibold text-[#1A1A1A] truncate group-hover/card:text-[#C8972E] transition-colors">
+                              {product.name}
+                            </p>
+                            <p className="text-[10px] uppercase tracking-[0.1em] text-[#6B6560]/60 truncate">
+                              {categoryName(product)}
+                            </p>
+                            <p className="text-[13px] font-bold text-[#C8972E] mt-0.5">
+                              {formatPrice(product.final_price || product.price_ars)}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
 
                   {/* Link to full results */}
-                  <div className="mt-5 pt-4 border-t border-[#E8E4DD] text-center">
+                  <div
+                    className="lupita-item mt-5 pt-4 border-t border-[#E8E4DD] text-center"
+                    style={{
+                      transitionDelay: `${150 + Math.min(results.length, 8) * 50}ms`,
+                    }}
+                  >
                     <button
                       onClick={goToSearch}
                       className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[#6B6560] hover:text-[#C8972E] transition-colors"
@@ -339,7 +367,10 @@ export default function SearchOverlay({ isOpen, onClose }) {
 
               {/* Empty state */}
               {showEmpty && (
-                <div className="text-center py-10">
+                <div
+                  className="lupita-item text-center py-10"
+                  style={{ transitionDelay: '100ms' }}
+                >
                   <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#6B6560]/50">
                     No se encontraron resultados para &quot;{query}&quot;
                   </p>
