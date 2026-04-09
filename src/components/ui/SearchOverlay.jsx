@@ -27,16 +27,15 @@ export default function SearchOverlay({ isOpen, onClose }) {
   const debounceRef = useRef(null);
   const panelRef = useRef(null);
 
-  // Load popular products on first open
+  // Prefetch popular products on mount so the first open is warm
+  // (data + DOM + image decode already done behind the hidden panel)
   useEffect(() => {
-    if (isOpen && popularProducts.length === 0 && !loadingPopular) {
-      setLoadingPopular(true);
-      getFeaturedProducts()
-        .then((data) => setPopularProducts(data.slice(0, 4)))
-        .catch(() => {})
-        .finally(() => setLoadingPopular(false));
-    }
-  }, [isOpen, popularProducts.length, loadingPopular]);
+    setLoadingPopular(true);
+    getFeaturedProducts()
+      .then((data) => setPopularProducts(data.slice(0, 4)))
+      .catch(() => {})
+      .finally(() => setLoadingPopular(false));
+  }, []);
 
   // Auto-focus input on open
   useEffect(() => {

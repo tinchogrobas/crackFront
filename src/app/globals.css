@@ -271,6 +271,12 @@ details.accordion[open] .icon-minus { display: block; }
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+  /* Force GPU compositor layer up-front so the first open isn't janky.
+     Without this, the very first paint happens when the panel becomes
+     visible and the transition skips frames. */
+  transform: translateZ(0);
+  will-change: opacity, transform;
+  backface-visibility: hidden;
   transition:
     opacity 0.2s cubic-bezier(0.215, 0.61, 0.355, 1),
     visibility 0.2s cubic-bezier(0.215, 0.61, 0.355, 1);
@@ -285,6 +291,7 @@ details.accordion[open] .icon-minus { display: block; }
 .lupita-item {
   opacity: 0;
   transform: translateY(-5px);
+  will-change: transform, opacity;
   transition:
     transform 0.15s cubic-bezier(0.215, 0.61, 0.355, 1),
     opacity 0.35s cubic-bezier(0.215, 0.61, 0.355, 1);
