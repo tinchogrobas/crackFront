@@ -86,7 +86,13 @@ function TiendaContent() {
     return () => clearTimeout(t);
   }, [fetchProducts]);
 
-  const toggle = (arr, setArr, v) => setArr(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
+  const toggle = (arr, setArr, v) => {
+    const next = arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
+    setArr(next);
+    if (setArr === setSelectedCategories && v === 'singles' && !next.includes('singles')) {
+      setSelectedConditions([]);
+    }
+  };
   const clearAll = () => { setSearch(''); setSelectedTcgs([]); setSelectedCategories([]); setSelectedConditions([]); setSelectedCertEntities([]); setMinPrice(''); setMaxPrice(''); setHasDiscount(false); };
   const activeCount = selectedTcgs.length + selectedCategories.length + selectedConditions.length + selectedCertEntities.length + (minPrice ? 1 : 0) + (maxPrice ? 1 : 0) + (hasDiscount ? 1 : 0);
 
@@ -111,9 +117,20 @@ function TiendaContent() {
   const filters = (
     <div className="space-y-1">
       <Section title="TCG">{tcgs.map((t) => <Check key={t.id} label={t.name} checked={selectedTcgs.includes(t.slug)} onChange={() => toggle(selectedTcgs, setSelectedTcgs, t.slug)} />)}</Section>
-      <Section title="Categoría">{categoriesList.map((c) => <Check key={c.id} label={c.name} checked={selectedCategories.includes(c.slug)} onChange={() => toggle(selectedCategories, setSelectedCategories, c.slug)} />)}</Section>
+      <Section title="Categoría">
+        {categoriesList.map((c) => (
+          <div key={c.id}>
+            <Check label={c.name} checked={selectedCategories.includes(c.slug)} onChange={() => toggle(selectedCategories, setSelectedCategories, c.slug)} />
+            {c.slug === 'singles' && selectedCategories.includes('singles') && conditions.length > 0 && (
+              <div className="ml-6 mt-2 mb-1 pl-3 border-l border-[#E8E4DD] space-y-2">
+                <span className="text-[10px] tracking-[0.15em] text-[#6B6560]/40 uppercase font-medium">Condición</span>
+                {conditions.map((co) => <Check key={co.id} label={co.abbreviation} checked={selectedConditions.includes(co.abbreviation)} onChange={() => toggle(selectedConditions, setSelectedConditions, co.abbreviation)} />)}
+              </div>
+            )}
+          </div>
+        ))}
+      </Section>
       <Section title="Precio"><div className="flex gap-2"><input type="number" placeholder="Min" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} className={inputCls} /><input type="number" placeholder="Max" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} className={inputCls} /></div></Section>
-      <Section title="Condición">{conditions.map((c) => <Check key={c.id} label={c.abbreviation} checked={selectedConditions.includes(c.abbreviation)} onChange={() => toggle(selectedConditions, setSelectedConditions, c.abbreviation)} />)}</Section>
       <Section title="Certificadora">{certEntities.map((e) => <Check key={e.id} label={e.abbreviation} checked={selectedCertEntities.includes(e.abbreviation)} onChange={() => toggle(selectedCertEntities, setSelectedCertEntities, e.abbreviation)} />)}</Section>
       <div className="space-y-3 pt-3 border-t border-[#E8E4DD]">
         <label className="flex items-center justify-between cursor-pointer pt-1">
