@@ -53,6 +53,8 @@ function TiendaContent() {
   const [certEntities, setCertEntities] = useState([]);
   const [total, setTotal] = useState(0);
 
+  const CONDITION_ORDER = ['DM', 'LP', 'MT', 'MP', 'NM'];
+
   useEffect(() => {
     Promise.all([getTcgs(), getCategories(), getConditions(), getCertificationEntities()])
       .then(([t, c, co, ce]) => { setTcgs(t); setCategoriesList(c); setConditions(co); setCertEntities(ce); });
@@ -62,6 +64,31 @@ function TiendaContent() {
     const cat = searchParams.get('category');
     if (cat) setSelectedCategories([cat]);
   }, [searchParams]);
+
+  const singlesCategorySlugs = categoriesList
+    .filter((category) => {
+      const slug = (category?.slug || '').toLowerCase().trim();
+      const name = (category?.name || '').toLowerCase().trim();
+      return slug.includes('single') || name.includes('single');
+    })
+    .map((category) => category.slug);
+
+  const isSinglesSelected = selectedCategories.some((slug) => singlesCategorySlugs.includes(slug));
+
+  const sortedConditions = [...conditions].sort((a, b) => {
+    const left = (a?.abbreviation || '').toUpperCase().trim();
+    const right = (b?.abbreviation || '').toUpperCase().trim();
+    const leftIndex = CONDITION_ORDER.indexOf(left);
+    const rightIndex = CONDITION_ORDER.indexOf(right);
+
+    if (leftIndex !== -1 || rightIndex !== -1) {
+      const normalizedLeft = leftIndex === -1 ? Number.MAX_SAFE_INTEGER : leftIndex;
+      const normalizedRight = rightIndex === -1 ? Number.MAX_SAFE_INTEGER : rightIndex;
+      if (normalizedLeft !== normalizedRight) return normalizedLeft - normalizedRight;
+    }
+
+    return left.localeCompare(right);
+  });
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -86,12 +113,23 @@ function TiendaContent() {
     return () => clearTimeout(t);
   }, [fetchProducts]);
 
-  const toggle = (arr, setArr, v) => {
-    const next = arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v];
+  const toggleValue = (arr, setArr, value) => {
+    const next = arr.includes(value) ? arr.filter((item) => item !== value) : [...arr, value];
     setArr(next);
-    if (setArr === setSelectedCategories && v === 'singles' && !next.includes('singles')) {
+    return next;
+  };
+
+  const toggleCategory = (slug) => {
+    const nextCategories = toggleValue(selectedCategories, setSelectedCategories, slug);
+    const stillHasSingles = nextCategories.some((itemSlug) => singlesCategorySlugs.includes(itemSlug));
+    if (!stillHasSingles) {
       setSelectedConditions([]);
     }
+  };
+
+  const toggleCondition = (abbreviation) => {
+    if (!isSinglesSelected) return;
+    toggleValue(selectedConditions, setSelectedConditions, abbreviation);
   };
   const clearAll = () => { setSearch(''); setSelectedTcgs([]); setSelectedCategories([]); setSelectedConditions([]); setSelectedCertEntities([]); setMinPrice(''); setMaxPrice(''); setHasDiscount(false); };
   const activeCount = selectedTcgs.length + selectedCategories.length + selectedConditions.length + selectedCertEntities.length + (minPrice ? 1 : 0) + (maxPrice ? 1 : 0) + (hasDiscount ? 1 : 0);
@@ -116,22 +154,29 @@ function TiendaContent() {
 
   const filters = (
     <div className="space-y-1">
-      <Section title="TCG">{tcgs.map((t) => <Check key={t.id} label={t.name} checked={selectedTcgs.includes(t.slug)} onChange={() => toggle(selectedTcgs, setSelectedTcgs, t.slug)} />)}</Section>
+      <Section title="TCG">{tcgs.map((t) => <Check key={t.id} label={t.name} checked={selectedTcgs.includes(t.slug)} onChange={() => toggleValue(selectedTcgs, setSelectedTcgs, t.slug)} />)}</Section>
       <Section title="Categoría">
         {categoriesList.map((c) => (
           <div key={c.id}>
-            <Check label={c.name} checked={selectedCategories.includes(c.slug)} onChange={() => toggle(selectedCategories, setSelectedCategories, c.slug)} />
-            {c.slug === 'singles' && selectedCategories.includes('singles') && conditions.length > 0 && (
+            <Check label={c.name} checked={selectedCategories.includes(c.slug)} onChange={() => toggleCategory(c.slug)} />
+            {singlesCategorySlugs.includes(c.slug) && isSinglesSelected && sortedConditions.length > 0 && (
               <div className="ml-6 mt-2 mb-1 pl-3 border-l border-[#E8E4DD] space-y-2">
                 <span className="text-[10px] tracking-[0.15em] text-[#6B6560]/40 uppercase font-medium">Condición</span>
-                {conditions.map((co) => <Check key={co.id} label={co.abbreviation} checked={selectedConditions.includes(co.abbreviation)} onChange={() => toggle(selectedConditions, setSelectedConditions, co.abbreviation)} />)}
+                {sortedConditions.map((co) => (
+                  <Check
+                    key={co.id}
+                    label={co.abbreviation}
+                    checked={selectedConditions.includes(co.abbreviation)}
+                    onChange={() => toggleCondition(co.abbreviation)}
+                  />
+                ))}
               </div>
             )}
           </div>
         ))}
       </Section>
       <Section title="Precio"><div className="flex gap-2"><input type="number" placeholder="Min" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} className={inputCls} /><input type="number" placeholder="Max" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} className={inputCls} /></div></Section>
-      <Section title="Certificadora">{certEntities.map((e) => <Check key={e.id} label={e.abbreviation} checked={selectedCertEntities.includes(e.abbreviation)} onChange={() => toggle(selectedCertEntities, setSelectedCertEntities, e.abbreviation)} />)}</Section>
+      <Section title="Certificadora">{certEntities.map((e) => <Check key={e.id} label={e.abbreviation} checked={selectedCertEntities.includes(e.abbreviation)} onChange={() => toggleValue(selectedCertEntities, setSelectedCertEntities, e.abbreviation)} />)}</Section>
       <div className="space-y-3 pt-3 border-t border-[#E8E4DD]">
         <label className="flex items-center justify-between cursor-pointer pt-1">
           <span className="text-[13px] text-[#6B6560]">Con descuento</span>
