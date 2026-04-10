@@ -252,6 +252,114 @@ export default function ProductDetailPage({ params }) {
               </div>
             )}
 
+            {/* Completa tu pedido — cross-sell carousel */}
+            {hasSuggested && (
+              <div className="mb-8">
+                <div className="h-px bg-gradient-to-r from-transparent via-[#E8E4DD] to-transparent mb-6" />
+                <h3 className="text-[13px] font-bold tracking-[0.08em] uppercase text-[#2F2A25] mb-4">
+                  Completa tu pedido
+                </h3>
+
+                <div className="relative">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={activeSuggested.id}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.22, ease: 'easeOut' }}
+                      className="flex items-center gap-4 bg-white border border-[#E8E4DD] rounded-sm p-3"
+                    >
+                      <Link
+                        href={`/tienda/${activeSuggested.slug}`}
+                        className="relative w-20 h-24 flex-shrink-0 bg-[#FAFAF7] rounded-sm overflow-hidden border border-[#F0ECE5] hover:border-[#C8972E]/30 transition-colors"
+                      >
+                        {activeSuggested.image_url ? (
+                          <Image
+                            src={activeSuggested.image_url}
+                            alt={activeSuggested.name}
+                            fill
+                            className="object-contain p-1.5"
+                            sizes="80px"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <ShoppingBag size={18} className="text-[#6B6560]/20" />
+                          </div>
+                        )}
+                      </Link>
+
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] uppercase tracking-[0.14em] text-[#C8972E] font-semibold mb-0.5 truncate">
+                          {activeSuggested.category}
+                        </p>
+                        <Link href={`/tienda/${activeSuggested.slug}`} className="no-underline">
+                          <p className="text-[13px] font-bold text-[#2F2A25] leading-snug line-clamp-2 hover:text-[#C8972E] transition-colors">
+                            {activeSuggested.name}
+                          </p>
+                        </Link>
+                        <p className="text-[15px] font-black text-[#2F2A25] mt-1">
+                          {formatPrice(activeSuggested.final_price || activeSuggested.price_ars)}
+                        </p>
+                      </div>
+
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const ok = addToCart(activeSuggested, 1);
+                          if (ok) {
+                            toast.success('Agregado al carrito');
+                          } else {
+                            toast.error('Stock máximo alcanzado');
+                          }
+                        }}
+                        className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-sm border border-[#E8E4DD] bg-[#FAFAF7] text-[#2F2A25] hover:border-[#C8972E] hover:text-[#C8972E] transition-colors"
+                        aria-label="Agregar al carrito"
+                      >
+                        <ShoppingBag size={16} />
+                      </motion.button>
+                    </motion.div>
+                  </AnimatePresence>
+
+                  {suggestedProducts.length > 1 && (
+                    <div className="flex items-center justify-between mt-3">
+                      <button
+                        type="button"
+                        onClick={prevSuggested}
+                        className="w-7 h-7 flex items-center justify-center text-[#6B6560]/50 hover:text-[#C8972E] transition-colors"
+                        aria-label="Anterior"
+                      >
+                        <ChevronLeft size={16} />
+                      </button>
+
+                      <div className="flex items-center gap-1.5">
+                        {suggestedProducts.map((item, index) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => setSuggestedIndex(index)}
+                            className={`rounded-full transition-all duration-300 ${index === suggestedIndex ? 'w-6 h-[3px] bg-[#C8972E]' : 'w-4 h-[3px] bg-[#D4CFC6] hover:bg-[#B8B3AB]'}`}
+                            aria-label={`Ver sugerido ${index + 1}`}
+                          />
+                        ))}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={nextSuggested}
+                        className="w-7 h-7 flex items-center justify-center text-[#6B6560]/50 hover:text-[#C8972E] transition-colors"
+                        aria-label="Siguiente"
+                      >
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Trust badges — redesigned with icons */}
             <div className="mt-auto pt-8 border-t border-[#E8E4DD] grid grid-cols-3 gap-4">
               {[
@@ -268,99 +376,6 @@ export default function ProductDetailPage({ params }) {
             </div>
           </motion.div>
         </div>
-
-        {hasSuggested && (
-          <section className="mt-14 pt-8 border-t border-[#E8E4DD]">
-            <h2 className="text-[20px] font-black tracking-[-0.01em] text-[#2F2A25] uppercase mb-4">
-              Completa tu pedido
-            </h2>
-
-            <div className="bg-[#EFEFEF] border border-[#E1DED8] rounded-sm p-3 sm:p-4">
-              <div className="flex items-center gap-2 sm:gap-3">
-                {suggestedProducts.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={prevSuggested}
-                    className="w-9 h-9 flex items-center justify-center text-[#2F2A25] hover:text-[#C8972E] transition-colors"
-                    aria-label="Producto sugerido anterior"
-                  >
-                    <ChevronLeft size={18} />
-                  </button>
-                )}
-
-                <div className="flex-1 min-w-0">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={activeSuggested.id}
-                      initial={{ opacity: 0, x: 24 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -24 }}
-                      transition={{ duration: 0.24, ease: 'easeOut' }}
-                    >
-                      <Link
-                        href={`/tienda/${activeSuggested.slug}`}
-                        className="flex items-center gap-4 no-underline"
-                      >
-                        <div className="relative w-20 h-24 sm:w-24 sm:h-28 flex-shrink-0 bg-white border border-[#DCD6CC] rounded-sm overflow-hidden">
-                          {activeSuggested.image_url ? (
-                            <Image
-                              src={activeSuggested.image_url}
-                              alt={activeSuggested.name}
-                              fill
-                              className="object-contain p-1.5"
-                              sizes="96px"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <ShoppingBag size={20} className="text-[#6B6560]/30" />
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="min-w-0">
-                          <p className="text-[11px] uppercase tracking-[0.14em] text-[#6B6560]/70 mb-1 truncate">
-                            {activeSuggested.category}
-                          </p>
-                          <p className="text-[15px] sm:text-[18px] font-black uppercase text-[#2F2A25] leading-tight line-clamp-2">
-                            {activeSuggested.name}
-                          </p>
-                          <p className="text-[20px] font-black text-[#2F2A25] mt-1">
-                            {formatPrice(activeSuggested.final_price || activeSuggested.price_ars)}
-                          </p>
-                        </div>
-                      </Link>
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-
-                {suggestedProducts.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={nextSuggested}
-                    className="w-9 h-9 flex items-center justify-center text-[#2F2A25] hover:text-[#C8972E] transition-colors"
-                    aria-label="Siguiente producto sugerido"
-                  >
-                    <ChevronRight size={18} />
-                  </button>
-                )}
-              </div>
-
-              {suggestedProducts.length > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-4">
-                  {suggestedProducts.map((item, index) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => setSuggestedIndex(index)}
-                      className={`h-[3px] rounded-full transition-all ${index === suggestedIndex ? 'w-10 bg-[#2F2A25]' : 'w-8 bg-[#9A9893]/45 hover:bg-[#9A9893]/70'}`}
-                      aria-label={`Ver sugerido ${index + 1}`}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          </section>
-        )}
       </div>
     </div>
   );
