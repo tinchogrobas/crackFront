@@ -3,7 +3,7 @@ import { useState, useEffect, use } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, ChevronLeft, ChevronRight, Award, Truck, BadgeCheck, PackageCheck } from 'lucide-react';
+import { ShoppingBag, ChevronLeft, ChevronRight, Award, Truck, BadgeCheck, PackageCheck, ChevronRight as ChevronSep } from 'lucide-react';
 import ConditionBadge from '@/components/ui/ConditionBadge';
 import { getProductMaxQuantity, useCartStore } from '@/store/cartStore';
 import { formatPrice } from '@/lib/formatPrice';
@@ -86,10 +86,59 @@ export default function ProductDetailPage({ params }) {
   return (
     <div className="pt-28 pb-20">
       <div className="max-w-[1200px] mx-auto px-5 sm:px-8">
-        <Link href="/tienda" className="inline-flex items-center gap-1.5 text-[12px] text-[#6B6560]/60 hover:text-[#1A1A1A] transition-colors mb-10 group">
-          <ChevronLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
-          Volver
-        </Link>
+        {/* Breadcrumb — visible + JSON-LD structured data for SEO */}
+        {(() => {
+          const crumbs = [
+            { name: 'Inicio', href: '/' },
+            { name: 'Tienda', href: '/tienda' },
+          ];
+          if (categoryName) {
+            crumbs.push({ name: categoryName, href: `/tienda?category=${encodeURIComponent(categoryName)}` });
+          }
+          crumbs.push({ name: product.name });
+
+          const jsonLd = {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: crumbs.map((c, i) => ({
+              '@type': 'ListItem',
+              position: i + 1,
+              name: c.name,
+              ...(c.href ? { item: `${process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : '')}${c.href}` } : {}),
+            })),
+          };
+
+          return (
+            <>
+              <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+              />
+              <nav aria-label="Breadcrumb" className="mb-8">
+                <ol className="flex items-center flex-wrap gap-1 text-[12px]">
+                  {crumbs.map((crumb, i) => {
+                    const isLast = i === crumbs.length - 1;
+                    return (
+                      <li key={i} className="flex items-center gap-1">
+                        {i > 0 && <ChevronSep size={11} className="text-[#D4CFC6]" />}
+                        {isLast ? (
+                          <span className="text-[#3A3530] font-medium truncate max-w-[200px] sm:max-w-none">{crumb.name}</span>
+                        ) : (
+                          <Link
+                            href={crumb.href}
+                            className="text-[#6B6560]/60 hover:text-[#C8972E] transition-colors whitespace-nowrap"
+                          >
+                            {crumb.name}
+                          </Link>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ol>
+              </nav>
+            </>
+          );
+        })()}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
           {/* Image — with 3D tilt and contact shadow */}
