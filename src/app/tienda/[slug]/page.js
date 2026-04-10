@@ -58,6 +58,7 @@ export default function ProductDetailPage({ params }) {
 
   const images = [product.image_url, product.image_url_2, product.image_url_3].filter(Boolean);
   const hasDiscount = product.discount_percent > 0;
+  const categorySlug = typeof product.category === 'object' ? product.category.slug : null;
   const categoryName = typeof product.category === 'object' ? product.category.name : product.category;
   const conditionName = product.condition ? (typeof product.condition === 'object' ? product.condition.name : product.condition) : null;
   const certEntity = product.certification_entity ? (typeof product.certification_entity === 'object' ? product.certification_entity.abbreviation || product.certification_entity.name : product.certification_entity) : null;
@@ -93,7 +94,7 @@ export default function ProductDetailPage({ params }) {
             { name: 'Tienda', href: '/tienda' },
           ];
           if (categoryName) {
-            crumbs.push({ name: categoryName, href: `/tienda?category=${encodeURIComponent(categoryName)}` });
+            crumbs.push({ name: categoryName, href: `/tienda?category=${encodeURIComponent(categorySlug || categoryName)}` });
           }
           crumbs.push({ name: product.name });
 
