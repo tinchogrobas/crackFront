@@ -124,7 +124,7 @@ function TiendaContent() {
             {c.slug === 'singles' && selectedCategories.includes('singles') && conditions.length > 0 && (
               <div className="ml-6 mt-2 mb-1 pl-3 border-l border-[#E8E4DD] space-y-2">
                 <span className="text-[10px] tracking-[0.15em] text-[#6B6560]/40 uppercase font-medium">Condición</span>
-                {conditions.map((co) => <Check key={co.id} label={co.abbreviation} checked={selectedConditions.includes(co.abbreviation)} onChange={() => toggle(selectedConditions, setSelectedConditions, co.abbreviation)} />)}
+                {conditions.map((co) => <Check key={co.id} label={co.abbreviation} checked={selectedConditions.includes(co.slug)} onChange={() => toggle(selectedConditions, setSelectedConditions, co.slug)} />)}
               </div>
             )}
           </div>
