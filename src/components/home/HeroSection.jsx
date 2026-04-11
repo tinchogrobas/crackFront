@@ -20,11 +20,10 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="mb-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] uppercase tracking-[0.2em]"
+          className="mb-3 gradient-text-shimmer uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]"
           style={{
             fontFamily: 'Roboto, sans-serif',
-            fontWeight: 600,
-            color: '#C8972E',
+            fontWeight: 700,
             fontSize: '12px',
             lineHeight: '16px',
           }}
