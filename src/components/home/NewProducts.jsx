@@ -51,6 +51,8 @@ export default function NewProducts() {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
             </button>
 
+            <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-24 bg-gradient-to-l from-[#FAF9F6] to-transparent z-[5] pointer-events-none" />
+
             {/* Scroll container */}
             <div
               ref={scrollRef}
