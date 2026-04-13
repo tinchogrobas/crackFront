@@ -16,33 +16,12 @@ export default function HeroSection() {
 
       <div className="relative w-full px-5 sm:px-10 lg:px-16 pb-8 sm:pb-10 pt-0 sm:pt-0 flex flex-col items-center sm:items-start text-center sm:text-left">
 
-        {/* Subtítulo */}
-        <motion.p
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="mb-3 gradient-text-shimmer uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]"
-          style={{
-            fontFamily: 'Roboto, sans-serif',
-            fontWeight: 700,
-            fontSize: '12px',
-            lineHeight: '16px',
-          }}
-        >
-          <span className="hidden sm:inline" style={{ fontSize: '15px', lineHeight: '20px' }}>
-            Tu tienda favorita de Pokémon TCG en Argentina
-          </span>
-          <span className="sm:hidden">
-            Tu tienda favorita de Pokémon TCG en Argentina
-          </span>
-        </motion.p>
-
         {/* Título visual */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.5 }}
-          className="mb-8 w-full"
+          className="mb-2 sm:mb-3 w-full"
         >
           <div className="relative inline-block">
             <Image
@@ -57,6 +36,27 @@ export default function HeroSection() {
             />
           </div>
         </motion.div>
+
+        {/* Subtítulo */}
+        <motion.p
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.62 }}
+          className="mb-8 sm:mb-9 gradient-text-shimmer uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]"
+          style={{
+            fontFamily: 'Roboto, sans-serif',
+            fontWeight: 700,
+            fontSize: '12px',
+            lineHeight: '16px',
+          }}
+        >
+          <span className="hidden sm:inline" style={{ fontSize: '15px', lineHeight: '20px' }}>
+            Tu tienda favorita de Pokémon TCG en Argentina
+          </span>
+          <span className="sm:hidden">
+            Tu tienda favorita de Pokémon TCG en Argentina
+          </span>
+        </motion.p>
 
         {/* Botón */}
         <motion.div
