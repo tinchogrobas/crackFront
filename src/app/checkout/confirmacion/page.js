@@ -7,7 +7,7 @@ import CheckoutStatusView from '@/components/checkout/CheckoutStatusView';
 
 function ConfirmacionContent() {
   const searchParams = useSearchParams();
-  const orderCode = searchParams.get('code');
+  const orderCode = searchParams.get('code') || searchParams.get('external_reference');
   const orderId = searchParams.get('order');
   const email = searchParams.get('email');
   const paymentId = searchParams.get('payment_id');
