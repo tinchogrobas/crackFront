@@ -103,7 +103,7 @@ export default function Navbar() {
             </div>
 
             {/* Center: logo */}
-            <Link href="/" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 px-2 py-1">
+            <Link href="/" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[calc(50%+3px)] px-2">
               {!logoUnavailable ? (
                 <span className="relative block w-[132px] sm:w-[160px] h-8 sm:h-10">
                   <Image
