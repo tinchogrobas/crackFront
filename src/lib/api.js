@@ -116,9 +116,14 @@ export async function getExchangeRate() {
  * @param {Array<{product_id: number, quantity: number}>} orderData.items
  */
 export async function createOrder(orderData) {
+  const payload = { ...orderData };
+  if (typeof window !== 'undefined') {
+    payload.frontend_origin = window.location.origin;
+  }
+
   return apiFetch('/orders/', {
     method: 'POST',
-    body: JSON.stringify(orderData),
+    body: JSON.stringify(payload),
   });
 }
 
