@@ -1,6 +1,7 @@
 'use client';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 
 export default function HeroSection() {
@@ -36,25 +37,26 @@ export default function HeroSection() {
           </span>
         </motion.p>
 
-        {/* Título */}
-        <motion.h1
+        {/* Título visual */}
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.5 }}
-          className="mb-8 drop-shadow-[0_4px_8px_rgba(0,0,0,0.4)] uppercase w-full"
-          style={{
-            fontFamily: 'var(--font-bebas), "Barlow Condensed", sans-serif',
-            fontWeight: 800,
-            color: 'rgb(255,255,255)',
-          }}
+          className="mb-8 w-full"
         >
-          <span className="hidden sm:block" style={{ fontSize: '64px', lineHeight: '77px' }}>
-            CRACK STORE ONLINE
-          </span>
-          <span className="sm:hidden block" style={{ fontSize: '56px', lineHeight: '1.05' }}>
-            CRACK STORE ONLINE
-          </span>
-        </motion.h1>
+          <div className="relative inline-block">
+            <Image
+              src="/brand/landing%20logo.png"
+              alt="Crack Store Online"
+              width={980}
+              height={220}
+              priority
+              fetchPriority="high"
+              sizes="(max-width: 640px) 90vw, 980px"
+              className="h-[40px] sm:h-[105px] w-auto drop-shadow-[0_6px_14px_rgba(0,0,0,0.45)]"
+            />
+          </div>
+        </motion.div>
 
         {/* Botón */}
         <motion.div
