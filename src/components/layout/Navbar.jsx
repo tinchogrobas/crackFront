@@ -143,7 +143,7 @@ export default function Navbar() {
             </Link>
 
             {/* Right: search + cart */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-5">
               <button
                 onClick={() => setSearchOpen(true)}
                 aria-label="Abrir búsqueda"
@@ -153,7 +153,7 @@ export default function Navbar() {
                     : 'text-white/90 hover:text-[#C8972E] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]'
                 }`}
               >
-                <Search size={19} />
+                <Search size={22} />
               </button>
               <button
                 onClick={openCart}
@@ -163,7 +163,7 @@ export default function Navbar() {
                     : 'text-white/90 hover:text-[#C8972E] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]'
                 }`}
               >
-                <ShoppingBag size={19} />
+                <ShoppingBag size={22} />
                 {mounted && itemCount > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 bg-[#C8972E] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
                     {itemCount > 9 ? '9+' : itemCount}
