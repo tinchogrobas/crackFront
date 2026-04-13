@@ -122,6 +122,17 @@ export async function createOrder(orderData) {
   });
 }
 
+export async function getPaymentConfig() {
+  return apiFetch('/payments/config/');
+}
+
+export async function verifyMercadoPagoPayment(payload) {
+  return apiFetch('/payments/verify/', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
 // ─── Discount ─────────────────────────────────────────────────────────────────
 
 export async function validateDiscount(code) {

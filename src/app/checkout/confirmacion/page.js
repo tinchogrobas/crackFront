@@ -4,13 +4,75 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Copy, Check } from 'lucide-react';
+import { verifyMercadoPagoPayment } from '@/lib/api';
+import { useCartStore } from '@/store/cartStore';
 
 function ConfirmacionContent() {
   const searchParams = useSearchParams();
   const orderCode = searchParams.get('code');
   const orderId = searchParams.get('order');
   const email = searchParams.get('email');
+  const paymentId = searchParams.get('payment_id');
+  const externalReference = searchParams.get('external_reference');
+  const mpStatus = searchParams.get('status');
+  const cashOrder = searchParams.get('cash') === '1';
+  const clearCart = useCartStore((s) => s.clearCart);
   const [copied, setCopied] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [paymentVerified, setPaymentVerified] = useState(cashOrder);
+  const [paymentMessage, setPaymentMessage] = useState('');
+
+  useEffect(() => {
+    if (cashOrder) {
+      clearCart();
+      return;
+    }
+
+    if (!paymentId) {
+      setPaymentVerified(false);
+      if (mpStatus === 'pending' || mpStatus === 'in_process') {
+        setPaymentMessage('Tu pago está pendiente. Te avisaremos cuando se acredite.');
+      } else {
+        setPaymentMessage('Recibimos tu pedido. Falta confirmar el pago para finalizar la compra.');
+      }
+      return;
+    }
+
+    let cancelled = false;
+
+    async function verifyPayment() {
+      setVerifying(true);
+      try {
+        const data = await verifyMercadoPagoPayment({
+          payment_id: paymentId,
+          external_reference: externalReference || orderCode || '',
+        });
+        if (cancelled) return;
+
+        if (data.paid) {
+          setPaymentVerified(true);
+          clearCart();
+        } else {
+          setPaymentVerified(false);
+          if (data.payment_status === 'pending' || data.payment_status === 'in_process') {
+            setPaymentMessage('Tu pago está pendiente. Te avisaremos cuando se acredite.');
+          } else {
+            setPaymentMessage('No pudimos validar el pago todavía. Si ya pagaste, no te preocupes: lo confirmamos por webhook.');
+          }
+        }
+      } catch {
+        if (!cancelled) {
+          setPaymentVerified(false);
+          setPaymentMessage('No pudimos verificar el pago en este momento. Si ya pagaste, se confirmará automáticamente en unos minutos.');
+        }
+      } finally {
+        if (!cancelled) setVerifying(false);
+      }
+    }
+
+    verifyPayment();
+    return () => { cancelled = true; };
+  }, [paymentId, externalReference, orderCode, cashOrder, clearCart, mpStatus]);
 
   const handleCopy = () => {
     if (!orderCode) return;
@@ -22,16 +84,22 @@ function ConfirmacionContent() {
 
   return (
     <div className="pt-24 pb-20 min-h-screen flex flex-col items-center justify-center text-center px-4">
+      {verifying && (
+        <p className="text-sm text-[#6B6560] mb-4">Verificando tu pago...</p>
+      )}
+
       {/* Check animado */}
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
-        className="w-16 h-16 rounded-full bg-[#C8972E]/10 border border-[#C8972E]/30 flex items-center justify-center mb-6"
+        className={`w-16 h-16 rounded-full border flex items-center justify-center mb-6 ${
+          paymentVerified ? 'bg-[#C8972E]/10 border-[#C8972E]/30' : 'bg-orange-50 border-orange-200'
+        }`}
       >
         <motion.svg
           width="28" height="28" viewBox="0 0 24 24" fill="none"
-          stroke="#C8972E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+          stroke={paymentVerified ? '#C8972E' : '#EA580C'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
         >
           <motion.polyline
             initial={{ pathLength: 0 }}
@@ -49,7 +117,7 @@ function ConfirmacionContent() {
         transition={{ delay: 0.3 }}
         className="text-3xl font-black text-[#1A1A1A] mb-2 tracking-tight"
       >
-        ¡PEDIDO CONFIRMADO!
+        {paymentVerified ? '¡PEDIDO CONFIRMADO!' : 'PEDIDO RECIBIDO'}
       </motion.h1>
 
       {email && (
@@ -103,7 +171,7 @@ function ConfirmacionContent() {
         transition={{ delay: 0.6 }}
         className="text-[#6B6560] text-sm max-w-sm mb-8 leading-relaxed"
       >
-        Estamos revisando tu pedido y te contactaremos a la brevedad para coordinar el pago y el envío.
+        {paymentMessage || 'Estamos revisando tu pedido y te contactaremos a la brevedad para coordinar el envío.'}
       </motion.p>
 
       {/* CTA */}

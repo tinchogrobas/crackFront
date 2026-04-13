@@ -6,9 +6,9 @@ import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/cartStore';
 import { syncCartWithBackend } from '@/lib/cartSync';
 import { formatPrice } from '@/lib/formatPrice';
-import { createOrder, validateDiscount } from '@/lib/api';
+import { createOrder, getPaymentConfig, validateDiscount } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Tag, AlertTriangle, Loader2, X, ShoppingBag } from 'lucide-react';
+import { Tag, AlertTriangle, Loader2, X } from 'lucide-react';
 
 const provinces = [
   'Buenos Aires', 'CABA', 'Catamarca', 'Chaco', 'Chubut', 'Córdoba', 'Corrientes', 'Entre Ríos',
@@ -21,7 +21,6 @@ export default function CheckoutPage() {
   const router = useRouter();
   const items = useCartStore((s) => s.items);
   const getSubtotal = useCartStore((s) => s.getSubtotal);
-  const getTotal = useCartStore((s) => s.getTotal);
   const discountCode = useCartStore((s) => s.discountCode);
   const discountPercent = useCartStore((s) => s.discountPercent);
   const discountFixed = useCartStore((s) => s.discountFixed);
@@ -35,11 +34,16 @@ export default function CheckoutPage() {
     customer_email: '',
     customer_phone: '',
     shipping_type: 'delivery',
+    payment_method: 'mercadopago',
     shipping_address: '',
     shipping_city: '',
     shipping_province: '',
     shipping_zip: '',
     shipping_branch: '',
+  });
+  const [paymentConfig, setPaymentConfig] = useState({
+    cash_discount_enabled: true,
+    cash_discount_percent: 15,
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -90,6 +94,22 @@ export default function CheckoutPage() {
     checkStock();
     return () => { cancelled = true; };
   }, [cartItemsSnapshot, syncCartProducts]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadPaymentConfig() {
+      try {
+        const data = await getPaymentConfig();
+        if (!cancelled) setPaymentConfig(data);
+      } catch {
+        if (!cancelled) {
+          setPaymentConfig({ cash_discount_enabled: true, cash_discount_percent: 15 });
+        }
+      }
+    }
+    loadPaymentConfig();
+    return () => { cancelled = true; };
+  }, []);
 
   const updateForm = (field, value) => {
     setForm((f) => ({ ...f, [field]: value }));
@@ -205,11 +225,12 @@ export default function CheckoutPage() {
 
     setSubmitting(true);
     try {
-      const order = await createOrder({
+      const response = await createOrder({
         customer_name: form.customer_name.trim(),
         customer_email: form.customer_email.trim(),
         customer_phone: form.customer_phone.trim(),
         shipping_type: form.shipping_type === 'delivery' ? 'home' : 'pickup',
+        payment_method: form.payment_method,
         shipping_address: form.shipping_address.trim(),
         shipping_city: form.shipping_city.trim(),
         shipping_province: form.shipping_province,
@@ -218,8 +239,21 @@ export default function CheckoutPage() {
         discount_code: discountCode || '',
         items: items.map((item) => ({ product_id: item.id, quantity: item.quantity })),
       });
+
+      const order = response?.order || response;
+      const checkout = response?.checkout || null;
+
+      if (form.payment_method === 'mercadopago') {
+        const checkoutUrl = checkout?.init_point || checkout?.sandbox_init_point;
+        if (!checkoutUrl) {
+          throw new Error('No recibimos URL de Checkout Pro.');
+        }
+        window.location.href = checkoutUrl;
+        return;
+      }
+
       clearCart();
-      router.push(`/checkout/confirmacion?order=${order.id}&code=${order.order_code}&email=${encodeURIComponent(order.customer_email)}`);
+      router.push(`/checkout/confirmacion?order=${order.id}&code=${order.order_code}&email=${encodeURIComponent(order.customer_email)}&cash=1`);
     } catch (err) {
       const data = err?.data;
       const errorMessages = [];
@@ -273,6 +307,16 @@ export default function CheckoutPage() {
   }
 
   const hasBlockingIssues = stockIssues.length > 0;
+  const subtotal = getSubtotal();
+  const codeDiscountAmount = discountPercent > 0
+    ? subtotal * discountPercent / 100
+    : (discountFixed || 0);
+  const subtotalAfterCode = Math.max(0, subtotal - codeDiscountAmount);
+  const cashDiscountPercent = (
+    form.payment_method === 'cash' && paymentConfig?.cash_discount_enabled
+  ) ? Number(paymentConfig?.cash_discount_percent || 0) : 0;
+  const cashDiscountAmount = subtotalAfterCode * cashDiscountPercent / 100;
+  const checkoutTotal = Math.max(0, subtotalAfterCode - cashDiscountAmount);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="pt-24 pb-20">
@@ -409,6 +453,42 @@ export default function CheckoutPage() {
                 </div>
               )}
             </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+              <h2 className="text-sm font-bold tracking-[0.15em] text-[#1A1A1A] mb-6">PAGO</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => updateForm('payment_method', 'mercadopago')}
+                  className={`border rounded-lg px-4 py-3 text-left transition-all ${
+                    form.payment_method === 'mercadopago'
+                      ? 'border-[#C8972E] bg-[#C8972E]/5 text-[#1A1A1A]'
+                      : 'border-[#E8E4DD] text-[#6B6560] hover:border-[#D4CFC6]'
+                  }`}
+                >
+                  <p className="text-sm font-semibold">Mercado Pago</p>
+                  <p className="text-xs mt-1 opacity-80">Tarjeta, transferencia o efectivo en redes de cobro.</p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => updateForm('payment_method', 'cash')}
+                  className={`border rounded-lg px-4 py-3 text-left transition-all ${
+                    form.payment_method === 'cash'
+                      ? 'border-[#C8972E] bg-[#C8972E]/5 text-[#1A1A1A]'
+                      : 'border-[#E8E4DD] text-[#6B6560] hover:border-[#D4CFC6]'
+                  }`}
+                >
+                  <p className="text-sm font-semibold">Pago en efectivo</p>
+                  <p className="text-xs mt-1 opacity-80">
+                    Coordinamos por WhatsApp o tienda.
+                    {paymentConfig?.cash_discount_enabled && cashDiscountPercent > 0
+                      ? ` Descuento: ${cashDiscountPercent}%`
+                      : ''}
+                  </p>
+                </button>
+              </div>
+            </motion.div>
           </div>
 
           {/* ── Resumen del pedido ── */}
@@ -490,12 +570,12 @@ export default function CheckoutPage() {
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-sm">
                   <span className="text-[#6B6560]">Subtotal</span>
-                  <span className="text-[#1A1A1A]">{formatPrice(getSubtotal())}</span>
+                  <span className="text-[#1A1A1A]">{formatPrice(subtotal)}</span>
                 </div>
                 {discountPercent > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-green-600">Descuento ({discountPercent}%)</span>
-                    <span className="text-green-600">-{formatPrice(getSubtotal() * discountPercent / 100)}</span>
+                    <span className="text-green-600">-{formatPrice(codeDiscountAmount)}</span>
                   </div>
                 )}
                 {discountFixed > 0 && (
@@ -504,9 +584,15 @@ export default function CheckoutPage() {
                     <span className="text-green-600">-{formatPrice(discountFixed)}</span>
                   </div>
                 )}
+                {cashDiscountPercent > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-green-600">Descuento efectivo ({cashDiscountPercent}%)</span>
+                    <span className="text-green-600">-{formatPrice(cashDiscountAmount)}</span>
+                  </div>
+                )}
                 <div className="border-t border-[#E8E4DD] pt-3 flex justify-between text-lg font-bold">
                   <span className="text-[#1A1A1A]">Total</span>
-                  <span className="text-[#1A1A1A]">{formatPrice(getTotal())}</span>
+                  <span className="text-[#1A1A1A]">{formatPrice(checkoutTotal)}</span>
                 </div>
               </div>
 
@@ -520,7 +606,7 @@ export default function CheckoutPage() {
                 ) : stockChecking ? (
                   <><Loader2 size={14} className="animate-spin" /> VERIFICANDO...</>
                 ) : (
-                  'CONFIRMAR PEDIDO'
+                  form.payment_method === 'mercadopago' ? 'PAGAR CON MERCADO PAGO' : 'CONFIRMAR PEDIDO'
                 )}
               </button>
 
