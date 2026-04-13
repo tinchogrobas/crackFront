@@ -105,15 +105,30 @@ export default function Navbar() {
             {/* Center: logo */}
             <Link href="/" className="absolute left-1/2 -translate-x-1/2 px-2 py-1">
               {!logoUnavailable ? (
-                <Image
-                  src={scrolled ? "/brand/logo2.png" : "/brand/logo.png"}
-                  alt="Crack"
-                  width={160}
-                  height={48}
-                  priority
-                  className="h-8 sm:h-10 w-auto"
-                  onError={() => setLogoUnavailable(true)}
-                />
+                <span className="relative block w-[132px] sm:w-[160px] h-8 sm:h-10">
+                  <Image
+                    src="/brand/logo.png"
+                    alt="Crack"
+                    fill
+                    priority
+                    sizes="(min-width: 640px) 160px, 132px"
+                    className={`object-contain transition-opacity duration-500 ease-out ${
+                      scrolled ? 'opacity-0' : 'opacity-100'
+                    }`}
+                    onError={() => setLogoUnavailable(true)}
+                  />
+                  <Image
+                    src="/brand/logo2.png"
+                    alt="Crack"
+                    fill
+                    priority
+                    sizes="(min-width: 640px) 160px, 132px"
+                    className={`object-contain transition-opacity duration-500 ease-out ${
+                      scrolled ? 'opacity-100' : 'opacity-0'
+                    }`}
+                    onError={() => setLogoUnavailable(true)}
+                  />
+                </span>
               ) : (
                 <span
                   className={`font-display text-xl sm:text-2xl font-bold tracking-[0.3em] transition-all duration-300 ${
@@ -185,7 +200,7 @@ export default function Navbar() {
               <div className="flex items-center justify-between mb-12">
                 {!logoUnavailable ? (
                   <Image
-                    src="/brand/logo.png"
+                    src="/brand/logo2.png"
                     alt="Crack"
                     width={124}
                     height={40}
