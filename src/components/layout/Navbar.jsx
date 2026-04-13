@@ -106,7 +106,7 @@ export default function Navbar() {
             <Link href="/" className="absolute left-1/2 -translate-x-1/2 px-2 py-1">
               {!logoUnavailable ? (
                 <Image
-                  src="/brand/logo.png"
+                  src={scrolled ? "/brand/logo2.png" : "/brand/logo.png"}
                   alt="Crack"
                   width={160}
                   height={48}
