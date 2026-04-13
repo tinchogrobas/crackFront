@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ShoppingBag, Menu, X, Search } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import CartDrawer from './CartDrawer';
@@ -9,6 +10,7 @@ import SearchOverlay from '@/components/ui/SearchOverlay';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [logoUnavailable, setLogoUnavailable] = useState(false);
   const cartOpen = useCartStore((s) => s.isCartOpen);
   const openCart = useCartStore((s) => s.openCart);
   const closeCart = useCartStore((s) => s.closeCart);
@@ -101,16 +103,28 @@ export default function Navbar() {
             </div>
 
             {/* Center: logo */}
-            <Link href="/" className="absolute left-1/2 -translate-x-1/2">
-              <span
-                className={`font-display text-xl sm:text-2xl font-bold tracking-[0.3em] transition-all duration-300 ${
-                  scrolled
-                    ? 'text-[#1A1A1A] hover:text-[#C8972E]'
-                    : 'text-white hover:text-[#C8972E] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]'
-                }`}
-              >
-                CRACK
-              </span>
+            <Link href="/" className="absolute left-1/2 -translate-x-1/2 px-2 py-1">
+              {!logoUnavailable ? (
+                <Image
+                  src="/brand/logo.png"
+                  alt="Crack"
+                  width={160}
+                  height={48}
+                  priority
+                  className="h-8 sm:h-10 w-auto"
+                  onError={() => setLogoUnavailable(true)}
+                />
+              ) : (
+                <span
+                  className={`font-display text-xl sm:text-2xl font-bold tracking-[0.3em] transition-all duration-300 ${
+                    scrolled
+                      ? 'text-[#1A1A1A] hover:text-[#C8972E]'
+                      : 'text-white hover:text-[#C8972E] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]'
+                  }`}
+                >
+                  CRACK
+                </span>
+              )}
             </Link>
 
             {/* Right: search + cart */}
@@ -169,7 +183,18 @@ export default function Navbar() {
               className="fixed left-0 top-0 h-full w-full max-w-xs bg-white z-[80] p-8 lg:hidden border-r border-[#E8E4DD] shadow-lg"
             >
               <div className="flex items-center justify-between mb-12">
-                <span className="font-display text-lg font-bold tracking-[0.25em] text-[#1A1A1A]">CRACK</span>
+                {!logoUnavailable ? (
+                  <Image
+                    src="/brand/logo.png"
+                    alt="Crack"
+                    width={124}
+                    height={40}
+                    className="h-7 w-auto px-1 py-0.5"
+                    onError={() => setLogoUnavailable(true)}
+                  />
+                ) : (
+                  <span className="font-display text-lg font-bold tracking-[0.25em] text-[#1A1A1A]">CRACK</span>
+                )}
                 <button onClick={() => setMobileMenuOpen(false)} className="text-[#6B6560]/60 hover:text-[#1A1A1A]">
                   <X size={18} />
                 </button>
