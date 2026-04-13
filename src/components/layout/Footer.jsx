@@ -1,6 +1,7 @@
 'use client';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowUpRight } from 'lucide-react';
 
 export default function Footer() {
@@ -15,8 +16,14 @@ export default function Footer() {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-16"
         >
           <div className="lg:col-span-1">
-            <Link href="/" className="font-display text-xl font-bold tracking-[0.25em] text-[#1A1A1A] hover:text-[#C8972E] transition-colors">
-              CRACK
+            <Link href="/" aria-label="Crack" className="inline-flex items-center transition-opacity hover:opacity-80">
+              <Image
+                src="/brand/whiteBgColor.png"
+                alt="Crack"
+                width={600}
+                height={120}
+                className="h-[36px] sm:h-[80px] w-auto"
+              />
             </Link>
             <p className="text-[13px] text-[#6B6560]/70 mt-4 leading-relaxed">
               Tu tienda de cartas Pokémon TCG en Argentina. Singles, Slabs, Sellados y más.
