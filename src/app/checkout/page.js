@@ -479,7 +479,7 @@ export default function CheckoutPage() {
                       : 'border-[#E8E4DD] text-[#6B6560] hover:border-[#D4CFC6]'
                   }`}
                 >
-                  <p className="text-sm font-semibold">Pago en efectivo</p>
+                  <p className="text-sm font-semibold">Pago en efectivo o transferencia / Crypto</p>
                   <p className="text-xs mt-1 opacity-80">
                     Coordinamos por WhatsApp o tienda.
                     {paymentConfig?.cash_discount_enabled && cashDiscountPercent > 0

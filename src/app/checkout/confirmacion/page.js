@@ -1,33 +1,44 @@
 'use client';
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { verifyMercadoPagoPayment } from '@/lib/api';
 import { useCartStore } from '@/store/cartStore';
 import CheckoutStatusView from '@/components/checkout/CheckoutStatusView';
 
 function ConfirmacionContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const orderCode = searchParams.get('code') || searchParams.get('external_reference');
-  const orderId = searchParams.get('order');
   const email = searchParams.get('email');
   const paymentId = searchParams.get('payment_id');
   const externalReference = searchParams.get('external_reference');
-  const mpStatus = searchParams.get('status');
+  const mpStatus = (searchParams.get('status') || '').toLowerCase();
   const cashOrder = searchParams.get('cash') === '1';
   const clearCart = useCartStore((s) => s.clearCart);
-  const [verifying, setVerifying] = useState(false);
+  const [verifying, setVerifying] = useState(!cashOrder);
   const [paymentVerified, setPaymentVerified] = useState(cashOrder);
   const [isPending, setIsPending] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState('');
 
   useEffect(() => {
+    if (!cashOrder && (mpStatus === 'rejected' || mpStatus === 'cancelled')) {
+      const params = new URLSearchParams();
+      if (orderCode) params.set('code', orderCode);
+      if (externalReference) params.set('external_reference', externalReference);
+      router.replace(`/checkout/error?${params.toString()}`);
+      return;
+    }
+
     if (cashOrder) {
+      setVerifying(false);
       clearCart();
       setIsPending(false);
       return;
     }
 
-    if (!paymentId) {
+    if (!paymentId && !(externalReference || orderCode)) {
+      setVerifying(false);
       setPaymentVerified(false);
       if (mpStatus === 'pending' || mpStatus === 'in_process') {
         setIsPending(true);
@@ -43,9 +54,10 @@ function ConfirmacionContent() {
 
     async function verifyPayment() {
       setVerifying(true);
+      setPaymentMessage('Estamos validando el estado final de tu pago con Mercado Pago.');
       try {
         const data = await verifyMercadoPagoPayment({
-          payment_id: paymentId,
+          payment_id: paymentId || '',
           external_reference: externalReference || orderCode || '',
         });
         if (cancelled) return;
@@ -55,6 +67,14 @@ function ConfirmacionContent() {
           setIsPending(false);
           clearCart();
         } else {
+          if (data.payment_status === 'rejected' || data.payment_status === 'cancelled') {
+            const params = new URLSearchParams();
+            if (orderCode) params.set('code', orderCode);
+            if (externalReference) params.set('external_reference', externalReference);
+            router.replace(`/checkout/error?${params.toString()}`);
+            return;
+          }
+
           setPaymentVerified(false);
           if (data.payment_status === 'pending' || data.payment_status === 'in_process') {
             setIsPending(true);
@@ -77,13 +97,17 @@ function ConfirmacionContent() {
 
     verifyPayment();
     return () => { cancelled = true; };
-  }, [paymentId, externalReference, orderCode, cashOrder, clearCart, mpStatus]);
+  }, [paymentId, externalReference, orderCode, cashOrder, clearCart, mpStatus, router]);
 
-  const variant = paymentVerified ? 'success' : (isPending ? 'pending' : 'error');
-  const title = paymentVerified
+  const variant = verifying ? 'pending' : (paymentVerified ? 'success' : (isPending ? 'pending' : 'error'));
+  const title = verifying
+    ? 'VALIDANDO PAGO'
+    : paymentVerified
     ? 'PEDIDO CONFIRMADO'
     : (isPending ? 'PAGO PENDIENTE' : 'PEDIDO RECIBIDO');
-  const statusLabel = paymentVerified
+  const statusLabel = verifying
+    ? 'Estado: Verificando'
+    : paymentVerified
     ? 'Estado: Aprobado'
     : (isPending ? 'Estado: En revision' : 'Estado: Validacion requerida');
 
@@ -93,8 +117,8 @@ function ConfirmacionContent() {
       title={title}
       statusLabel={statusLabel}
       message={paymentMessage || 'Estamos revisando tu pedido y te contactaremos a la brevedad para coordinar el envio.'}
-      email={email}
-      orderCode={orderCode}
+      email={verifying ? '' : email}
+      orderCode={verifying ? '' : orderCode}
       loadingText={verifying ? 'Verificando tu pago...' : ''}
       actions={[
         { href: '/tienda', label: 'VOLVER A LA TIENDA', primary: false },
