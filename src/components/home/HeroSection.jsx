@@ -21,7 +21,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.5 }}
-          className="mb-2 sm:mb-3 w-full"
+          className="-mb-1 sm:-mb-2 w-full"
         >
           <div className="relative inline-block">
             <Image
