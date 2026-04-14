@@ -77,7 +77,20 @@ export default function CheckoutPage() {
         if (!cancelled) {
           setStockIssues(issues);
           if (issues.length > 0) {
-            toast.error('Algunos productos ya no están disponibles', { duration: 4000 });
+            // Auto-remove solo los items sin stock
+            const noStockIssues = issues.filter((issue) => issue.issue === 'sin stock');
+            if (noStockIssues.length > 0) {
+              noStockIssues.forEach((issue) => {
+                removeFromCart(issue.id);
+              });
+              if (noStockIssues.length === issues.length) {
+                toast.error('Algunos productos fueron removidos porque ya no están disponibles', { duration: 4000 });
+              } else {
+                toast.error('Algunos productos fueron removidos por falta de stock. Por favor ajusta los demás.', { duration: 4000 });
+              }
+            } else {
+              toast.error('Algunos productos tienen stock insuficiente. Por favor ajusta las cantidades.', { duration: 4000 });
+            }
           }
         }
       } catch {
@@ -92,8 +105,8 @@ export default function CheckoutPage() {
     }
 
     checkStock();
-    return () => { cancelled = true; };
-  }, [cartItemsSnapshot, syncCartProducts]);
+    return () => { cancelled = true };
+  }, [cartSignature, syncCartProducts, removeFromCart]);
 
   useEffect(() => {
     let cancelled = false;

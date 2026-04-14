@@ -24,7 +24,15 @@ export default function ProductDetailPage({ params }) {
 
   useEffect(() => {
     getProductBySlug(slug)
-      .then((data) => setProduct(data))
+      .then((data) => {
+        if (data && !data.in_stock) {
+          // Producto agotado - no permitir acceso
+          setProduct(null);
+        } else {
+          setProduct(data);
+        }
+      })
+      .catch(() => setProduct(null))
       .finally(() => setLoading(false));
   }, [slug]);
 
@@ -50,7 +58,7 @@ export default function ProductDetailPage({ params }) {
   if (!product) {
     return (
       <div className="pt-28 pb-20 text-center min-h-screen flex flex-col items-center justify-center">
-        <p className="text-[#6B6560]/60 mb-4">Producto no encontrado</p>
+        <p className="text-[#6B6560]/60 mb-4">Producto no encontrado o agotado</p>
         <Link href="/tienda" className="text-[12px] text-[#6B6560] hover:text-[#1A1A1A] underline">Volver a la tienda</Link>
       </div>
     );
