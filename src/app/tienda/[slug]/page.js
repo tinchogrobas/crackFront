@@ -157,30 +157,49 @@ export default function ProductDetailPage({ params }) {
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col items-center"
           >
-            <div className="relative w-full max-w-[420px]">
-              <div className="relative aspect-[3/4] overflow-hidden rounded-lg">
+            <div className="relative w-full max-w-[520px]">
+              {/* Contenedor gris grande — sombra adentro, sin overflow hidden */}
+              <div
+                className="relative w-full rounded-xl flex items-end justify-center"
+                style={{ aspectRatio: '1/1', paddingBottom: '48px' }}
+              >
                 {images[selectedImage] ? (
-                  <Image src={images[selectedImage]} alt={product.name} fill className="object-cover rounded-lg" sizes="(max-width: 1024px) 100vw, 420px" priority />
+                  <>
+                    {/* Imagen centrada con espacio */}
+                    <div className="absolute inset-0 flex items-center justify-center" style={{ paddingBottom: '40px' }}>
+                      <Image
+                        src={images[selectedImage]}
+                        alt={product.name}
+                        fill
+                        className="object-contain"
+                        style={{ padding: '8% 10% 18%' }}
+                        sizes="(max-width: 1024px) 100vw, 520px"
+                        priority
+                      />
+                    </div>
+                    {/* Sombra dorada dentro, en la parte baja */}
+                    <div
+                      className="relative pointer-events-none z-10"
+                      style={{
+                        width: '50%',
+                        height: '32px',
+                        borderRadius: '50%',
+                        background: 'radial-gradient(ellipse at center, rgba(160,100,0,0.85) 0%, rgba(200,151,46,0.55) 35%, rgba(200,151,46,0.2) 65%, transparent 100%)',
+                        filter: 'blur(6px)',
+                      }}
+                    />
+                  </>
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center"><ShoppingBag size={48} className="text-[#6B6560]/20" /></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <ShoppingBag size={48} className="text-[#6B6560]/20" />
+                  </div>
                 )}
                 {hasDiscount && (
-                  <span className="absolute top-3 left-3 bg-[#C8972E] text-white text-[11px] font-bold px-3 py-1.5 rounded-sm shadow-md z-20">-{product.discount_percent}%</span>
+                  <span className="absolute top-3 left-3 bg-[#C8972E] text-white text-[11px] font-bold px-3 py-1.5 rounded-sm shadow-md z-20">
+                    -{product.discount_percent}%
+                  </span>
                 )}
               </div>
-
-              {/* Contact shadow — golden ground shadow */}
-              <div
-                className="mx-auto pointer-events-none"
-                style={{
-                  marginTop: '14px',
-                  width: '80%',
-                  height: '32px',
-                  borderRadius: '50%',
-                  background: 'radial-gradient(ellipse at center, rgba(200,151,46,0.5) 0%, rgba(200,151,46,0.25) 35%, rgba(200,151,46,0.08) 65%, transparent 100%)',
-                  filter: 'blur(2px)',
-                }}
-              />
             </div>
 
             {images.length > 1 && (
