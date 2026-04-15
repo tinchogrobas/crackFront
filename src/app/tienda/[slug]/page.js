@@ -8,7 +8,7 @@ import ConditionBadge from '@/components/ui/ConditionBadge';
 import { getProductMaxQuantity, useCartStore } from '@/store/cartStore';
 import { formatPrice } from '@/lib/formatPrice';
 import QuantitySelector from '@/components/ui/QuantitySelector';
-import { getProductBySlug } from '@/lib/api';
+import { getProductBySlug, getPaymentConfig } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 export default function ProductDetailPage({ params }) {
@@ -19,8 +19,19 @@ export default function ProductDetailPage({ params }) {
   const [quantity, setQuantity] = useState(1);
   const [descOpen, setDescOpen] = useState(false);
   const [suggestedIndex, setSuggestedIndex] = useState(0);
+  const [cashDiscount, setCashDiscount] = useState({ enabled: false, percent: 0 });
   const addToCart = useCartStore((s) => s.addToCart);
   const openCart = useCartStore((s) => s.openCart);
+
+  useEffect(() => {
+    getPaymentConfig()
+      .then((data) => {
+        if (data?.cash_discount_enabled) {
+          setCashDiscount({ enabled: true, percent: Number(data.cash_discount_percent || 0) });
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     getProductBySlug(slug)
@@ -242,31 +253,69 @@ export default function ProductDetailPage({ params }) {
             </div>
 
             {/* Price */}
-            <div className="flex items-baseline gap-3 mb-2">
-              {hasDiscount ? (
+            {(() => {
+              const basePrice = parseFloat(product.final_price || product.price_ars || 0);
+              const cashPrice = cashDiscount.enabled && cashDiscount.percent > 0
+                ? basePrice * (1 - cashDiscount.percent / 100)
+                : null;
+
+              return (
                 <>
-                  <motion.span
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                    className="text-3xl font-black gradient-text-shimmer"
-                  >
-                    {formatPrice(product.final_price)}
-                  </motion.span>
-                  <span className="text-lg text-[#6B6560]/40 line-through">{formatPrice(product.price_ars)}</span>
-                  <span className="text-[12px] text-[#C8972E] font-bold bg-[#C8972E]/10 px-2 py-0.5 rounded">-{product.discount_percent}%</span>
+                  <div className="flex items-baseline gap-3 mb-3">
+                    {hasDiscount ? (
+                      <>
+                        <motion.span
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.5, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                          className="text-3xl font-black gradient-text-shimmer"
+                        >
+                          {formatPrice(product.final_price)}
+                        </motion.span>
+                        <span className="text-lg text-[#6B6560]/40 line-through">{formatPrice(product.price_ars)}</span>
+                        <span className="text-[12px] text-[#C8972E] font-bold bg-[#C8972E]/10 px-2 py-0.5 rounded">-{product.discount_percent}%</span>
+                      </>
+                    ) : (
+                      <motion.span
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                        className="text-3xl font-black gradient-text-shimmer"
+                      >
+                        {formatPrice(basePrice)}
+                      </motion.span>
+                    )}
+                  </div>
+
+                  {/* Descuento efectivo / transferencia / crypto */}
+                  {cashPrice && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: 0.6 }}
+                      className="flex items-center gap-3 mb-4 p-3 rounded-lg border border-green-200 bg-green-50"
+                    >
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+                        </svg>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[11px] text-green-700 font-semibold tracking-wide uppercase mb-0.5">
+                          Efectivo · Transferencia · Crypto
+                        </p>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-xl font-black text-green-700">{formatPrice(cashPrice)}</span>
+                          <span className="text-[12px] font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
+                            -{cashDiscount.percent}% OFF
+                          </span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
                 </>
-              ) : (
-                <motion.span
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                  className="text-3xl font-black gradient-text-shimmer"
-                >
-                  {formatPrice(product.final_price || product.price_ars)}
-                </motion.span>
-              )}
-            </div>
+              );
+            })()}
 
             <p className="text-[13px] mb-6">
               {product.in_stock !== false ? (
