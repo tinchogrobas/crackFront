@@ -172,7 +172,7 @@ export default function ProductDetailPage({ params }) {
                         alt={product.name}
                         fill
                         className="object-contain"
-                        style={{ padding: '8% 10% 18%' }}
+                        style={{ padding: '8% 10% 23%' }}
                         sizes="(max-width: 1024px) 100vw, 520px"
                         priority
                       />
