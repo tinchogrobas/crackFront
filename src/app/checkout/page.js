@@ -9,6 +9,7 @@ import { formatPrice } from '@/lib/formatPrice';
 import { createOrder, getPaymentConfig, validateDiscount } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Tag, AlertTriangle, Loader2, X } from 'lucide-react';
+import { ExchangeBinance } from '@web3icons/react';
 
 const provinces = [
   'Buenos Aires', 'CABA', 'Catamarca', 'Chaco', 'Chubut', 'Córdoba', 'Corrientes', 'Entre Ríos',
@@ -492,8 +493,11 @@ export default function CheckoutPage() {
                       : 'border-[#E8E4DD] text-[#6B6560] hover:border-[#D4CFC6]'
                   }`}
                 >
-                  <p className="text-sm font-semibold">Pago en efectivo o transferencia / Crypto</p>
-                  <p className="text-xs mt-1 opacity-80">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-sm font-semibold">Efectivo / Transferencia / Crypto</p>
+                    <ExchangeBinance variant="branded" size={20} />
+                  </div>
+                  <p className="text-xs opacity-80">
                     Coordinamos por WhatsApp o tienda.
                     {paymentConfig?.cash_discount_enabled && cashDiscountPercent > 0
                       ? ` Descuento: ${cashDiscountPercent}%`
