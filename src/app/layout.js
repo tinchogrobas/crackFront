@@ -4,6 +4,16 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Toaster } from 'react-hot-toast';
 import MaintenancePage from '@/components/MaintenancePage';
+import {
+  SITE_URL,
+  SITE_NAME,
+  BRAND_LEGAL,
+  DEFAULT_LOCALE,
+  GLOBAL_KEYWORDS,
+  DEFAULT_OG_IMAGE,
+  SOCIAL,
+  CONTACT,
+} from '@/lib/seo';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -24,10 +34,131 @@ const barlowCondensed = Barlow_Condensed({
   display: 'swap',
 });
 
-export const metadata = {
-  title: 'CRACK® — Pokémon TCG Store',
-  description: 'Tu tienda de cartas Pokémon TCG. Singles, Slabs, Sellados, Accesorios y Mystery Packs.',
+const DEFAULT_TITLE = `${SITE_NAME} — Cartas Pokémon TCG en Argentina`;
+const DEFAULT_DESCRIPTION =
+  'Tienda oficial de cartas Pokémon TCG en Argentina. Singles, Slabs certificados PSA/BGS/CGC, sobres sellados, accesorios y Mystery Packs. Envíos a todo el país. Precios en pesos argentinos.';
+
+export const viewport = {
+  themeColor: '#1A1A1A',
+  colorScheme: 'light',
+  width: 'device-width',
+  initialScale: 1,
 };
+
+export const metadata = {
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: DEFAULT_TITLE,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: DEFAULT_DESCRIPTION,
+  applicationName: SITE_NAME,
+  keywords: GLOBAL_KEYWORDS,
+  authors: [{ name: BRAND_LEGAL }],
+  creator: BRAND_LEGAL,
+  publisher: BRAND_LEGAL,
+  category: 'shopping',
+  formatDetection: { email: false, address: false, telephone: false },
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    locale: DEFAULT_LOCALE,
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    images: [
+      {
+        url: DEFAULT_OG_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: `${SITE_NAME} — Tienda Pokémon TCG Argentina`,
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    nocache: false,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
+  },
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+  },
+};
+
+function OrganizationJsonLd() {
+  const organization = {
+    '@context': 'https://schema.org',
+    '@type': 'OnlineStore',
+    '@id': `${SITE_URL}#organization`,
+    name: SITE_NAME,
+    legalName: BRAND_LEGAL,
+    url: SITE_URL,
+    logo: `${SITE_URL}/brand/logo.png`,
+    image: DEFAULT_OG_IMAGE,
+    description: DEFAULT_DESCRIPTION,
+    sameAs: Object.values(SOCIAL).filter(Boolean),
+    email: CONTACT.email,
+    areaServed: { '@type': 'Country', name: CONTACT.country },
+    address: {
+      '@type': 'PostalAddress',
+      addressCountry: 'AR',
+    },
+    currenciesAccepted: 'ARS',
+    paymentAccepted: 'Mercado Pago, Transferencia, Efectivo, Crypto',
+  };
+
+  const website = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${SITE_URL}#website`,
+    url: SITE_URL,
+    name: SITE_NAME,
+    publisher: { '@id': `${SITE_URL}#organization` },
+    inLanguage: 'es-AR',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${SITE_URL}/tienda?search={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organization) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }}
+      />
+    </>
+  );
+}
 
 /**
  * Fetches site configuration from the backend.
@@ -73,6 +204,7 @@ export default async function RootLayout({ children }) {
           <MaintenancePage message={siteConfig.maintenance_message} />
         ) : (
           <>
+            <OrganizationJsonLd />
             <Navbar />
             <main className="min-h-screen pt-8">{children}</main>
             <Footer />

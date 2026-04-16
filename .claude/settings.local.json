@@ -42,6 +42,9 @@
       "Bash(ls:*)",
       "Bash(find:*)",
       "Bash(npx --no-install next lint src/components/ui/SearchOverlay.jsx)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\AR039894\\Desktop\\crackbackend"
     ]
   }
 }

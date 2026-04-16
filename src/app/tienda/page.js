@@ -53,37 +53,52 @@ function normalizeCategoryValues(rawValues, categories) {
 }
 
 export async function generateMetadata({ searchParams }) {
-  const qs = new URLSearchParams();
-  const search = toSingleValue(searchParams?.search);
-  const ordering = toSingleValue(searchParams?.ordering);
-  const category = toSingleValue(searchParams?.category);
-  const tcg = toSingleValue(searchParams?.tcg);
-  const page = Number.parseInt(toSingleValue(searchParams?.page) || '1', 10);
+  const resolvedParams = await searchParams;
+  const search = toSingleValue(resolvedParams?.search);
+  const category = toSingleValue(resolvedParams?.category);
+  const tcg = toSingleValue(resolvedParams?.tcg);
+  const page = Number.parseInt(toSingleValue(resolvedParams?.page) || '1', 10);
+  const isPaginated = Number.isInteger(page) && page > 1;
 
-  if (search) qs.set('search', search);
-  if (ordering) qs.set('ordering', ordering);
-  if (category) qs.set('category', category);
-  if (tcg) qs.set('tcg', tcg);
-  if (Number.isInteger(page) && page > 1) qs.set('page', String(page));
+  // Canonical: solo filtros "evergreen" (categoría / tcg) + paginación reciben su propia canonical.
+  // Búsquedas / orden son no-canónicos → apuntan a /tienda para evitar duplicados.
+  const canonicalQs = new URLSearchParams();
+  if (category) canonicalQs.set('category', category);
+  if (tcg) canonicalQs.set('tcg', tcg);
+  if (isPaginated) canonicalQs.set('page', String(page));
+  const canonical = `${SITE_URL}/tienda${canonicalQs.toString() ? `?${canonicalQs.toString()}` : ''}`;
+  const pageSuffix = isPaginated ? ` · Página ${page}` : '';
 
-  const canonical = `${SITE_URL}/tienda${qs.toString() ? `?${qs.toString()}` : ''}`;
-  const pageSuffix = Number.isInteger(page) && page > 1 ? ` - Pagina ${page}` : '';
+  const subject = category ? category : tcg ? tcg : 'Pokémon TCG';
+  const title = search
+    ? `Resultados: "${search}" en CRACK TCG`
+    : `Tienda ${subject}${pageSuffix} — Cartas, Slabs y Sellados en Argentina`;
+  const description = search
+    ? `Resultados de búsqueda para "${search}" en CRACK TCG. Cartas Pokémon, singles, slabs y sellados con envío a todo el país.`
+    : `Catálogo completo de ${subject} en Argentina. Singles, Slabs PSA/BGS/CGC, sobres sellados, accesorios y Mystery Packs. Envíos a todo el país. Precios en ARS.`;
+
+  // Noindex para resultados de búsqueda y filtros combinados con search — evitan thin/duplicate content.
+  const noindex = Boolean(search);
 
   return {
-    title: `Tienda de Cartas TCG${pageSuffix} | Crack Store`,
-    description: 'Compra singles, slabs, sellados y accesorios TCG con filtros por categoria, juego, condicion y precio.',
-    alternates: {
-      canonical,
-    },
-    robots: {
-      index: true,
-      follow: true,
-    },
+    title,
+    description,
+    alternates: { canonical },
+    robots: noindex
+      ? { index: false, follow: true }
+      : { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
     openGraph: {
-      title: `Crack Store - Tienda TCG${pageSuffix}`,
-      description: 'Catalogo de cartas y coleccionables TCG con filtros avanzados y paginacion server-side.',
+      title,
+      description,
       url: canonical,
       type: 'website',
+      locale: 'es_AR',
+      siteName: 'CRACK® TCG',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
     },
   };
 }
