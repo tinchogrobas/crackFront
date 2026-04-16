@@ -172,7 +172,7 @@ export default function ProductDetailPage({ params }) {
               {/* Contenedor gris grande — sombra adentro, sin overflow hidden */}
               <div
                 className="relative w-full rounded-xl flex items-end justify-center"
-                style={{ aspectRatio: '1/1', paddingBottom: '9%' }}
+                style={{ aspectRatio: '1/1', paddingBottom: '6%' }}
               >
                 {images[selectedImage] ? (
                   <>
