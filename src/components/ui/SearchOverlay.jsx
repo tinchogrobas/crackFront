@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, X, Loader2 } from 'lucide-react';
 import Image from 'next/image';
@@ -26,6 +26,22 @@ export default function SearchOverlay({ isOpen, onClose }) {
   const inputRef = useRef(null);
   const debounceRef = useRef(null);
   const panelRef = useRef(null);
+  const [firstCardEl, setFirstCardEl] = useState(null);
+  const [rowHeight, setRowHeight] = useState(0);
+
+  // Measure one card's height so the results container shows exactly one row,
+  // letting scroll-snap step row-by-row.
+  useLayoutEffect(() => {
+    if (!firstCardEl) {
+      setRowHeight(0);
+      return;
+    }
+    const measure = () => setRowHeight(firstCardEl.offsetHeight);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(firstCardEl);
+    return () => ro.disconnect();
+  }, [firstCardEl]);
 
   // Prefetch popular products on mount so the first open is warm
   // (data + DOM + image decode already done behind the hidden panel)
@@ -302,14 +318,18 @@ export default function SearchOverlay({ isOpen, onClose }) {
                   >
                     Productos
                   </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  <div
+                    className="grid grid-cols-4 gap-3 snap-y snap-mandatory overflow-y-auto hide-scrollbar overscroll-contain"
+                    style={rowHeight ? { maxHeight: `${rowHeight}px` } : undefined}
+                  >
                     {results.slice(0, 8).map((product, idx) => {
                       const delay = `${150 + idx * 50}ms`;
                       return (
                         <button
                           key={product.id}
+                          ref={idx === 0 ? setFirstCardEl : undefined}
                           onClick={() => goToProduct(product.slug)}
-                          className="lupita-item text-left group/card"
+                          className="lupita-item text-left group/card snap-start"
                           style={{ transitionDelay: delay }}
                           role="option"
                         >
