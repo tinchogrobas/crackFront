@@ -29,6 +29,7 @@ export default function Navbar() {
 
   const navLinks = [
     { href: '/tienda', label: 'Tienda' },
+    { href: '/vender-coleccion', label: 'Sell your Collection' },
     { href: '/contacto', label: 'Contacto' },
   ];
 
