@@ -14,13 +14,11 @@ import {
   absoluteUrl,
 } from '@/lib/seo';
 
-const REVALIDATE_SECONDS = 60;
-
-export const revalidate = REVALIDATE_SECONDS;
+export const revalidate = 60;
 
 async function fetchProduct(slug) {
   return serverFetch(`/products/${encodeURIComponent(slug)}/`, {
-    revalidateSeconds: REVALIDATE_SECONDS,
+    revalidateSeconds: 60,
   });
 }
 
