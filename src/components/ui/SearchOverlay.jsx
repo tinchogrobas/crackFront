@@ -194,7 +194,7 @@ export default function SearchOverlay({ isOpen, onClose }) {
             {/* Results area */}
             <div
               id="search-results"
-              className="max-h-[calc(100dvh-180px)] overflow-y-auto hide-scrollbar"
+              className="max-h-[calc(100dvh-280px)] overflow-y-auto hide-scrollbar"
               role="region"
               aria-live="polite"
               aria-label="Resultados de búsqueda"
@@ -303,7 +303,7 @@ export default function SearchOverlay({ isOpen, onClose }) {
                     Productos
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {results.slice(0, 4).map((product, idx) => {
+                    {results.slice(0, 8).map((product, idx) => {
                       const delay = `${150 + idx * 50}ms`;
                       return (
                         <button
@@ -351,7 +351,7 @@ export default function SearchOverlay({ isOpen, onClose }) {
                   <div
                     className="lupita-item mt-5 pt-4 border-t border-[#E8E4DD] text-center"
                     style={{
-                      transitionDelay: `${150 + Math.min(results.length, 4) * 50}ms`,
+                      transitionDelay: `${150 + Math.min(results.length, 8) * 50}ms`,
                     }}
                   >
                     <button
