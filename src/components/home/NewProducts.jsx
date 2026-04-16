@@ -56,7 +56,7 @@ export default function NewProducts() {
             {/* Scroll container */}
             <div
               ref={scrollRef}
-              className="flex gap-3 overflow-x-auto hide-scrollbar px-5 sm:px-8 snap-x snap-mandatory"
+              className="flex gap-3 overflow-x-auto hide-scrollbar px-5 sm:px-8 snap-x snap-mandatory scroll-pl-5 sm:scroll-pl-8"
               style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}
             >
               {products.map((product) => (
