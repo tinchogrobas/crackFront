@@ -245,14 +245,14 @@ export default function SearchOverlay({ isOpen, onClose }) {
                         <Loader2 size={20} className="animate-spin text-[#C8972E]/30" />
                       </div>
                     ) : (
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         {popularProducts.map((product, idx) => {
                           const delay = `${200 + idx * 50}ms`;
                           return (
                             <button
                               key={product.id}
                               onClick={() => goToProduct(product.slug)}
-                              className={`lupita-item text-left group/card ${idx >= 2 ? 'hidden sm:block' : ''}`}
+                              className={`lupita-item text-left group/card ${idx >= 2 ? 'hidden md:block' : ''}`}
                               style={{ transitionDelay: delay }}
                             >
                               <div
