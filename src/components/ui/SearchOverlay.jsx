@@ -252,7 +252,7 @@ export default function SearchOverlay({ isOpen, onClose }) {
                             <button
                               key={product.id}
                               onClick={() => goToProduct(product.slug)}
-                              className="lupita-item text-left group/card"
+                              className={`lupita-item text-left group/card ${idx >= 2 ? 'hidden sm:block' : ''}`}
                               style={{ transitionDelay: delay }}
                             >
                               <div
