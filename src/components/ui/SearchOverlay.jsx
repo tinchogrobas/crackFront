@@ -194,7 +194,7 @@ export default function SearchOverlay({ isOpen, onClose }) {
             {/* Results area */}
             <div
               id="search-results"
-              className="max-h-[60vh] overflow-y-auto hide-scrollbar"
+              className="max-h-[calc(100dvh-180px)] overflow-y-auto hide-scrollbar"
               role="region"
               aria-live="polite"
               aria-label="Resultados de búsqueda"
