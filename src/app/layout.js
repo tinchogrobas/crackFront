@@ -96,10 +96,15 @@ export const metadata = {
       'max-video-preview': -1,
     },
   },
+  manifest: '/favicon/site.webmanifest',
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
+    icon: [
+      { url: '/favicon/favicon.ico' },
+      { url: '/favicon/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
+      { url: '/favicon/favicon.svg', type: 'image/svg+xml' },
+    ],
+    shortcut: '/favicon/favicon.ico',
+    apple: [{ url: '/favicon/apple-touch-icon.png', sizes: '180x180' }],
   },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
@@ -198,6 +203,11 @@ export default async function RootLayout({ children }) {
             dedup cuando canonical y language apuntan a la misma URL. */}
         <link rel="alternate" hrefLang="es-AR" href={SITE_URL} />
         <link rel="alternate" hrefLang="x-default" href={SITE_URL} />
+        <link rel="icon" type="image/png" href="/favicon/favicon-96x96.png" sizes="96x96" />
+        <link rel="icon" type="image/svg+xml" href="/favicon/favicon.svg" />
+        <link rel="shortcut icon" href="/favicon/favicon.ico" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
+        <link rel="manifest" href="/favicon/site.webmanifest" />
       </head>
       <body
         className={
