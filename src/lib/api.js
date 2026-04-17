@@ -156,6 +156,13 @@ export async function subscribe(email) {
   });
 }
 
+export async function unsubscribeNewsletter(token) {
+  return apiFetch('/unsubscribe/', {
+    method: 'POST',
+    body: JSON.stringify({ token }),
+  });
+}
+
 export async function sendContact(data) {
   return apiFetch('/contact/', {
     method: 'POST',
