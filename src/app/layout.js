@@ -61,10 +61,6 @@ export const metadata = {
   formatDetection: { email: false, address: false, telephone: false },
   alternates: {
     canonical: '/',
-    languages: {
-      'es-AR': '/',
-      'x-default': '/',
-    },
   },
   openGraph: {
     type: 'website',
@@ -197,6 +193,12 @@ export default async function RootLayout({ children }) {
   const isMaintenance = !siteConfig.is_active;
   return (
     <html lang="es" className={`${inter.variable} ${spaceGrotesk.variable} ${barlowCondensed.variable}`}>
+      <head>
+        {/* hreflang — sitio mono-idioma (es-AR). Se emite manual porque Next.js
+            dedup cuando canonical y language apuntan a la misma URL. */}
+        <link rel="alternate" hrefLang="es-AR" href={SITE_URL} />
+        <link rel="alternate" hrefLang="x-default" href={SITE_URL} />
+      </head>
       <body
         className={
           isMaintenance
