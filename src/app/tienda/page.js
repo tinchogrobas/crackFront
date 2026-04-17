@@ -57,28 +57,40 @@ export async function generateMetadata({ searchParams }) {
   const search = toSingleValue(resolvedParams?.search);
   const category = toSingleValue(resolvedParams?.category);
   const tcg = toSingleValue(resolvedParams?.tcg);
+  const condition = toSingleValue(resolvedParams?.condition);
+  const certEntity = toSingleValue(resolvedParams?.certification_entity);
   const page = Number.parseInt(toSingleValue(resolvedParams?.page) || '1', 10);
   const isPaginated = Number.isInteger(page) && page > 1;
 
-  // Canonical: solo filtros "evergreen" (categoría / tcg) + paginación reciben su propia canonical.
-  // Búsquedas / orden son no-canónicos → apuntan a /tienda para evitar duplicados.
+  // Filtros CSV (múltiples valores) NO son canónicos → apuntan a /tienda base
+  const isCsv = (v) => typeof v === 'string' && v.includes(',');
+  const hasCsvFilter = isCsv(category) || isCsv(tcg) || isCsv(condition) || isCsv(certEntity);
+
+  // Canonical: solo filtros "evergreen" de valor único + paginación reciben su propia canonical.
+  // Orden canónico fijo: category → tcg → condition → certification_entity → page
+  // Ese orden matchea el sitemap y evita duplicados por reordenamiento de params.
   const canonicalQs = new URLSearchParams();
-  if (category) canonicalQs.set('category', category);
-  if (tcg) canonicalQs.set('tcg', tcg);
-  if (isPaginated) canonicalQs.set('page', String(page));
+  if (!hasCsvFilter && !search) {
+    if (category) canonicalQs.set('category', category);
+    if (tcg) canonicalQs.set('tcg', tcg);
+    if (condition) canonicalQs.set('condition', condition);
+    if (certEntity) canonicalQs.set('certification_entity', certEntity);
+    if (isPaginated) canonicalQs.set('page', String(page));
+  }
   const canonical = `${SITE_URL}/tienda${canonicalQs.toString() ? `?${canonicalQs.toString()}` : ''}`;
   const pageSuffix = isPaginated ? ` · Página ${page}` : '';
 
-  const subject = category ? category : tcg ? tcg : 'Pokémon TCG';
+  const descriptors = [category, tcg, condition, certEntity].filter(Boolean);
+  const subject = descriptors.length ? descriptors.join(' ') : 'Pokémon TCG';
   const title = search
     ? `Resultados: "${search}" en CRACK TCG`
-    : `Tienda ${subject}${pageSuffix} — Cartas, Slabs y Sellados en Argentina`;
+    : `${subject[0].toUpperCase()}${subject.slice(1)}${pageSuffix} — Comprar en Argentina | CRACK TCG`;
   const description = search
     ? `Resultados de búsqueda para "${search}" en CRACK TCG. Cartas Pokémon, singles, slabs y sellados con envío a todo el país.`
-    : `Catálogo completo de ${subject} en Argentina. Singles, Slabs PSA/BGS/CGC, sobres sellados, accesorios y Mystery Packs. Envíos a todo el país. Precios en ARS.`;
+    : `Catálogo de ${subject} en Argentina. Singles, Slabs PSA/BGS/CGC, sobres sellados, accesorios y Mystery Packs. Envíos a todo el país. Precios en ARS.`;
 
-  // Noindex para resultados de búsqueda y filtros combinados con search — evitan thin/duplicate content.
-  const noindex = Boolean(search);
+  // Noindex para: búsquedas, filtros con CSV (combinaciones arbitrarias del usuario)
+  const noindex = Boolean(search) || hasCsvFilter;
 
   return {
     title,

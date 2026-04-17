@@ -104,3 +104,82 @@ export function resolveCategory(product) {
   if (typeof product.category === 'string') return { name: product.category, slug: null };
   return { name: product.category.name || null, slug: product.category.slug || null };
 }
+
+// ─── Sitemap / XML helpers ───────────────────────────────────────────────────
+
+/** Escapa los 5 caracteres reservados de XML para inyectar URLs o texto en el XML. */
+export function xmlEscape(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+/** Convierte Date o string ISO a formato W3C Datetime (YYYY-MM-DDTHH:mm:ss+00:00). */
+export function toW3CDate(input) {
+  if (!input) return new Date().toISOString();
+  const d = input instanceof Date ? input : new Date(input);
+  if (Number.isNaN(d.getTime())) return new Date().toISOString();
+  return d.toISOString();
+}
+
+/** Construye una entrada <url>...</url> del sitemap, con soporte de image:image. */
+export function buildUrlEntry({ loc, lastmod, changefreq, priority, images = [] }) {
+  const parts = [
+    '  <url>',
+    `    <loc>${xmlEscape(loc)}</loc>`,
+    lastmod ? `    <lastmod>${toW3CDate(lastmod)}</lastmod>` : null,
+    changefreq ? `    <changefreq>${changefreq}</changefreq>` : null,
+    priority != null ? `    <priority>${Number(priority).toFixed(1)}</priority>` : null,
+    ...images
+      .filter(Boolean)
+      .map((url) => `    <image:image><image:loc>${xmlEscape(url)}</image:loc></image:image>`),
+    '  </url>',
+  ].filter(Boolean);
+  return parts.join('\n');
+}
+
+/** Construye una entrada <sitemap>...</sitemap> del sitemap index. */
+export function buildSitemapEntry({ loc, lastmod }) {
+  return [
+    '  <sitemap>',
+    `    <loc>${xmlEscape(loc)}</loc>`,
+    lastmod ? `    <lastmod>${toW3CDate(lastmod)}</lastmod>` : null,
+    '  </sitemap>',
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
+/** Wrappea el contenido de <urlset>. Se pasa `withImages` para incluir el namespace image. */
+export function wrapUrlset(entries, { withImages = false } = {}) {
+  const imageNs = withImages ? ' xmlns:image="http://www.google.com/schemas/sitemap-image/0.9"' : '';
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"${imageNs}>
+${entries.join('\n')}
+</urlset>`;
+}
+
+/** Wrappea el contenido de <sitemapindex>. */
+export function wrapSitemapIndex(entries) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${entries.join('\n')}
+</sitemapindex>`;
+}
+
+/** Headers estándar para responses XML de sitemap con ISR. */
+export function xmlResponseHeaders({ maxAgeSeconds = 3600 } = {}) {
+  return {
+    'Content-Type': 'application/xml; charset=utf-8',
+    'Cache-Control': `public, max-age=${maxAgeSeconds}, s-maxage=${maxAgeSeconds}, stale-while-revalidate=86400`,
+    'X-Robots-Tag': 'noindex',
+  };
+}
+
+/** Filtro defensivo: valida que un slug solo contenga caracteres SEO-safe. */
+export function isSafeSlug(slug) {
+  return typeof slug === 'string' && /^[a-zA-Z0-9_\-./]+$/.test(slug);
+}
