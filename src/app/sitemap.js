@@ -60,13 +60,12 @@ export default async function sitemap() {
     }));
 
   const productEntries = products
-    .filter((p) => p?.slug)
+    .filter((p) => p?.slug && /^[a-zA-Z0-9\-_/]+$/.test(p.slug))
     .map((p) => ({
       url: `${SITE_URL}/tienda/${p.slug}`,
       lastModified: p.updated_at ? new Date(p.updated_at) : now,
       changeFrequency: 'weekly',
       priority: 0.9,
-      ...(p.image_url ? { images: [p.image_url] } : {}),
     }));
 
   return [...staticEntries, ...categoryEntries, ...productEntries];
