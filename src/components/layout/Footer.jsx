@@ -60,7 +60,7 @@ export default function Footer() {
         </motion.div>
         <div className="border-t border-[#E8E4DD] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-[11px] text-[#6B6560]/50">&copy; {new Date().getFullYear()} CRACK&reg;. Todos los derechos reservados.</p>
-          <p className="text-[11px] text-[#6B6560]/50">Buenos Aires, Argentina</p>
+          <p className="text-[11px] text-[#6B6560]/50">Deheza 2921, PB, Saavedra, Buenos Aires, Argentina</p>
         </div>
       </div>
     </footer>

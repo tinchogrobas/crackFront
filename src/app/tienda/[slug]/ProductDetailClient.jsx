@@ -62,7 +62,7 @@ export default function ProductDetailClient({ product }) {
   };
 
   return (
-    <div className="pt-28 pb-20">
+    <div className="pt-10 md:pt-28 pb-20">
       <div className="max-w-[1200px] mx-auto px-5 sm:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
           {/* Image — with 3D tilt and contact shadow */}
@@ -79,19 +79,18 @@ export default function ProductDetailClient({ product }) {
               >
                 {images[selectedImage] ? (
                   <>
-                    <div className="absolute inset-0 flex items-center justify-center" style={{ paddingBottom: '40px' }}>
+                    <div className="absolute inset-0 flex items-center justify-center pb-7 md:pb-10">
                       <Image
                         src={images[selectedImage]}
                         alt={product.name}
                         fill
-                        className="object-contain"
-                        style={{ padding: '8% 10% 23%' }}
+                        className="object-contain px-[6%] pt-[6%] pb-[18%] md:px-[10%] md:pt-[8%] md:pb-[23%]"
                         sizes="(max-width: 1024px) 100vw, 520px"
                         priority
                       />
                     </div>
                     <div
-                      className="relative pointer-events-none z-10"
+                      className="relative pointer-events-none z-10 translate-y-4 md:translate-y-0 "
                       style={{
                         width: '50%',
                         height: '32px',

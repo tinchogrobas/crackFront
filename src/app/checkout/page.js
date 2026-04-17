@@ -18,6 +18,10 @@ const provinces = [
   'Tierra del Fuego', 'Tucumán',
 ];
 
+const PICKUP_BRANCH_ADDRESS = 'Deheza 2921, PB, Saavedra, Buenos Aires, Argentina';
+const PICKUP_BRANCH_MAP_URL = 'https://maps.app.goo.gl/vTPfffMMNMbMLCyn8';
+const PICKUP_BRANCH_MAP_EMBED_QUERY = 'Deheza 2921, C1429EAY Cdad. Autónoma de Buenos Aires';
+
 export default function CheckoutPage() {
   const router = useRouter();
   const items = useCartStore((s) => s.items);
@@ -52,6 +56,7 @@ export default function CheckoutPage() {
   const [validating, setValidating] = useState(false);
   const [orderErrors, setOrderErrors] = useState([]); // mensajes de error del backend
   const [fieldErrors, setFieldErrors] = useState({}); // errores de validación por campo
+  const [pickupMapOpen, setPickupMapOpen] = useState(false);
 
   // Validación de stock al cargar
   const [stockChecking, setStockChecking] = useState(true);
@@ -207,10 +212,6 @@ export default function CheckoutPage() {
       } else if (!/^\d{4}$/.test(zip)) {
         errors.shipping_zip = 'El código postal debe tener 4 dígitos';
       }
-    } else {
-      if (!form.shipping_branch.trim()) {
-        errors.shipping_branch = 'La sucursal es obligatoria';
-      }
     }
 
     return errors;
@@ -249,7 +250,7 @@ export default function CheckoutPage() {
         shipping_city: form.shipping_city.trim(),
         shipping_province: form.shipping_province,
         shipping_zip: form.shipping_zip.trim(),
-        shipping_branch: form.shipping_branch.trim(),
+        shipping_branch: form.shipping_type === 'pickup' ? PICKUP_BRANCH_ADDRESS : form.shipping_branch.trim(),
         discount_code: discountCode || '',
         items: items.map((item) => ({ product_id: item.id, quantity: item.quantity })),
       });
@@ -461,9 +462,50 @@ export default function CheckoutPage() {
                 </div>
               ) : (
                 <div>
-                  <label className={labelClass}>Sucursal / Punto de entrega *</label>
-                  <input type="text" value={form.shipping_branch} onChange={(e) => updateForm('shipping_branch', e.target.value)} className={inputClass('shipping_branch')} placeholder="Nombre o dirección de la sucursal" />
-                  <FieldError field="shipping_branch" />
+                  <label className={labelClass}>Retiro en punto</label>
+                  <div className="w-full bg-[#F8F6F1] border border-[#E8E4DD] rounded-lg px-4 py-3 text-sm text-[#3A3530]">
+                    {PICKUP_BRANCH_ADDRESS}
+                  </div>
+                  <div className="mt-3">
+                    <button
+                      type="button"
+                      onClick={() => setPickupMapOpen((v) => !v)}
+                      className="text-[11px] tracking-[0.1em] uppercase font-medium text-[#6B6560] hover:text-[#1A1A1A] transition-colors"
+                    >
+                      {pickupMapOpen ? 'Ocultar mapa' : 'Ver mapa'}
+                    </button>
+
+                    <AnimatePresence initial={false}>
+                      {pickupMapOpen && (
+                        <motion.div
+                          key="pickup-map"
+                          initial={{ height: 0, opacity: 0, y: -4 }}
+                          animate={{ height: 'auto', opacity: 1, y: 0 }}
+                          exit={{ height: 0, opacity: 0, y: -4 }}
+                          transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+                          className="overflow-hidden mt-3"
+                        >
+                          <div className="rounded-lg border border-[#E8E4DD] bg-white overflow-hidden">
+                            <iframe
+                              title="Mapa de punto de retiro"
+                              src={`https://www.google.com/maps?q=${encodeURIComponent(PICKUP_BRANCH_MAP_EMBED_QUERY)}&output=embed`}
+                              className="w-full h-44"
+                              loading="lazy"
+                              referrerPolicy="no-referrer-when-downgrade"
+                            />
+                          </div>
+                          <a
+                            href={PICKUP_BRANCH_MAP_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-block mt-2 text-[11px] tracking-[0.08em] uppercase text-[#6B6560] hover:text-[#1A1A1A] underline"
+                          >
+                            Abrir en Google Maps
+                          </a>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
               )}
             </motion.div>
