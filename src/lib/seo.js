@@ -125,17 +125,28 @@ export function toW3CDate(input) {
   return d.toISOString();
 }
 
-/** Construye una entrada <url>...</url> del sitemap, con soporte de image:image. */
+/**
+ * Construye una entrada <url>...</url> del sitemap, con soporte de image:image.
+ * `images` acepta strings (solo loc) u objetos `{ loc, title, caption }`.
+ */
 export function buildUrlEntry({ loc, lastmod, changefreq, priority, images = [] }) {
+  const imageBlocks = images
+    .map((img) => (typeof img === 'string' ? { loc: img } : img))
+    .filter((img) => img && img.loc)
+    .map((img) => {
+      const inner = [`<image:loc>${xmlEscape(img.loc)}</image:loc>`];
+      if (img.title) inner.push(`<image:title>${xmlEscape(img.title)}</image:title>`);
+      if (img.caption) inner.push(`<image:caption>${xmlEscape(img.caption)}</image:caption>`);
+      return `    <image:image>${inner.join('')}</image:image>`;
+    });
+
   const parts = [
     '  <url>',
     `    <loc>${xmlEscape(loc)}</loc>`,
     lastmod ? `    <lastmod>${toW3CDate(lastmod)}</lastmod>` : null,
     changefreq ? `    <changefreq>${changefreq}</changefreq>` : null,
     priority != null ? `    <priority>${Number(priority).toFixed(1)}</priority>` : null,
-    ...images
-      .filter(Boolean)
-      .map((url) => `    <image:image><image:loc>${xmlEscape(url)}</image:loc></image:image>`),
+    ...imageBlocks,
     '  </url>',
   ].filter(Boolean);
   return parts.join('\n');

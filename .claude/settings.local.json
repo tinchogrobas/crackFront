@@ -41,7 +41,9 @@
       "Bash(git pull:*)",
       "Bash(ls:*)",
       "Bash(find:*)",
-      "Bash(npx --no-install next lint src/components/ui/SearchOverlay.jsx)"
+      "Bash(npx --no-install next lint src/components/ui/SearchOverlay.jsx)",
+      "Read(//c/c/Users/AR039894/Desktop/crackFront/**)",
+      "Bash(python -m py_compile apps/products/views.py)"
     ],
     "additionalDirectories": [
       "C:\\Users\\AR039894\\Desktop\\crackbackend"

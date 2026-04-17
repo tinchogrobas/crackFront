@@ -61,6 +61,10 @@ export const metadata = {
   formatDetection: { email: false, address: false, telephone: false },
   alternates: {
     canonical: '/',
+    languages: {
+      'es-AR': '/',
+      'x-default': '/',
+    },
   },
   openGraph: {
     type: 'website',

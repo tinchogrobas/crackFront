@@ -59,6 +59,9 @@ export async function generateMetadata({ searchParams }) {
   const tcg = toSingleValue(resolvedParams?.tcg);
   const condition = toSingleValue(resolvedParams?.condition);
   const certEntity = toSingleValue(resolvedParams?.certification_entity);
+  const hasDiscountParam = ['1', 'true', 'yes'].includes(
+    toSingleValue(resolvedParams?.has_discount).toLowerCase(),
+  );
   const page = Number.parseInt(toSingleValue(resolvedParams?.page) || '1', 10);
   const isPaginated = Number.isInteger(page) && page > 1;
 
@@ -67,7 +70,7 @@ export async function generateMetadata({ searchParams }) {
   const hasCsvFilter = isCsv(category) || isCsv(tcg) || isCsv(condition) || isCsv(certEntity);
 
   // Canonical: solo filtros "evergreen" de valor único + paginación reciben su propia canonical.
-  // Orden canónico fijo: category → tcg → condition → certification_entity → page
+  // Orden canónico fijo: category → tcg → condition → certification_entity → has_discount → page
   // Ese orden matchea el sitemap y evita duplicados por reordenamiento de params.
   const canonicalQs = new URLSearchParams();
   if (!hasCsvFilter && !search) {
@@ -75,6 +78,7 @@ export async function generateMetadata({ searchParams }) {
     if (tcg) canonicalQs.set('tcg', tcg);
     if (condition) canonicalQs.set('condition', condition);
     if (certEntity) canonicalQs.set('certification_entity', certEntity);
+    if (hasDiscountParam) canonicalQs.set('has_discount', 'true');
     if (isPaginated) canonicalQs.set('page', String(page));
   }
   const canonical = `${SITE_URL}/tienda${canonicalQs.toString() ? `?${canonicalQs.toString()}` : ''}`;
@@ -82,11 +86,14 @@ export async function generateMetadata({ searchParams }) {
 
   const descriptors = [category, tcg, condition, certEntity].filter(Boolean);
   const subject = descriptors.length ? descriptors.join(' ') : 'Pokémon TCG';
+  const offersPrefix = hasDiscountParam ? 'Ofertas: ' : '';
   const title = search
     ? `Resultados: "${search}" en CRACK TCG`
-    : `${subject[0].toUpperCase()}${subject.slice(1)}${pageSuffix} — Comprar en Argentina | CRACK TCG`;
+    : `${offersPrefix}${subject[0].toUpperCase()}${subject.slice(1)}${pageSuffix} — Comprar en Argentina | CRACK TCG`;
   const description = search
     ? `Resultados de búsqueda para "${search}" en CRACK TCG. Cartas Pokémon, singles, slabs y sellados con envío a todo el país.`
+    : hasDiscountParam
+    ? `Ofertas y descuentos en ${subject} — Argentina. Singles, Slabs PSA/BGS/CGC, sobres sellados y Mystery Packs con rebajas. Envíos a todo el país. Precios en ARS.`
     : `Catálogo de ${subject} en Argentina. Singles, Slabs PSA/BGS/CGC, sobres sellados, accesorios y Mystery Packs. Envíos a todo el país. Precios en ARS.`;
 
   // Noindex para: búsquedas, filtros con CSV (combinaciones arbitrarias del usuario)

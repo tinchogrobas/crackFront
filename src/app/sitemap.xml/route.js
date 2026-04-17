@@ -12,6 +12,7 @@ const SHARDS = [
   { path: '/sitemap-static.xml', weight: 'static' },
   { path: '/sitemap-categories.xml', weight: 'categories' },
   { path: '/sitemap-products.xml', weight: 'products' },
+  { path: '/sitemap-images.xml', weight: 'images' },
 ];
 
 export async function GET() {
