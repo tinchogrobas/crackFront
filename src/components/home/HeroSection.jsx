@@ -32,7 +32,10 @@ export default function HeroSection() {
               priority
               fetchPriority="high"
               sizes="(max-width: 640px) 90vw, 980px"
-              className="h-[40px] sm:h-[105px] w-auto drop-shadow-[0_6px_14px_rgba(0,0,0,0.45)]"
+              className="h-[40px] sm:h-[105px] w-auto"
+              style={{
+                filter: 'drop-shadow(0 0 20px rgba(200,151,46,0.4)) drop-shadow(0 0 40px rgba(200,151,46,0.2)) drop-shadow(0 4px 12px rgba(0,0,0,0.5))',
+              }}
             />
           </div>
         </motion.div>
