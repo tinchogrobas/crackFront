@@ -27,14 +27,7 @@ function UnsubscribeFallback() {
 
       <div className="relative mx-auto w-full max-w-3xl">
         <div className="rounded-[26px] border border-[#E8E4DD] bg-white p-8 text-center shadow-[0_20px_54px_rgba(26,26,26,0.08)] sm:p-12">
-          <Image
-            src="/brand/logo2.png"
-            alt="Crack TCG"
-            width={216}
-            height={74}
-            className="mx-auto mb-8 h-auto w-[168px] sm:w-[216px]"
-            priority
-          />
+
 
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#EAD8AF] bg-[#FFF7E4] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#A6771B]">
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#C8972E]" />
@@ -123,19 +116,6 @@ function UnsubscribeContent() {
       <div className="relative mx-auto w-full max-w-3xl">
         <div className="rounded-[26px] border border-[#E8E4DD] bg-white p-8 shadow-[0_20px_54px_rgba(26,26,26,0.08)] sm:p-12">
           <div className="text-center">
-            <Image
-              src="/brand/logo2.png"
-              alt="Crack TCG"
-              width={216}
-              height={74}
-              className="mx-auto mb-8 h-auto w-[168px] sm:w-[216px]"
-              priority
-            />
-
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#EAD8AF] bg-[#FFF7E4] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#A6771B]">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#C8972E]" />
-              Preferencias de email
-            </div>
 
             {loading ? (
               <>
