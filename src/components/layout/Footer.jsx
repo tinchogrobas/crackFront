@@ -41,9 +41,8 @@ export default function Footer() {
             <p className="text-[11px] tracking-[0.2em] text-[#C8972E]/60 uppercase font-medium mb-5">Info</p>
             <div className="flex flex-col gap-3">
               <Link href="/contacto" className="text-[13px] text-[#6B6560] hover:text-[#1A1A1A] transition-colors">Contacto</Link>
-              <Link href="/otros-productos" className="text-[13px] text-[#6B6560] hover:text-[#1A1A1A] transition-colors">Otros Productos</Link>
-              <a href="#" className="text-[13px] text-[#6B6560] hover:text-[#1A1A1A] transition-colors">Términos</a>
-              <a href="#" className="text-[13px] text-[#6B6560] hover:text-[#1A1A1A] transition-colors">Privacidad</a>
+              <Link href="/terminos" className="text-[13px] text-[#6B6560] hover:text-[#1A1A1A] transition-colors">Términos</Link>
+              <Link href="/privacidad" className="text-[13px] text-[#6B6560] hover:text-[#1A1A1A] transition-colors">Privacidad</Link>
             </div>
           </div>
           <div>

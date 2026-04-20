@@ -1,11 +1,34 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { unsubscribeNewsletter } from '@/lib/api';
 import { Check } from 'lucide-react';
 
 export default function UnsubscribePage() {
+  return (
+    <Suspense fallback={<UnsubscribeFallback />}>
+      <UnsubscribeContent />
+    </Suspense>
+  );
+}
+
+function UnsubscribeFallback() {
+  return (
+    <section className="min-h-[72vh] flex items-center justify-center px-5 py-16 bg-[#FAFAF7]">
+      <div className="w-full max-w-2xl border border-[#E8E4DD] bg-white p-8 sm:p-12 text-center shadow-[0_12px_34px_rgba(0,0,0,0.06)]">
+        <p className="text-[11px] tracking-[0.25em] uppercase text-[#C8972E] font-semibold mb-5">CRACK TCG</p>
+        <div className="mx-auto mb-5 h-14 w-14 rounded-full border-4 border-[#F2E8CE] border-t-[#C8972E] animate-spin" />
+        <h1 className="font-display text-3xl sm:text-4xl text-[#1A1A1A] mb-4 tracking-[-0.02em]">
+          Procesando solicitud
+        </h1>
+        <p className="text-[15px] text-[#6B6560]">Procesando desuscripción...</p>
+      </div>
+    </section>
+  );
+}
+
+function UnsubscribeContent() {
   const searchParams = useSearchParams();
   const token = useMemo(() => (searchParams.get('token') || '').trim(), [searchParams]);
 

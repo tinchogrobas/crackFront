@@ -222,7 +222,7 @@ export default function Navbar() {
                 <span className="text-[13px] font-semibold uppercase tracking-[0.12em]">Buscar</span>
               </button>
               <div className="flex flex-col gap-6">
-                {[...navLinks, { href: '/otros-productos', label: 'Otros Productos' }].map((link, i) => (
+                {navLinks.map((link, i) => (
                   <motion.div
                     key={link.href}
                     initial={{ opacity: 0, x: -20 }}

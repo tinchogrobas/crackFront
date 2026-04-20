@@ -73,8 +73,8 @@ export default function ProductCard({ product }) {
           </span>
         )}
 
-        {/* Hover actions */}
-        <div className="absolute bottom-3 right-3 flex flex-col gap-1.5 z-10">
+        {/* Hover actions — desktop only (hover-capable devices) */}
+        <div className="absolute bottom-3 right-3 hidden md:flex flex-col gap-1.5 z-10">
           <button onClick={handleAddToCart} disabled={!canAddToCart} className="w-9 h-9 bg-[#C8972E] text-white rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300 hover:bg-[#B8851F] shadow-md hover:shadow-lg hover:scale-105 disabled:opacity-40 disabled:translate-y-0 disabled:cursor-not-allowed">
             <ShoppingBag size={14} />
           </button>
