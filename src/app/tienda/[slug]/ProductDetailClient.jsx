@@ -9,6 +9,7 @@ import { getProductMaxQuantity, useCartStore } from '@/store/cartStore';
 import { formatPrice } from '@/lib/formatPrice';
 import QuantitySelector from '@/components/ui/QuantitySelector';
 import { getPaymentConfig } from '@/lib/api';
+import { initProductZoom } from '@/lib/productZoom';
 import toast from 'react-hot-toast';
 
 export default function ProductDetailClient({ product }) {
@@ -33,6 +34,11 @@ export default function ProductDetailClient({ product }) {
   useEffect(() => {
     setSuggestedIndex(0);
   }, [product?.id]);
+
+  useEffect(() => {
+    const cleanup = initProductZoom();
+    return cleanup;
+  }, [product?.id, selectedImage]);
 
   const images = [product.image_url, product.image_url_2, product.image_url_3].filter(Boolean);
   const hasDiscount = product.discount_percent > 0;
@@ -80,14 +86,19 @@ export default function ProductDetailClient({ product }) {
                 {images[selectedImage] ? (
                   <>
                     <div className="absolute inset-0 flex items-center justify-center pb-7 md:pb-10">
-                      <Image
-                        src={images[selectedImage]}
-                        alt={product.name}
-                        fill
-                        className="object-contain px-[6%] pt-[6%] pb-[18%] md:px-[10%] md:pt-[8%] md:pb-[23%]"
-                        sizes="(max-width: 1024px) 100vw, 520px"
-                        priority
-                      />
+                      <div className="w-full h-full px-[6%] pt-[6%] pb-[18%] md:px-[10%] md:pt-[8%] md:pb-[23%]">
+                        <div className="relative w-full h-full">
+                          <Image
+                            src={images[selectedImage]}
+                            alt={product.name}
+                            fill
+                            className="object-contain zoom-image"
+                            data-zoom-src={images[selectedImage]}
+                            sizes="(max-width: 1024px) 100vw, 520px"
+                            priority
+                          />
+                        </div>
+                      </div>
                     </div>
                     <div
                       className="relative pointer-events-none z-10 translate-y-4 md:translate-y-0 "
