@@ -15,10 +15,11 @@ export default function Newsletter() {
     setLoading(true);
     try {
       const res = await subscribe(email.trim());
-      toast.success(res.message || '¡Te suscribiste correctamente!');
+      toast.success(res.message || 'Ya formas parte de la newsletter de CRACK.');
       setEmail('');
-    } catch {
-      toast.error('Error al suscribirte.');
+    } catch (err) {
+      const detail = err?.data?.email?.[0] || err?.data?.detail || err?.message || 'No pudimos procesar tu suscripción en este momento.';
+      toast.error(detail);
     } finally {
       setLoading(false);
     }
