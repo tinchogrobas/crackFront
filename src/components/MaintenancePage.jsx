@@ -42,21 +42,19 @@ export default function MaintenancePage({ message }) {
       <div className="relative z-10 flex flex-col items-center text-center max-w-xl w-full">
 
         {/* Logo */}
-        <motion.h1
+        <motion.div
           initial={{ opacity: 0, y: -24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="font-[family-name:var(--font-bebas)] leading-none font-bold tracking-[0.25em]"
-          style={{
-            fontSize: 'clamp(96px, 22vw, 180px)',
-            background: 'linear-gradient(170deg, #FFFFFF 30%, #C8972E 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-          }}
+          className="flex items-center justify-center w-full"
         >
-          CRACK
-        </motion.h1>
+          <img
+            src="/brand/whiteBgColor.png"
+            alt="CRACK"
+            className="w-auto max-w-full"
+            style={{ height: 'clamp(96px, 22vw, 180px)' }}
+          />
+        </motion.div>
 
         {/* Ornamental divider */}
         <motion.div
