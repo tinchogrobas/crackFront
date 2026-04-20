@@ -107,7 +107,7 @@ export default function MaintenancePage({ message }) {
         </motion.p>
 
         {/* Animated status row */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.05 }}
@@ -117,9 +117,9 @@ export default function MaintenancePage({ message }) {
           <span className="text-[10px] sm:text-[11px] tracking-[0.25em] text-white/25 uppercase font-medium">
             Volvemos a la brevedad
           </span>
-        </motion.div>
+        </motion.div> */}
 
-        {/* Social links */}
+        {/* Social links
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -141,7 +141,7 @@ export default function MaintenancePage({ message }) {
               <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-[#C8972E] group-hover:w-full transition-all duration-300" />
             </a>
           ))}
-        </motion.div>
+        </motion.div> */}
       </div>
 
       {/* ── Footer copyright ──────────────────────────────────────────── */}
