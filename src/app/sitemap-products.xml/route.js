@@ -26,25 +26,16 @@ export async function GET() {
   const entries = products
     .filter((p) => isSafeSlug(p?.slug))
     .slice(0, MAX_URLS_PER_SITEMAP)
-    .map((p) => {
-      // `images` llega del backend como array (hasta 3); fallback al campo viejo.
-      const urls = Array.isArray(p.images)
-        ? p.images.filter(Boolean)
-        : p.image_url
-          ? [p.image_url]
-          : [];
-      const title = p.name || '';
-      const images = urls.map((url) => (title ? { loc: url, title } : url));
-      return buildUrlEntry({
+    .map((p) =>
+      buildUrlEntry({
         loc: `${SITE_URL}/tienda/${p.slug}`,
         lastmod: p.updated_at || new Date(),
         changefreq: 'weekly',
         priority: 0.9,
-        images,
-      });
-    });
+      }),
+    );
 
-  return new Response(wrapUrlset(entries, { withImages: true }), {
+  return new Response(wrapUrlset(entries), {
     headers: xmlResponseHeaders({ maxAgeSeconds: 900 }),
   });
 }
