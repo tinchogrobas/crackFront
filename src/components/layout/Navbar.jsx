@@ -108,7 +108,7 @@ export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAUL
             </div>
 
             {/* Center: logo */}
-            <Link href="/" className="justify-self-center px-2">
+            <Link href="/" className="justify-self-center px-2 -translate-y-[3px] sm:-translate-y-[4px]">
               {!logoUnavailable ? (
                 <span className="relative block w-[132px] sm:w-[160px] h-8 sm:h-10">
                   <Image
