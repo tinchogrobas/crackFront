@@ -8,7 +8,11 @@ import { useCartStore } from '@/store/cartStore';
 import CartDrawer from './CartDrawer';
 import SearchOverlay from '@/components/ui/SearchOverlay';
 
-export default function Navbar() {
+const DEFAULT_BANNER_MESSAGE = 'Envíos a todo el país — 15% OFF con código CRACK15';
+
+export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAULT_BANNER_MESSAGE }) {
+  const ANNOUNCEMENT_BAR_HEIGHT = 36;
+  const NAVBAR_TOP_GAP = 0;
   const [scrolled, setScrolled] = useState(false);
   const [logoUnavailable, setLogoUnavailable] = useState(false);
   const cartOpen = useCartStore((s) => s.isCartOpen);
@@ -31,37 +35,38 @@ export default function Navbar() {
     { href: '/tienda', label: 'Tienda' },
     { href: '/contacto', label: 'Contacto' },
   ];
+  const bannerMessage = (topBannerMessage || DEFAULT_BANNER_MESSAGE).trim();
+  const navTop = showTopBanner ? ANNOUNCEMENT_BAR_HEIGHT + NAVBAR_TOP_GAP : 0;
 
   return (
     <>
       {/* Top announcement bar */}
-      <div className="bg-gradient-to-r from-[#C8972E] to-[#B8851F] text-white text-center py-2 fixed top-0 left-0 right-0 z-[60] px-4 overflow-hidden">
-        {/* Mobile: rota entre dos mensajes */}
-        <div className="sm:hidden">
-          <div className="animate-marquee-slow whitespace-nowrap inline-flex gap-16 text-[10px] tracking-[0.08em] font-bold uppercase">
-            <span>Envíos a todo el país</span>
-            <span>·</span>
-            <span>15% OFF · Código <span className="underline underline-offset-2">CRACK15</span></span>
-            <span>·</span>
-            <span>Envíos a todo el país</span>
-            <span>·</span>
-            <span>15% OFF · Código <span className="underline underline-offset-2">CRACK15</span></span>
-            <span>·</span>
+      {showTopBanner && (
+        <div className="bg-gradient-to-r from-[#C8972E] to-[#B8851F] text-white text-center h-9 fixed top-0 left-0 right-0 z-[60] px-4 overflow-hidden flex items-center justify-center">
+          {/* Mobile: marquee del mensaje configurable */}
+          <div className="sm:hidden">
+            <div className="animate-marquee-slow whitespace-nowrap inline-flex gap-16 text-[10px] tracking-[0.08em] font-bold uppercase">
+              <span>{bannerMessage}</span>
+              <span>·</span>
+              <span>{bannerMessage}</span>
+              <span>·</span>
+            </div>
           </div>
+          {/* Desktop: texto estático configurable */}
+          <span className="hidden sm:inline text-[11px] tracking-[0.15em] font-bold uppercase">
+            {bannerMessage}
+          </span>
         </div>
-        {/* Desktop: texto completo estático */}
-        <span className="hidden sm:inline text-[11px] tracking-[0.15em] font-bold uppercase">
-          Envíos a todo el país — 15% OFF con código CRACK15
-        </span>
-      </div>
+      )}
 
       {/* Main navbar */}
       <nav
-        className={`fixed top-8 left-0 right-0 z-50 transition-all duration-500 border-b ${
+        className={`fixed left-0 right-0 z-50 transition-all duration-500 border-b ${
           scrolled
             ? 'bg-white/95 backdrop-blur-2xl border-[#E8E4DD] shadow-md'
             : 'bg-[#1a1a1a]/70 backdrop-blur-md border-[#C8972E]/30'
         }`}
+        style={{ top: `${navTop}px` }}
       >
         {/* Gold accent glow below navbar */}
         <div className={`absolute top-full left-0 right-0 transition-opacity duration-500 ${scrolled ? 'opacity-0' : 'opacity-100'} pointer-events-none`}>
@@ -71,9 +76,9 @@ export default function Navbar() {
         </div>
 
         <div className="max-w-[1400px] mx-auto px-5 sm:px-8">
-          <div className="flex items-center justify-between h-14 sm:h-16">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center h-14 sm:h-16">
             {/* Left: mobile menu + nav links */}
-            <div className="flex items-center gap-8">
+            <div className="flex items-center gap-8 min-w-0">
               <button
                 onClick={() => setMobileMenuOpen(true)}
                 className={`lg:hidden transition-colors ${
@@ -103,7 +108,7 @@ export default function Navbar() {
             </div>
 
             {/* Center: logo */}
-            <Link href="/" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 px-2">
+            <Link href="/" className="justify-self-center px-2">
               {!logoUnavailable ? (
                 <span className="relative block w-[132px] sm:w-[160px] h-8 sm:h-10">
                   <Image
@@ -143,7 +148,7 @@ export default function Navbar() {
             </Link>
 
             {/* Right: search + cart */}
-            <div className="flex items-center gap-5">
+            <div className="flex items-center justify-end gap-5">
               <button
                 onClick={() => setSearchOpen(true)}
                 aria-label="Abrir búsqueda"

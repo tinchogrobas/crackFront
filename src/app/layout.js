@@ -185,11 +185,23 @@ async function getSiteConfig() {
 
     clearTimeout(timeoutId);
 
-    if (!res.ok) return { is_active: true, maintenance_message: '' };
+    if (!res.ok) {
+      return {
+        is_active: true,
+        maintenance_message: '',
+        show_top_banner: true,
+        top_banner_message: 'Envíos a todo el país — 15% OFF con código CRACK15',
+      };
+    }
     return res.json();
   } catch {
     // Backend unreachable or timeout → fail open, never falsely block users
-    return { is_active: true, maintenance_message: '' };
+    return {
+      is_active: true,
+      maintenance_message: '',
+      show_top_banner: true,
+      top_banner_message: 'Envíos a todo el país — 15% OFF con código CRACK15',
+    };
   }
 }
 
@@ -221,7 +233,10 @@ export default async function RootLayout({ children }) {
         ) : (
           <>
             <OrganizationJsonLd />
-            <Navbar />
+            <Navbar
+              showTopBanner={siteConfig.show_top_banner}
+              topBannerMessage={siteConfig.top_banner_message}
+            />
             <main className="min-h-screen pt-8">{children}</main>
             <Footer />
             <Toaster
