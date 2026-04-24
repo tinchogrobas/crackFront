@@ -50,6 +50,7 @@ export const useCartStore = create(
       discountCode: null,
       discountPercent: 0,
       discountFixed: 0,
+      discountExpiresAt: null,
 
       // Cart drawer UI state (not persisted — see partialize below)
       isCartOpen: false,
@@ -133,11 +134,11 @@ export const useCartStore = create(
         });
       },
 
-      clearCart: () => set({ items: [], discountCode: null, discountPercent: 0, discountFixed: 0 }),
+      clearCart: () => set({ items: [], discountCode: null, discountPercent: 0, discountFixed: 0, discountExpiresAt: null }),
 
-      setDiscount: (code, percent, fixed = 0) => set({ discountCode: code, discountPercent: percent, discountFixed: fixed }),
+      setDiscount: (code, percent, fixed = 0, expiresAt = null) => set({ discountCode: code, discountPercent: percent, discountFixed: fixed, discountExpiresAt: expiresAt }),
 
-      clearDiscount: () => set({ discountCode: null, discountPercent: 0, discountFixed: 0 }),
+      clearDiscount: () => set({ discountCode: null, discountPercent: 0, discountFixed: 0, discountExpiresAt: null }),
 
       getSubtotal: () => {
         return get().items.reduce((total, item) => {
@@ -165,6 +166,7 @@ export const useCartStore = create(
         discountCode: state.discountCode,
         discountPercent: state.discountPercent,
         discountFixed: state.discountFixed,
+        discountExpiresAt: state.discountExpiresAt,
       }),
     }
   )

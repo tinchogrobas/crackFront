@@ -46,7 +46,8 @@
       "Bash(python -m py_compile apps/products/views.py)"
     ],
     "additionalDirectories": [
-      "C:\\Users\\AR039894\\Desktop\\crackbackend"
+      "C:\\Users\\AR039894\\Desktop\\crackbackend",
+      "C:\\Users\\Martin\\Desktop\\crackbackend"
     ]
   }
 }

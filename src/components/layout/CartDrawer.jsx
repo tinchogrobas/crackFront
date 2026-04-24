@@ -1,21 +1,35 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Minus, ShoppingBag } from 'lucide-react';
+import { X, Plus, Minus, ShoppingBag, Tag, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { syncCartWithBackend } from '@/lib/cartSync';
 import { getProductMaxQuantity, useCartStore } from '@/store/cartStore';
 import { formatPrice } from '@/lib/formatPrice';
+import { validateDiscount } from '@/lib/api';
+
+function formatExpiryDate(isoDate) {
+  if (!isoDate) return null;
+  const d = new Date(isoDate);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
+}
 
 export default function CartDrawer({ isOpen, onClose }) {
   const items = useCartStore((s) => s.items);
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const removeFromCart = useCartStore((s) => s.removeFromCart);
   const getSubtotal = useCartStore((s) => s.getSubtotal);
-  const getTotal = useCartStore((s) => s.getTotal);
   const syncCartProducts = useCartStore((s) => s.syncCartProducts);
+  const discountCode = useCartStore((s) => s.discountCode);
+  const discountPercent = useCartStore((s) => s.discountPercent);
+  const discountFixed = useCartStore((s) => s.discountFixed);
+  const discountExpiresAt = useCartStore((s) => s.discountExpiresAt);
+  const setDiscount = useCartStore((s) => s.setDiscount);
+  const clearDiscount = useCartStore((s) => s.clearDiscount);
   const [stockIssues, setStockIssues] = useState([]);
+  const [discountError, setDiscountError] = useState(null);
   const cartSignature = useMemo(() => items.map((item) => `${item.id}:${item.quantity}`).join('|'), [items]);
   const cartItemsSnapshot = useMemo(() => items.map((item) => ({ ...item })), [cartSignature]);
   const stockIssuesById = useMemo(() => new Map(stockIssues.map((issue) => [issue.id, issue])), [stockIssues]);
@@ -37,6 +51,55 @@ export default function CartDrawer({ isOpen, onClose }) {
     syncCart();
     return () => { cancelled = true; };
   }, [cartItemsSnapshot, isOpen, syncCartProducts]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (!discountCode) {
+      setDiscountError(null);
+      return;
+    }
+
+    if (discountExpiresAt && new Date(discountExpiresAt).getTime() < Date.now()) {
+      setDiscountError({ reason: 'expired', expiresAt: discountExpiresAt });
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await validateDiscount(discountCode);
+        if (cancelled) return;
+        if (!data?.valid) {
+          setDiscountError({
+            reason: data?.reason || 'invalid',
+            expiresAt: data?.expires_at || discountExpiresAt || null,
+          });
+          return;
+        }
+        setDiscountError(null);
+        const nextExpires = data.expires_at || null;
+        const nextPercent = data.type === 'percent' ? data.amount : 0;
+        const nextFixed = data.type === 'fixed' ? data.amount : 0;
+        if (
+          nextPercent !== discountPercent ||
+          nextFixed !== (discountFixed || 0) ||
+          nextExpires !== (discountExpiresAt || null)
+        ) {
+          setDiscount(data.code, nextPercent, nextFixed, nextExpires);
+        }
+      } catch {
+        if (!cancelled) setDiscountError(null);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isOpen, discountCode, discountExpiresAt, discountPercent, discountFixed, setDiscount]);
+
+  const subtotal = getSubtotal();
+  const discountValid = Boolean(discountCode) && !discountError;
+  const discountAmount = discountValid
+    ? (discountPercent > 0 ? subtotal * discountPercent / 100 : (discountFixed || 0))
+    : 0;
+  const total = Math.max(0, subtotal - discountAmount);
 
   return (
     <AnimatePresence>
@@ -146,13 +209,60 @@ export default function CartDrawer({ isOpen, onClose }) {
                   })}
                 </div>
                 <div className="border-t border-[#E8E4DD] p-6 space-y-4">
+                  {discountCode && discountError && (
+                    <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5">
+                      <AlertTriangle size={14} className="text-red-500 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 text-[11px] text-red-700 leading-snug">
+                        {discountError.reason === 'expired' ? (
+                          <>
+                            El cupón <span className="font-semibold">{discountCode}</span> caducó
+                            {discountError.expiresAt ? ` el ${formatExpiryDate(discountError.expiresAt)}` : ''}.
+                          </>
+                        ) : discountError.reason === 'used' ? (
+                          <>El cupón <span className="font-semibold">{discountCode}</span> ya fue utilizado.</>
+                        ) : (
+                          <>El cupón <span className="font-semibold">{discountCode}</span> ya no es válido.</>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => { clearDiscount(); setDiscountError(null); }}
+                          className="block mt-1 font-semibold text-red-600 underline hover:no-underline"
+                        >
+                          Quitar cupón
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex justify-between text-[13px]">
                     <span className="text-[#6B6560]">Subtotal</span>
-                    <span className="font-medium text-[#1A1A1A]">{formatPrice(getSubtotal())}</span>
+                    <span className="font-medium text-[#1A1A1A]">{formatPrice(subtotal)}</span>
                   </div>
+
+                  {discountValid && (
+                    <div className="flex justify-between items-center text-[13px]">
+                      <span className="inline-flex items-center gap-1.5 text-green-700">
+                        <Tag size={12} />
+                        <span>
+                          Cupón <span className="font-semibold">{discountCode}</span>
+                          {discountPercent > 0 ? ` (-${discountPercent}%)` : ''}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={clearDiscount}
+                          className="ml-1 text-green-600/70 hover:text-green-700 transition-colors"
+                          aria-label="Quitar cupón"
+                        >
+                          <X size={12} />
+                        </button>
+                      </span>
+                      <span className="font-medium text-green-700">-{formatPrice(discountAmount)}</span>
+                    </div>
+                  )}
+
                   <div className="flex justify-between text-lg font-bold">
                     <span className="text-[#1A1A1A]">Total</span>
-                    <span className="text-[#C8972E]">{formatPrice(getTotal())}</span>
+                    <span className="text-[#C8972E]">{formatPrice(total)}</span>
                   </div>
                   <Link href="/checkout" onClick={onClose} className={`block w-full text-center py-4 text-[12px] font-bold tracking-[0.05em] transition-all ${stockIssues.length > 0 ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-[#C8972E] hover:bg-[#B8851F] text-white'}`}>
                     Ir al checkout

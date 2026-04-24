@@ -153,10 +153,10 @@ export default function CheckoutPage() {
         return;
       }
       if (data.type === 'percent') {
-        setDiscount(data.code, data.amount, 0);
+        setDiscount(data.code, data.amount, 0, data.expires_at || null);
         toast.success(`Código aplicado: ${data.amount}% de descuento`);
       } else {
-        setDiscount(data.code, 0, data.amount);
+        setDiscount(data.code, 0, data.amount, data.expires_at || null);
         toast.success(`Código aplicado: -${formatPrice(data.amount)}`);
       }
       setCode('');
