@@ -101,7 +101,7 @@ export default function ProductDetailClient({ product }) {
                       </div>
                     </div>
                     <div
-                      className="relative pointer-events-none z-10 translate-y-4 md:translate-y-0 lg:translate-y-5"
+                      className="relative pointer-events-none z-10 translate-y-4 md:translate-y-0 lg:translate-y-9"
                       style={{
                         width: '50%',
                         height: '32px',
