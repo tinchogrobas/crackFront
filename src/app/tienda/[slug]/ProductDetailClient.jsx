@@ -125,7 +125,7 @@ export default function ProductDetailClient({ product }) {
             </div>
 
             {images.length > 1 && (
-              <div className="flex gap-2 mt-4 justify-center">
+              <div className="flex gap-2 mt-4 lg:mt-20 justify-center">
                 {images.map((img, i) => (
                   <button key={i} onClick={() => setSelectedImage(i)} className={`w-16 h-20 overflow-hidden rounded border-2 transition-all ${selectedImage === i ? 'border-[#C8972E] shadow-md' : 'border-[#E8E4DD] hover:border-[#D4CFC6]'}`}>
                     <div className="relative w-full h-full bg-white"><Image src={img} alt="" fill className="object-contain p-1.5" sizes="64px" /></div>
