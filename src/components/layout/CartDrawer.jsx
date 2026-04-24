@@ -146,35 +146,8 @@ export default function CartDrawer({ isOpen, onClose }) {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'tween', duration: 0.3 }}
-            className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-[60] border-l border-[#E8E4DD] flex flex-col shadow-xl overflow-hidden"
+            className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-[60] border-l border-[#E8E4DD] flex flex-col shadow-xl"
           >
-            {/* Pokéball watermark — subtle golden glow behind content */}
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden"
-            >
-              <motion.div
-                animate={{ scale: [1, 1.06, 1], opacity: [0.09, 0.15, 0.09] }}
-                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                className="w-[360px] h-[360px]"
-                style={{ filter: 'blur(48px)' }}
-              >
-                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                  <defs>
-                    <radialGradient id="cart-pokeball" cx="50%" cy="38%" r="62%">
-                      <stop offset="0%" stopColor="#F4D06A" />
-                      <stop offset="55%" stopColor="#C8972E" />
-                      <stop offset="100%" stopColor="#7A5A18" />
-                    </radialGradient>
-                  </defs>
-                  <circle cx="100" cy="100" r="94" fill="url(#cart-pokeball)" />
-                  <rect x="6" y="94" width="188" height="12" fill="#2A1F0E" fillOpacity="0.55" />
-                  <circle cx="100" cy="100" r="22" fill="#F7EDCE" stroke="#2A1F0E" strokeWidth="4" strokeOpacity="0.55" />
-                  <circle cx="100" cy="100" r="10" fill="#C8972E" />
-                </svg>
-              </motion.div>
-            </div>
-
             <div className="relative z-10 flex items-center justify-between p-6 border-b border-[#E8E4DD]">
               <h2 className="font-display text-[13px] font-bold tracking-[0.15em] text-[#1A1A1A]">CARRITO</h2>
               <button onClick={onClose} className="text-[#6B6560]/50 hover:text-[#1A1A1A] transition-colors w-8 h-8 flex items-center justify-center">
@@ -198,7 +171,29 @@ export default function CartDrawer({ isOpen, onClose }) {
                     <p className="text-[11px] text-red-600 mt-1">Están marcados abajo para que los quites rápido.</p>
                   </div>
                 )}
-                <div className="relative z-10 flex-1 overflow-y-auto p-6 space-y-5">
+                <div className="relative flex-1 overflow-hidden">
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 flex items-center justify-center"
+                  >
+                    <motion.div
+                      animate={{ rotate: 360, opacity: [0.1, 0.16, 0.1] }}
+                      transition={{
+                        rotate: { duration: 90, repeat: Infinity, ease: 'linear' },
+                        opacity: { duration: 6, repeat: Infinity, ease: 'easeInOut' },
+                      }}
+                      className="w-[200px] h-[200px]"
+                    >
+                      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" fill="none" stroke="#C8972E" strokeWidth="2.5" strokeLinecap="round">
+                        <circle cx="100" cy="100" r="94" />
+                        <line x1="6" y1="100" x2="78" y2="100" />
+                        <line x1="122" y1="100" x2="194" y2="100" />
+                        <circle cx="100" cy="100" r="22" />
+                        <circle cx="100" cy="100" r="10" />
+                      </svg>
+                    </motion.div>
+                  </div>
+                  <div className="relative z-10 h-full overflow-y-auto p-6 space-y-5">
                   {items.map((item) => {
                     const maxQty = getProductMaxQuantity(item);
                     const issue = stockIssuesById.get(item.id);
@@ -269,6 +264,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                     </div>
                     );
                   })}
+                  </div>
                 </div>
                 <div className="relative z-10 border-t border-[#E8E4DD] p-6 space-y-4 bg-white/70 backdrop-blur-sm">
                   {!discountCode && (
