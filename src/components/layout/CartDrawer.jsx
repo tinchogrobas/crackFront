@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Minus, ShoppingBag, Tag, AlertTriangle } from 'lucide-react';
+import { X, Plus, Minus, ShoppingBag, Tag, AlertTriangle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import toast from 'react-hot-toast';
 import { syncCartWithBackend } from '@/lib/cartSync';
 import { getProductMaxQuantity, useCartStore } from '@/store/cartStore';
 import { formatPrice } from '@/lib/formatPrice';
@@ -30,6 +31,8 @@ export default function CartDrawer({ isOpen, onClose }) {
   const clearDiscount = useCartStore((s) => s.clearDiscount);
   const [stockIssues, setStockIssues] = useState([]);
   const [discountError, setDiscountError] = useState(null);
+  const [codeInput, setCodeInput] = useState('');
+  const [validatingCode, setValidatingCode] = useState(false);
   const cartSignature = useMemo(() => items.map((item) => `${item.id}:${item.quantity}`).join('|'), [items]);
   const cartItemsSnapshot = useMemo(() => items.map((item) => ({ ...item })), [cartSignature]);
   const stockIssuesById = useMemo(() => new Map(stockIssues.map((issue) => [issue.id, issue])), [stockIssues]);
@@ -93,6 +96,38 @@ export default function CartDrawer({ isOpen, onClose }) {
     })();
     return () => { cancelled = true; };
   }, [isOpen, discountCode, discountExpiresAt, discountPercent, discountFixed, setDiscount]);
+
+  const handleApplyCode = async () => {
+    const trimmed = codeInput.trim();
+    if (!trimmed || validatingCode) return;
+    setValidatingCode(true);
+    try {
+      const data = await validateDiscount(trimmed);
+      if (!data?.valid) {
+        const msg = data?.reason === 'expired'
+          ? 'El código expiró'
+          : data?.reason === 'used'
+          ? 'El código ya fue utilizado'
+          : 'Código inválido';
+        toast.error(msg);
+        return;
+      }
+      const expiresAt = data.expires_at || null;
+      if (data.type === 'percent') {
+        setDiscount(data.code, data.amount, 0, expiresAt);
+        toast.success(`Código aplicado: ${data.amount}% de descuento`);
+      } else {
+        setDiscount(data.code, 0, data.amount, expiresAt);
+        toast.success(`Código aplicado: -${formatPrice(data.amount)}`);
+      }
+      setDiscountError(null);
+      setCodeInput('');
+    } catch {
+      toast.error('Error al validar el código');
+    } finally {
+      setValidatingCode(false);
+    }
+  };
 
   const subtotal = getSubtotal();
   const discountValid = Boolean(discountCode) && !discountError;
@@ -209,6 +244,35 @@ export default function CartDrawer({ isOpen, onClose }) {
                   })}
                 </div>
                 <div className="border-t border-[#E8E4DD] p-6 space-y-4">
+                  {!discountCode && (
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Tag size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B6560]/40" />
+                        <input
+                          type="text"
+                          value={codeInput}
+                          onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleApplyCode();
+                            }
+                          }}
+                          placeholder="Código de descuento"
+                          className="w-full bg-white border border-[#E8E4DD] rounded-lg pl-9 pr-3 py-2.5 text-sm text-[#1A1A1A] outline-none focus:border-[#C8972E]/40 placeholder:text-[#6B6560]/40"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleApplyCode}
+                        disabled={validatingCode || !codeInput.trim()}
+                        className="text-[11px] font-bold tracking-wider border border-[#E8E4DD] px-4 py-2.5 rounded-lg hover:border-[#D4CFC6] transition-all disabled:opacity-50 text-[#1A1A1A] flex items-center justify-center min-w-[76px]"
+                      >
+                        {validatingCode ? <Loader2 size={14} className="animate-spin" /> : 'APLICAR'}
+                      </button>
+                    </div>
+                  )}
+
                   {discountCode && discountError && (
                     <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5">
                       <AlertTriangle size={14} className="text-red-500 mt-0.5 flex-shrink-0" />
