@@ -171,29 +171,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                     <p className="text-[11px] text-red-600 mt-1">Están marcados abajo para que los quites rápido.</p>
                   </div>
                 )}
-                <div className="relative flex-1 overflow-hidden">
-                  <div
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-0 flex items-center justify-center"
-                  >
-                    <motion.div
-                      animate={{ rotate: 360, opacity: [0.1, 0.16, 0.1] }}
-                      transition={{
-                        rotate: { duration: 90, repeat: Infinity, ease: 'linear' },
-                        opacity: { duration: 6, repeat: Infinity, ease: 'easeInOut' },
-                      }}
-                      className="w-[200px] h-[200px]"
-                    >
-                      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-full h-full" fill="none" stroke="#C8972E" strokeWidth="2.5" strokeLinecap="round">
-                        <circle cx="100" cy="100" r="94" />
-                        <line x1="6" y1="100" x2="78" y2="100" />
-                        <line x1="122" y1="100" x2="194" y2="100" />
-                        <circle cx="100" cy="100" r="22" />
-                        <circle cx="100" cy="100" r="10" />
-                      </svg>
-                    </motion.div>
-                  </div>
-                  <div className="relative z-10 h-full overflow-y-auto p-6 space-y-5">
+                <div className="flex-1 overflow-y-auto p-6 space-y-5">
                   {items.map((item) => {
                     const maxQty = getProductMaxQuantity(item);
                     const issue = stockIssuesById.get(item.id);
@@ -264,7 +242,6 @@ export default function CartDrawer({ isOpen, onClose }) {
                     </div>
                     );
                   })}
-                  </div>
                 </div>
                 <div className="relative z-10 border-t border-[#E8E4DD] p-6 space-y-4 bg-white/70 backdrop-blur-sm">
                   {!discountCode && (
