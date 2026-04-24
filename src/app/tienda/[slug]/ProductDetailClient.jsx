@@ -78,15 +78,15 @@ export default function ProductDetailClient({ product }) {
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col items-center"
           >
-            <div className="relative w-full max-w-[520px] lg:max-w-[620px]">
+            <div className="relative w-full max-w-[520px] lg:max-w-[700px]">
               <div
                 className="relative w-full rounded-xl flex items-end justify-center"
                 style={{ aspectRatio: '1/1', paddingBottom: '6%' }}
               >
                 {images[selectedImage] ? (
                   <>
-                    <div className="absolute inset-0 flex items-center justify-center pb-7 md:pb-10">
-                      <div className="w-full h-full px-[6%] pt-[6%] pb-[18%] md:px-[10%] md:pt-[8%] md:pb-[23%] lg:px-[4%] lg:pt-[4%] lg:pb-[18%]">
+                    <div className="absolute inset-0 flex items-center justify-center pb-7 md:pb-10 lg:pb-5">
+                      <div className="w-full h-full px-[6%] pt-[6%] pb-[18%] md:px-[10%] md:pt-[8%] md:pb-[23%] lg:px-[3%] lg:pt-[3%] lg:pb-[9%]">
                         <div className="relative w-full h-full">
                           <Image
                             src={images[selectedImage]}
@@ -94,7 +94,7 @@ export default function ProductDetailClient({ product }) {
                             fill
                             className="object-contain zoom-image"
                             data-zoom-src={images[selectedImage]}
-                            sizes="(max-width: 1024px) 100vw, 620px"
+                            sizes="(max-width: 1024px) 100vw, 700px"
                             priority
                           />
                         </div>
