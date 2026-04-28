@@ -6,7 +6,7 @@ import { getCategories } from '@/lib/api';
 
 // Imagen por slug  agregá las tuyas acá
 const CATEGORY_IMAGES = {
-  'singles':       'https://res.cloudinary.com/di7baglxg/image/upload/v1775481449/gemini-watermark-removed_1_c5ortl.png',
+  'singles':       '/categories/singles.png',
   'slabs':         'https://res.cloudinary.com/di7baglxg/image/upload/v1775482601/gemini-watermark-removed_5_q4y4ah.png',
   'sellados':      'https://res.cloudinary.com/di7baglxg/image/upload/v1775481578/gemini-watermark-removed_2_trzslg.png',
   'accesorios':    '/categories/accesorios.png',
