@@ -9,7 +9,7 @@ const CATEGORY_IMAGES = {
   'singles':       'https://res.cloudinary.com/di7baglxg/image/upload/v1775481449/gemini-watermark-removed_1_c5ortl.png',
   'slabs':         'https://res.cloudinary.com/di7baglxg/image/upload/v1775482601/gemini-watermark-removed_5_q4y4ah.png',
   'sellados':      'https://res.cloudinary.com/di7baglxg/image/upload/v1775481578/gemini-watermark-removed_2_trzslg.png',
-  'accesorios':    'https://res.cloudinary.com/di7baglxg/image/upload/v1775481876/gemini-watermark-removed_3_bnjt57.png',
+  'accesorios':    '/categories/accesorios.png',
   'mystery-packs': 'https://res.cloudinary.com/di7baglxg/image/upload/v1775481855/gemini-watermark-removed_4_tvragc.png',
 };
 
