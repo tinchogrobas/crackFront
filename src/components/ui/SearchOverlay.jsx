@@ -149,22 +149,16 @@ export default function SearchOverlay({ isOpen, onClose }) {
         aria-modal="true"
         aria-label="Búsqueda"
       >
-        <div className="bg-[#FAFAF7] border-b border-[#E8E4DD] shadow-xl">
-          <div className="w-full max-w-[1200px] mx-auto px-5 sm:px-8 pt-6 pb-6">
-            {/* Header: close */}
-            <div
-              className="lupita-item flex items-center justify-end mb-5"
-              style={{ transitionDelay: '0ms' }}
-            >
-              <button
-                onClick={handleClose}
-                className="text-[#6B6560] hover:text-[#1A1A1A] transition-colors"
-                aria-label="Cerrar búsqueda"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
+        <div className="bg-[#FAFAF7] border-b border-[#E8E4DD] shadow-xl relative">
+          <button
+            onClick={handleClose}
+            className="lupita-item absolute top-4 right-5 sm:right-8 text-[#6B6560] hover:text-[#1A1A1A] transition-colors z-10"
+            style={{ transitionDelay: '0ms' }}
+            aria-label="Cerrar búsqueda"
+          >
+            <X size={20} />
+          </button>
+          <div className="w-full max-w-[1200px] mx-auto px-5 sm:px-8 pt-5 pb-6">
             {/* Search form */}
             <form
               onSubmit={goToSearch}
