@@ -151,18 +151,11 @@ export default function SearchOverlay({ isOpen, onClose }) {
       >
         <div className="bg-[#FAFAF7] border-b border-[#E8E4DD] shadow-xl">
           <div className="w-full max-w-[1200px] mx-auto px-5 sm:px-8 pt-6 pb-6">
-            {/* Header: logo + close */}
+            {/* Header: close */}
             <div
-              className="lupita-item flex items-center justify-between mb-5"
+              className="lupita-item flex items-center justify-end mb-5"
               style={{ transitionDelay: '0ms' }}
             >
-              <Link
-                href="/"
-                onClick={handleLinkClick}
-                className="font-display text-lg font-bold tracking-[0.3em] text-[#1A1A1A] hover:text-[#C8972E] transition-colors"
-              >
-                CRACK
-              </Link>
               <button
                 onClick={handleClose}
                 className="text-[#6B6560] hover:text-[#1A1A1A] transition-colors"
