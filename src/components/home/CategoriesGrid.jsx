@@ -8,7 +8,7 @@ import { getCategories } from '@/lib/api';
 const CATEGORY_IMAGES = {
   'singles':       '/categories/singles.png',
   'slabs':         '/categories/slabs.png',
-  'sellados':      'https://res.cloudinary.com/di7baglxg/image/upload/v1775481578/gemini-watermark-removed_2_trzslg.png',
+  'sellados':      '/categories/productos-sellados.png',
   'accesorios':    '/categories/accesorios.png',
   'mystery-packs': '/categories/mystery-pack.png',
 };
