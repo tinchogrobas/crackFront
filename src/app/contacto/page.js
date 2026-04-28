@@ -55,20 +55,34 @@ export default function ContactoPage() {
           <motion.div className="space-y-10" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
             <div className="space-y-6">
               {[
-                { icon: Mail, label: 'Email', value: 'contacto@crack.com.ar' },
-                { icon: Phone, label: 'WhatsApp', value: '+54 11 1234-5678' },
-                { icon: MapPin, label: 'Ubicación', value: 'Buenos Aires, Argentina' },
-              ].map(({ icon: Icon, label, value }) => (
-                <div key={label} className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-[#F5F1EA] border border-[#E8E4DD] flex items-center justify-center flex-shrink-0">
-                    <Icon size={16} className="text-[#C8972E]" />
-                  </div>
-                  <div>
-                    <p className="text-[11px] text-[#6B6560]/60 uppercase tracking-wider">{label}</p>
-                    <p className="text-[14px] text-[#1A1A1A]/80 mt-0.5">{value}</p>
-                  </div>
-                </div>
-              ))}
+                { icon: Mail, label: 'Email', value: 'contacto@crack.com.ar', href: 'mailto:contacto@crack.com.ar' },
+                { icon: Phone, label: 'WhatsApp', value: '+54 11 5058-8131', href: 'https://wa.me/541150588131', external: true },
+                { icon: MapPin, label: 'Ubicación', value: 'Deheza 2921, PB, Saavedra, Buenos Aires, Argentina' },
+              ].map(({ icon: Icon, label, value, href, external }) => {
+                const content = (
+                  <>
+                    <div className="w-10 h-10 bg-[#F5F1EA] border border-[#E8E4DD] flex items-center justify-center flex-shrink-0">
+                      <Icon size={16} className="text-[#C8972E]" />
+                    </div>
+                    <div>
+                      <p className="text-[11px] text-[#6B6560]/60 uppercase tracking-wider">{label}</p>
+                      <p className="text-[14px] text-[#1A1A1A]/80 mt-0.5">{value}</p>
+                    </div>
+                  </>
+                );
+                return href ? (
+                  <a
+                    key={label}
+                    href={href}
+                    {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                    className="flex items-start gap-4 group"
+                  >
+                    {content}
+                  </a>
+                ) : (
+                  <div key={label} className="flex items-start gap-4">{content}</div>
+                );
+              })}
             </div>
 
             <div>
