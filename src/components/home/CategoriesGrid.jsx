@@ -10,7 +10,7 @@ const CATEGORY_IMAGES = {
   'slabs':         'https://res.cloudinary.com/di7baglxg/image/upload/v1775482601/gemini-watermark-removed_5_q4y4ah.png',
   'sellados':      'https://res.cloudinary.com/di7baglxg/image/upload/v1775481578/gemini-watermark-removed_2_trzslg.png',
   'accesorios':    '/categories/accesorios.png',
-  'mystery-packs': 'https://res.cloudinary.com/di7baglxg/image/upload/v1775481855/gemini-watermark-removed_4_tvragc.png',
+  'mystery-packs': '/categories/mystery-pack.png',
 };
 
 function CategoryCard({ cat, size }) {
