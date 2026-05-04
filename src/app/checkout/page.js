@@ -10,7 +10,6 @@ import { createOrder, getPaymentConfig, validateDiscount } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Tag, AlertTriangle, Loader2, X, Truck, MapPin, CreditCard, Landmark, Banknote, BadgePercent } from 'lucide-react';
 import { ExchangeBinance } from '@web3icons/react';
-import { FaCcVisa, FaCcMastercard } from 'react-icons/fa';
 
 const provinces = [
   'Buenos Aires', 'CABA', 'Catamarca', 'Chaco', 'Chubut', 'Córdoba', 'Corrientes', 'Entre Ríos',
@@ -22,26 +21,41 @@ const provinces = [
 const PICKUP_BRANCH_ADDRESS = 'Deheza 2921, PB, Saavedra, Buenos Aires, Argentina';
 const PICKUP_BRANCH_MAP_URL = 'https://maps.app.goo.gl/vTPfffMMNMbMLCyn8';
 const PICKUP_BRANCH_MAP_EMBED_QUERY = 'Deheza 2921, C1429EAY Cdad. Autónoma de Buenos Aires';
+const PICKUP_BRANCH_MAP_EMBED_SRC = `https://www.google.com/maps?q=${encodeURIComponent(PICKUP_BRANCH_MAP_EMBED_QUERY)}&output=embed`;
 
 const mercadoPagoBadges = [
   {
     label: 'Mercado Pago',
-    shortLabel: 'MP',
-    className: 'bg-[#009EE3] text-white border-[#009EE3]',
+    className: 'bg-white border-[#D8DFEA]',
+    imageSrc: '/payments/mercadopago.BK20nVmQ.svg',
   },
   {
     label: 'Visa',
-    className: 'bg-white text-[#1434CB] border-[#D8DFEA]',
-    icon: FaCcVisa,
+    className: 'bg-white border-[#D8DFEA]',
+    imageSrc: '/payments/visa.sxIq5Dot.svg',
   },
   {
     label: 'Mastercard',
-    className: 'bg-white text-[#EA001B] border-[#D8DFEA]',
-    icon: FaCcMastercard,
+    className: 'bg-white border-[#D8DFEA]',
+    imageSrc: '/payments/mastercard.1c4_lyMp.svg',
+  },
+];
+
+const mercadoPagoHoverBadges = [
+  {
+    label: 'Amex',
+    className: 'bg-white border-[#D8DFEA]',
+    imageSrc: '/payments/amex.Csr7hRoy.svg',
   },
   {
-    label: '+3',
-    className: 'bg-[#F5F1EA] text-[#3A3530] border-[#E8E4DD]',
+    label: 'Diners Club',
+    className: 'bg-white border-[#D8DFEA]',
+    imageSrc: '/payments/diners_club.B9hVEmwz.svg',
+  },
+  {
+    label: 'Maestro',
+    className: 'bg-white border-[#D8DFEA]',
+    imageSrc: '/payments/maestro.ByfUQi1c.svg',
   },
 ];
 
@@ -498,6 +512,15 @@ export default function CheckoutPage() {
                 </div>
               ) : (
                 <div>
+                  <div className="pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0" aria-hidden="true">
+                    <iframe
+                      title="Precarga de mapa de retiro"
+                      src={PICKUP_BRANCH_MAP_EMBED_SRC}
+                      loading="eager"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      tabIndex={-1}
+                    />
+                  </div>
                   <label className={labelClass}>Retiro en punto</label>
                   <div className="w-full bg-[#F8F6F1] border border-[#E8E4DD] rounded-lg px-4 py-3 text-sm text-[#3A3530]">
                     {PICKUP_BRANCH_ADDRESS}
@@ -524,7 +547,7 @@ export default function CheckoutPage() {
                           <div className="rounded-lg border border-[#E8E4DD] bg-white overflow-hidden">
                             <iframe
                               title="Mapa de punto de retiro"
-                              src={`https://www.google.com/maps?q=${encodeURIComponent(PICKUP_BRANCH_MAP_EMBED_QUERY)}&output=embed`}
+                              src={PICKUP_BRANCH_MAP_EMBED_SRC}
                               className="w-full h-44"
                               loading="lazy"
                               referrerPolicy="no-referrer-when-downgrade"
@@ -555,7 +578,7 @@ export default function CheckoutPage() {
                   className={`border rounded-lg px-4 py-3 text-left transition-all ${
                     form.payment_method === 'mercadopago'
                       ? 'border-[#C8972E] bg-[#FFF8E8] text-[#1A1A1A] shadow-[0_8px_24px_rgba(200,151,46,0.14)]'
-                      : 'border-[#E8E4DD] text-[#6B6560] hover:border-[#D4CFC6]'
+                      : 'border-[#E8E4DD] text-[#6B6560] hover:border-[#D4CFC6] hover:shadow-[0_10px_30px_rgba(17,17,17,0.06)]'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -575,12 +598,29 @@ export default function CheckoutPage() {
                         <span>Pago online inmediato</span>
                       </div>
                     </div>
-                    <div className="flex flex-wrap justify-end gap-1.5 max-w-[160px]">
-                      {mercadoPagoBadges.map((badge) => (
-                        <span key={badge.label} className={`flex min-w-[44px] items-center justify-center rounded-md border px-2 py-1 text-[10px] font-bold tracking-[0.08em] shadow-sm ${badge.className}`}>
-                          {badge.icon ? <badge.icon size={22} /> : (badge.shortLabel || badge.label)}
+                    <div className="ml-auto flex items-start justify-end gap-1.5">
+                      <div className="flex items-center justify-end gap-1.5 sm:hidden">
+                        <span className="flex h-8 min-w-[52px] items-center justify-center rounded-md border border-[#D8DFEA] bg-white shadow-sm">
+                          <Image src="/payments/mercadopago.BK20nVmQ.svg" alt="Mercado Pago" width={28} height={18} className="h-5 w-auto" />
                         </span>
-                      ))}
+                      </div>
+                      <div className="hidden sm:flex items-start justify-end gap-1.5">
+                        {mercadoPagoBadges.map((badge) => (
+                          <span key={badge.label} className={`flex h-8 min-w-[52px] items-center justify-center rounded-md border shadow-sm ${badge.className}`}>
+                            <Image src={badge.imageSrc} alt={badge.label} width={30} height={18} className="h-5 w-auto" />
+                          </span>
+                        ))}
+                        <span className="group/plus relative flex h-8 min-w-[36px] items-center justify-center rounded-md border border-[#D8DFEA] bg-white text-[11px] font-semibold text-[#3A3530] shadow-sm transition-transform duration-200 hover:-translate-y-0.5">
+                          +3
+                          <span className="pointer-events-none absolute -top-12 right-0 hidden items-center gap-1 rounded-xl bg-[#1A1A1A] px-2 py-2 opacity-0 shadow-[0_12px_30px_rgba(0,0,0,0.28)] transition-all duration-150 group-hover/plus:flex group-hover/plus:opacity-100">
+                            {mercadoPagoHoverBadges.map((badge) => (
+                              <span key={badge.label} className={`flex h-7 min-w-[42px] items-center justify-center rounded-md border px-2 ${badge.className}`}>
+                                <Image src={badge.imageSrc} alt={badge.label} width={26} height={16} className="h-4 w-auto" />
+                              </span>
+                            ))}
+                          </span>
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </button>
