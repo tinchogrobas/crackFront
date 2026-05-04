@@ -8,8 +8,9 @@ import { syncCartWithBackend } from '@/lib/cartSync';
 import { formatPrice } from '@/lib/formatPrice';
 import { createOrder, getPaymentConfig, validateDiscount } from '@/lib/api';
 import toast from 'react-hot-toast';
-import { Tag, AlertTriangle, Loader2, X } from 'lucide-react';
+import { Tag, AlertTriangle, Loader2, X, Truck, MapPin, CreditCard, Landmark, Banknote, BadgePercent } from 'lucide-react';
 import { ExchangeBinance } from '@web3icons/react';
+import { FaCcVisa, FaCcMastercard } from 'react-icons/fa';
 
 const provinces = [
   'Buenos Aires', 'CABA', 'Catamarca', 'Chaco', 'Chubut', 'Córdoba', 'Corrientes', 'Entre Ríos',
@@ -21,6 +22,34 @@ const provinces = [
 const PICKUP_BRANCH_ADDRESS = 'Deheza 2921, PB, Saavedra, Buenos Aires, Argentina';
 const PICKUP_BRANCH_MAP_URL = 'https://maps.app.goo.gl/vTPfffMMNMbMLCyn8';
 const PICKUP_BRANCH_MAP_EMBED_QUERY = 'Deheza 2921, C1429EAY Cdad. Autónoma de Buenos Aires';
+
+const mercadoPagoBadges = [
+  {
+    label: 'Mercado Pago',
+    shortLabel: 'MP',
+    className: 'bg-[#009EE3] text-white border-[#009EE3]',
+  },
+  {
+    label: 'Visa',
+    className: 'bg-white text-[#1434CB] border-[#D8DFEA]',
+    icon: FaCcVisa,
+  },
+  {
+    label: 'Mastercard',
+    className: 'bg-white text-[#EA001B] border-[#D8DFEA]',
+    icon: FaCcMastercard,
+  },
+  {
+    label: '+3',
+    className: 'bg-[#F5F1EA] text-[#3A3530] border-[#E8E4DD]',
+  },
+];
+
+const cashBadges = [
+  { label: 'EFVO', className: 'bg-[#ECFDF3] text-[#0F7B45] border-[#CDEEDC]' },
+  { label: 'CBU', className: 'bg-[#EEF4FF] text-[#1D4ED8] border-[#D8E4FF]' },
+  { label: 'USDT', className: 'bg-[#F4F3FF] text-[#5B44D1] border-[#E1DBFF]' },
+];
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -327,11 +356,17 @@ export default function CheckoutPage() {
     ? subtotal * discountPercent / 100
     : (discountFixed || 0);
   const subtotalAfterCode = Math.max(0, subtotal - codeDiscountAmount);
+  const cashDiscountAvailablePercent = paymentConfig?.cash_discount_enabled
+    ? Number(paymentConfig?.cash_discount_percent || 0)
+    : 0;
+  const cashDiscountPreviewAmount = subtotalAfterCode * cashDiscountAvailablePercent / 100;
   const cashDiscountPercent = (
     form.payment_method === 'cash' && paymentConfig?.cash_discount_enabled
   ) ? Number(paymentConfig?.cash_discount_percent || 0) : 0;
   const cashDiscountAmount = subtotalAfterCode * cashDiscountPercent / 100;
   const checkoutTotal = Math.max(0, subtotalAfterCode - cashDiscountAmount);
+  const paymentRadioClass = (selected) => `mt-0.5 flex h-5 w-5 min-h-5 min-w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${selected ? 'border-[#C8972E] bg-[#FFF8E8]' : 'border-[#B7B0A6] bg-white'}`;
+  const paymentRadioDotClass = (selected) => `h-2.5 w-2.5 rounded-full transition-colors ${selected ? 'bg-[#C8972E]' : 'bg-transparent'}`;
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="pt-24 pb-20">
@@ -421,15 +456,16 @@ export default function CheckoutPage() {
 
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
               <h2 className="text-sm font-bold tracking-[0.15em] text-[#1A1A1A] mb-6">ENVÍO</h2>
-              <div className="flex gap-4 mb-6">
+              <div className="grid grid-cols-2 gap-2 rounded-2xl bg-[#F3F1EC] p-1.5 mb-6">
                 {['delivery', 'pickup'].map((type) => (
                   <button
                     key={type}
                     type="button"
                     onClick={() => updateForm('shipping_type', type)}
-                    className={`flex-1 border rounded-lg px-4 py-3 text-sm transition-all ${form.shipping_type === type ? 'border-[#C8972E] text-[#1A1A1A] bg-[#C8972E]/5' : 'border-[#E8E4DD] text-[#6B6560] hover:border-[#D4CFC6]'}`}
+                    className={`flex items-center justify-center gap-2 rounded-xl border px-4 py-4 text-sm font-semibold transition-all ${form.shipping_type === type ? 'border-[#D9D3C7] bg-white text-[#111111] shadow-[0_6px_18px_rgba(17,17,17,0.06)]' : 'border-transparent bg-transparent text-[#3A3530] hover:bg-white/70'}`}
                   >
-                    {type === 'delivery' ? 'Envío a domicilio' : 'Retiro en punto'}
+                    {type === 'delivery' ? <Truck size={18} strokeWidth={2.2} /> : <MapPin size={18} strokeWidth={2.2} />}
+                    <span>{type === 'delivery' ? 'Envío' : 'Retiro'}</span>
                   </button>
                 ))}
               </div>
@@ -518,12 +554,35 @@ export default function CheckoutPage() {
                   onClick={() => updateForm('payment_method', 'mercadopago')}
                   className={`border rounded-lg px-4 py-3 text-left transition-all ${
                     form.payment_method === 'mercadopago'
-                      ? 'border-[#C8972E] bg-[#C8972E]/5 text-[#1A1A1A]'
+                      ? 'border-[#C8972E] bg-[#FFF8E8] text-[#1A1A1A] shadow-[0_8px_24px_rgba(200,151,46,0.14)]'
                       : 'border-[#E8E4DD] text-[#6B6560] hover:border-[#D4CFC6]'
                   }`}
                 >
-                  <p className="text-sm font-semibold">Mercado Pago</p>
-                  <p className="text-xs mt-1 opacity-80">Tarjeta, transferencia o efectivo en redes de cobro.</p>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className={paymentRadioClass(form.payment_method === 'mercadopago')}>
+                          <span className={paymentRadioDotClass(form.payment_method === 'mercadopago')} />
+                        </span>
+                        <p className="text-sm font-semibold text-[#111111]">Mercado Pago</p>
+                      </div>
+                      <div className="mt-3 flex items-center gap-2 text-[11px] text-[#6B6560]">
+                        <CreditCard size={14} />
+                        <span>Tarjeta, débito y saldo en cuenta</span>
+                      </div>
+                      <div className="mt-2 flex items-center gap-2 text-[11px] text-[#6B6560]">
+                        <Landmark size={14} />
+                        <span>Pago online inmediato</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap justify-end gap-1.5 max-w-[160px]">
+                      {mercadoPagoBadges.map((badge) => (
+                        <span key={badge.label} className={`flex min-w-[44px] items-center justify-center rounded-md border px-2 py-1 text-[10px] font-bold tracking-[0.08em] shadow-sm ${badge.className}`}>
+                          {badge.icon ? <badge.icon size={22} /> : (badge.shortLabel || badge.label)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 </button>
 
                 <button
@@ -531,20 +590,41 @@ export default function CheckoutPage() {
                   onClick={() => updateForm('payment_method', 'cash')}
                   className={`border rounded-lg px-4 py-3 text-left transition-all ${
                     form.payment_method === 'cash'
-                      ? 'border-[#C8972E] bg-[#C8972E]/5 text-[#1A1A1A]'
+                      ? 'border-[#C8972E] bg-[#FFF8E8] text-[#1A1A1A] shadow-[0_8px_24px_rgba(200,151,46,0.14)]'
                       : 'border-[#E8E4DD] text-[#6B6560] hover:border-[#D4CFC6]'
                   }`}
                 >
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="text-sm font-semibold">Efectivo / Transferencia / Crypto</p>
-                    <ExchangeBinance variant="branded" size={20} />
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className={paymentRadioClass(form.payment_method === 'cash')}>
+                          <span className={paymentRadioDotClass(form.payment_method === 'cash')} />
+                        </span>
+                        <p className="text-sm font-semibold text-[#111111]">Efectivo / Transferencia / Crypto</p>
+                      </div>
+                      <div className="mt-3 flex items-center gap-2 text-[11px] text-[#6B6560]">
+                        <Banknote size={14} />
+                        <span>Coordinación manual por WhatsApp o tienda</span>
+                      </div>
+                      {cashDiscountAvailablePercent > 0 && (
+                        <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-[11px] font-semibold text-green-700">
+                          <BadgePercent size={13} />
+                          <span>{cashDiscountAvailablePercent}% OFF</span>
+                          <span className="text-green-600">Ahorrás {formatPrice(cashDiscountPreviewAmount)}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap items-center justify-end gap-1.5 max-w-[170px]">
+                      {cashBadges.map((badge) => (
+                        <span key={badge.label} className={`rounded-md border px-2 py-1 text-[10px] font-bold tracking-[0.08em] ${badge.className}`}>
+                          {badge.label}
+                        </span>
+                      ))}
+                      <span className="flex h-7 w-7 items-center justify-center rounded-md border border-[#E8E4DD] bg-white">
+                        <ExchangeBinance variant="branded" size={16} />
+                      </span>
+                    </div>
                   </div>
-                  <p className="text-xs opacity-80">
-                    Coordinamos por WhatsApp o tienda.
-                    {paymentConfig?.cash_discount_enabled && cashDiscountPercent > 0
-                      ? ` Descuento: ${cashDiscountPercent}%`
-                      : ''}
-                  </p>
                 </button>
               </div>
             </motion.div>
@@ -665,7 +745,7 @@ export default function CheckoutPage() {
                 ) : stockChecking ? (
                   <><Loader2 size={14} className="animate-spin" /> VERIFICANDO...</>
                 ) : (
-                  form.payment_method === 'mercadopago' ? 'PAGAR CON MERCADO PAGO' : 'CONFIRMAR PEDIDO'
+                  'PAGAR AHORA'
                 )}
               </button>
 
