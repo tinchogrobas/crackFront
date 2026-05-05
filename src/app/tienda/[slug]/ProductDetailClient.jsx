@@ -152,7 +152,7 @@ export default function ProductDetailClient({ product }) {
             </div>
 
             {/* Badges */}
-            <div className="flex flex-wrap gap-2 mb-6">
+            <div className="flex flex-wrap gap-2 ">
               {certEntity && (
                 <span className="inline-flex items-center gap-1.5 text-[11px] bg-purple-50 text-purple-700 border border-purple-200 px-3 py-1.5 rounded-sm font-medium">
                   <Award size={12} />{certEntity} {product.certification_grade?.grade ?? product.certification_grade}
@@ -171,27 +171,29 @@ export default function ProductDetailClient({ product }) {
                 : null;
 
               return (
-                <>
-                  <div className="flex items-baseline gap-3 mb-3">
+                <div className="mb-5 flex flex-col gap-5">
+                  <div className="flex flex-col items-center gap-2 text-center sm:items-start sm:text-left">
                     {hasDiscount ? (
                       <>
                         <motion.span
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ duration: 0.5, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                          className="text-3xl font-black gradient-text-shimmer"
+                          className="text-3xl font-black leading-none gradient-text-shimmer"
                         >
                           {formatPrice(product.final_price)}
                         </motion.span>
-                        <span className="text-lg text-[#6B6560]/40 line-through">{formatPrice(product.price_ars)}</span>
-                        <span className="text-[12px] text-[#C8972E] font-bold bg-[#C8972E]/10 px-2 py-0.5 rounded">-{product.discount_percent}%</span>
+                        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 sm:justify-start">
+                          <span className="text-lg font-medium text-[#6B6560]/45 line-through">{formatPrice(product.price_ars)}</span>
+                          <span className="inline-flex items-center rounded-full bg-[#C8972E]/10 px-2.5 py-1 text-[12px] font-bold text-[#C8972E]">-{product.discount_percent}%</span>
+                        </div>
                       </>
                     ) : (
                       <motion.span
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.5, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                        className="text-3xl font-black gradient-text-shimmer"
+                        className="text-3xl font-black leading-none gradient-text-shimmer"
                       >
                         {formatPrice(basePrice)}
                       </motion.span>
@@ -203,27 +205,27 @@ export default function ProductDetailClient({ product }) {
                       initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, delay: 0.6 }}
-                      className="flex items-center gap-3 mb-4 p-3 rounded-lg border border-green-200 bg-green-50"
+                      className="flex items-center justify-center gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3.5 text-center sm:justify-start sm:text-left"
                     >
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                      <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
                         </svg>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[11px] text-green-700 font-semibold tracking-wide uppercase mb-0.5">
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-green-700">
                           Efectivo · Transferencia · Crypto
                         </p>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-xl font-black text-green-700">{formatPrice(cashPrice)}</span>
-                          <span className="text-[12px] font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
+                        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5 sm:justify-start">
+                          <span className="text-xl font-black leading-none text-green-700">{formatPrice(cashPrice)}</span>
+                          <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-1 text-[12px] font-bold text-green-600">
                             -{cashDiscount.percent}% OFF
                           </span>
                         </div>
                       </div>
                     </motion.div>
                   )}
-                </>
+                </div>
               );
             })()}
 
