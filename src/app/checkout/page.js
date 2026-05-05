@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useCartStore } from '@/store/cartStore';
 import { syncCartWithBackend } from '@/lib/cartSync';
 import { formatPrice } from '@/lib/formatPrice';
@@ -67,6 +67,7 @@ const cashBadges = [
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const items = useCartStore((s) => s.items);
   const getSubtotal = useCartStore((s) => s.getSubtotal);
   const discountCode = useCartStore((s) => s.discountCode);
@@ -74,7 +75,6 @@ export default function CheckoutPage() {
   const discountFixed = useCartStore((s) => s.discountFixed);
   const setDiscount = useCartStore((s) => s.setDiscount);
   const removeFromCart = useCartStore((s) => s.removeFromCart);
-  const clearCart = useCartStore((s) => s.clearCart);
   const syncCartProducts = useCartStore((s) => s.syncCartProducts);
 
   const [form, setForm] = useState({
@@ -100,6 +100,48 @@ export default function CheckoutPage() {
   const [orderErrors, setOrderErrors] = useState([]); // mensajes de error del backend
   const [fieldErrors, setFieldErrors] = useState({}); // errores de validación por campo
   const [pickupMapOpen, setPickupMapOpen] = useState(false);
+
+  const paymentId = searchParams.get('payment_id') || searchParams.get('collection_id');
+  const externalReference = searchParams.get('external_reference') || searchParams.get('code');
+  const statusParam = (searchParams.get('status') || '').toLowerCase();
+  const emailParam = searchParams.get('email') || '';
+  const isReturningFromPayment = Boolean(
+    paymentId ||
+    externalReference ||
+    ['approved', 'authorized', 'pending', 'in_process', 'rejected', 'cancelled', 'failure'].includes(statusParam)
+  );
+
+  useEffect(() => {
+    if (!isReturningFromPayment) return;
+
+    const params = new URLSearchParams();
+    if (paymentId) params.set('payment_id', paymentId);
+    if (externalReference) {
+      params.set('external_reference', externalReference);
+      params.set('code', externalReference);
+    }
+    if (emailParam) params.set('email', emailParam);
+    if (statusParam) params.set('status', statusParam);
+
+    if (statusParam === 'pending' || statusParam === 'in_process') {
+      router.replace(`/checkout/pendiente?${params.toString()}`);
+      return;
+    }
+
+    if (statusParam === 'rejected' || statusParam === 'cancelled' || statusParam === 'failure') {
+      router.replace(`/checkout/error?${params.toString()}`);
+      return;
+    }
+
+    router.replace(`/checkout/confirmacion?${params.toString()}`);
+  }, [
+    isReturningFromPayment,
+    paymentId,
+    externalReference,
+    emailParam,
+    statusParam,
+    router,
+  ]);
 
   // Validación de stock al cargar
   const [stockChecking, setStockChecking] = useState(true);
@@ -310,7 +352,6 @@ export default function CheckoutPage() {
         return;
       }
 
-      clearCart();
       router.push(`/checkout/confirmacion?order=${order.id}&code=${order.order_code}&email=${encodeURIComponent(order.customer_email)}&cash=1`);
     } catch (err) {
       const data = err?.data;
@@ -354,6 +395,14 @@ export default function CheckoutPage() {
   const inputClass = (field) => `${inputBase} ${fieldErrors[field] ? 'border-red-400 focus:border-red-400' : 'border-[#E8E4DD] focus:border-[#C8972E]/40'}`;
   const labelClass = "block text-[11px] tracking-[0.1em] text-[#6B6560] uppercase mb-1.5 font-medium";
   const FieldError = ({ field }) => fieldErrors[field] ? <p className="text-[11px] text-red-500 mt-1">{fieldErrors[field]}</p> : null;
+
+  if (isReturningFromPayment) {
+    return (
+      <div className="pt-24 pb-20 text-center min-h-screen flex flex-col items-center justify-center">
+        <p className="text-[#6B6560] text-sm mb-2">Estamos confirmando el estado de tu pago...</p>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
