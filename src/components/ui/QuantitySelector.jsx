@@ -5,7 +5,6 @@ export default function QuantitySelector({ quantity, onIncrease, onDecrease, max
     <div className="flex items-center border border-[#E8E4DD]">
       <button
         onClick={onDecrease}
-        
         disabled={quantity <= 1}
         className="w-11 h-11 flex items-center justify-center text-[#6B6560] hover:text-[#1A1A1A] disabled:opacity-20 transition-all hover:bg-[#F5F1EA]"
       >
