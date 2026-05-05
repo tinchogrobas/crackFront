@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -65,7 +65,7 @@ const cashBadges = [
   { label: 'USDT', className: 'bg-[#F4F3FF] text-[#5B44D1] border-[#E1DBFF]' },
 ];
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const items = useCartStore((s) => s.items);
@@ -848,5 +848,13 @@ export default function CheckoutPage() {
         </form>
       </div>
     </motion.div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div className="pt-24 pb-20 min-h-screen flex items-center justify-center text-[#6B6560] text-sm">Cargando...</div>}>
+      <CheckoutContent />
+    </Suspense>
   );
 }
