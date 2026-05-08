@@ -2,7 +2,6 @@ import { Inter, Space_Grotesk, Barlow_Condensed } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import WhatsappContactButton from '@/components/layout/WhatsappContactButton';
 import { Toaster } from 'react-hot-toast';
 import MaintenancePage from '@/components/MaintenancePage';
 import {
@@ -240,7 +239,6 @@ export default async function RootLayout({ children }) {
             />
             <main className="min-h-screen pt-8">{children}</main>
             <Footer />
-            <WhatsappContactButton />
             <Toaster
               position="bottom-right"
               toastOptions={{
