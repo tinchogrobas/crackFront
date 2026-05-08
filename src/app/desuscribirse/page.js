@@ -17,12 +17,12 @@ export default function UnsubscribePage() {
 
 function UnsubscribeFallback() {
   return (
-    <section className="relative isolate min-h-screen overflow-hidden bg-[#FAFAF7] px-5 py-16 sm:py-20">
+    <section className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[#FAFAF7] px-5 py-16 sm:py-20">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
       >
-        <div className="absolute left-1/2 top-[14%] h-[440px] w-[440px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(200,151,46,0.14),rgba(200,151,46,0.02)_45%,transparent_70%)]" />
+        <div className="absolute left-1/2 top-1/2 h-[440px] w-[440px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(200,151,46,0.14),rgba(200,151,46,0.02)_45%,transparent_70%)]" />
       </div>
 
       <div className="relative mx-auto w-full max-w-3xl">
@@ -104,12 +104,12 @@ function UnsubscribeContent() {
   };
 
   return (
-    <section className="relative isolate min-h-screen overflow-hidden bg-[#FAFAF7] px-5 py-16 sm:py-20">
+    <section className="relative isolate flex min-h-screen items-center justify-center overflow-hidden bg-[#FAFAF7] px-5 py-16 sm:py-20">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
       >
-        <div className="absolute left-1/2 top-[14%] h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(200,151,46,0.16),rgba(200,151,46,0.02)_46%,transparent_72%)]" />
+        <div className="absolute left-1/2 top-1/2 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(200,151,46,0.16),rgba(200,151,46,0.02)_46%,transparent_72%)]" />
         <div className="absolute bottom-[-120px] right-[-130px] h-[300px] w-[300px] rounded-full bg-[radial-gradient(circle,rgba(26,26,26,0.08),transparent_70%)]" />
       </div>
 
