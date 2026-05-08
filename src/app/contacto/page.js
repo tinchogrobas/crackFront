@@ -88,7 +88,7 @@ export default function ContactoPage() {
             <div>
               <p className="text-[11px] tracking-[0.15em] text-[#6B6560]/60 uppercase mb-4">Seguinos!</p>
               <div className="flex gap-4">
-                {['Instagram', 'Twitter', 'WhatsApp'].map((s) => (
+                {['Instagram', 'WhatsApp'].map((s) => (
                   <a key={s} href="#" className="text-[13px] text-[#6B6560] hover:text-[#C8972E] transition-colors">{s}</a>
                 ))}
               </div>
