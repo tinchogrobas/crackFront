@@ -9,7 +9,6 @@ import { formatPrice } from '@/lib/formatPrice';
 import { createOrder, getPaymentConfig, validateDiscount } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { Tag, AlertTriangle, Loader2, X, Truck, MapPin, CreditCard, Landmark, Banknote, BadgePercent } from 'lucide-react';
-import { ExchangeBinance } from '@web3icons/react';
 
 const provinces = [
   'Buenos Aires', 'CABA', 'Catamarca', 'Chaco', 'Chubut', 'Córdoba', 'Corrientes', 'Entre Ríos',
@@ -57,12 +56,6 @@ const mercadoPagoHoverBadges = [
     className: 'bg-white border-[#D8DFEA]',
     imageSrc: '/payments/maestro.ByfUQi1c.svg',
   },
-];
-
-const cashBadges = [
-  { label: 'EFVO', className: 'bg-[#ECFDF3] text-[#0F7B45] border-[#CDEEDC]' },
-  { label: 'CBU', className: 'bg-[#EEF4FF] text-[#1D4ED8] border-[#D8E4FF]' },
-  { label: 'USDT', className: 'bg-[#F4F3FF] text-[#5B44D1] border-[#E1DBFF]' },
 ];
 
 function CheckoutContent() {
@@ -702,16 +695,6 @@ function CheckoutContent() {
                           <span className="text-green-600">Ahorrás {formatPrice(cashDiscountPreviewAmount)}</span>
                         </div>
                       )}
-                    </div>
-                    <div className="flex flex-wrap items-center justify-end gap-1.5 max-w-[170px]">
-                      {cashBadges.map((badge) => (
-                        <span key={badge.label} className={`rounded-md border px-2 py-1 text-[10px] font-bold tracking-[0.08em] ${badge.className}`}>
-                          {badge.label}
-                        </span>
-                      ))}
-                      <span className="flex h-7 w-7 items-center justify-center rounded-md border border-[#E8E4DD] bg-white">
-                        <ExchangeBinance variant="branded" size={16} />
-                      </span>
                     </div>
                   </div>
                 </button>
