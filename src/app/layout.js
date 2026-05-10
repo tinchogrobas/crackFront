@@ -1,4 +1,5 @@
 import { Inter, Space_Grotesk, Barlow_Condensed } from 'next/font/google';
+import { cookies } from 'next/headers';
 import './globals.css';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -205,9 +206,45 @@ async function getSiteConfig() {
   }
 }
 
+/**
+ * Verifies the admin_bypass cookie against the backend.
+ * Returns true only if the token belongs to a staff user.
+ * Any failure (missing cookie, network error, non-staff) → false → maintenance stays.
+ */
+async function isAdminBypassValid() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('admin_bypass')?.value;
+  if (!token) return false;
+
+  const BASE_URL =
+    process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+    const res = await fetch(`${BASE_URL}/auth/me/`, {
+      cache: 'no-store',
+      signal: controller.signal,
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!res.ok) return false;
+    const me = await res.json();
+    return Boolean(me?.is_staff);
+  } catch {
+    return false;
+  }
+}
+
 export default async function RootLayout({ children }) {
   const siteConfig = await getSiteConfig();
-  const isMaintenance = !siteConfig.is_active;
+  let isMaintenance = !siteConfig.is_active;
+  if (isMaintenance && (await isAdminBypassValid())) {
+    isMaintenance = false;
+  }
   return (
     <html lang="es" className={`${inter.variable} ${spaceGrotesk.variable} ${barlowCondensed.variable}`}>
       <head>
