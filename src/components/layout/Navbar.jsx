@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingBag, Menu, X, Search } from 'lucide-react';
+import { ShoppingBag, Menu, X, Search, LogOut } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import CartDrawer from './CartDrawer';
 import SearchOverlay from '@/components/ui/SearchOverlay';
@@ -21,9 +21,18 @@ export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAUL
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [adminBypass, setAdminBypass] = useState(false);
   const itemCount = useCartStore((s) => s.getItemCount());
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+    setAdminBypass(document.cookie.split('; ').some((c) => c.startsWith('admin_bypass=')));
+  }, []);
+
+  const exitAdminMode = () => {
+    document.cookie = 'admin_bypass=; Path=/; Max-Age=0; SameSite=Lax';
+    window.location.reload();
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -149,6 +158,21 @@ export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAUL
 
             {/* Right: search + cart */}
             <div className="flex items-center justify-end gap-5">
+              {mounted && adminBypass && (
+                <button
+                  onClick={exitAdminMode}
+                  aria-label="Salir del modo administrador"
+                  title="Salir del modo administrador"
+                  className={`flex items-center gap-1.5 text-[10px] sm:text-[11px] tracking-[0.18em] uppercase font-semibold transition-colors ${
+                    scrolled
+                      ? 'text-[#C8972E] hover:text-[#1A1A1A]'
+                      : 'text-[#C8972E] hover:text-white'
+                  }`}
+                >
+                  <LogOut size={14} />
+                  <span className="hidden sm:inline">Salir admin</span>
+                </button>
+              )}
               <button
                 onClick={() => setSearchOpen(true)}
                 aria-label="Abrir búsqueda"
