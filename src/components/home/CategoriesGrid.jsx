@@ -28,28 +28,45 @@ function CategoryCard({ cat, size }) {
   );
 }
 
+function CategoryCardSkeleton({ size }) {
+  return (
+    <div className={`flex-shrink-0 ${size} animate-pulse`}>
+      <div className="relative aspect-square overflow-hidden rounded-xl bg-[#F0EDE6]" />
+    </div>
+  );
+}
+
+const SKELETON_COUNT = Object.keys(CATEGORY_IMAGES).length;
+
 export default function CategoriesGrid() {
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState(null);
 
   useEffect(() => {
-    getCategories().then(setCategories).catch(() => {});
+    getCategories().then(setCategories).catch(() => setCategories([]));
   }, []);
 
-  if (!categories.length) return null;
+  const isLoading = categories === null;
+  const items = isLoading ? Array.from({ length: SKELETON_COUNT }) : categories;
+
+  if (!isLoading && items.length === 0) return null;
 
   return (
     <section className="py-8 sm:py-10 border-t border-[#E8E4DD]">
       {/* Mobile: scroll horizontal */}
       <div className="sm:hidden flex gap-3 overflow-x-auto hide-scrollbar px-5 pb-1">
-        {categories.map((cat) => (
-          <CategoryCard key={cat.slug} cat={cat} size="w-[140px]" />
-        ))}
+        {items.map((cat, i) =>
+          isLoading
+            ? <CategoryCardSkeleton key={i} size="w-[140px]" />
+            : <CategoryCard key={cat.slug} cat={cat} size="w-[140px]" />
+        )}
       </div>
       {/* Desktop: grid */}
       <div className="hidden sm:grid max-w-[1400px] mx-auto px-8 grid-cols-3 lg:grid-cols-5 gap-3">
-        {categories.map((cat) => (
-          <CategoryCard key={cat.slug} cat={cat} size="w-full" />
-        ))}
+        {items.map((cat, i) =>
+          isLoading
+            ? <CategoryCardSkeleton key={i} size="w-full" />
+            : <CategoryCard key={cat.slug} cat={cat} size="w-full" />
+        )}
       </div>
     </section>
   );
