@@ -45,6 +45,10 @@ export default function ProductDetailClient({ product }) {
   const categoryName = typeof product.category === 'object' ? product.category.name : product.category;
   const conditionName = product.condition ? (typeof product.condition === 'object' ? product.condition.name : product.condition) : null;
   const certEntity = product.certification_entity ? (typeof product.certification_entity === 'object' ? product.certification_entity.abbreviation || product.certification_entity.name : product.certification_entity) : null;
+  const rawGrade = product.certification_grade?.grade ?? product.certification_grade;
+  const formattedGrade = rawGrade != null && rawGrade !== ''
+    ? (Number.isFinite(Number(rawGrade)) ? (Number(rawGrade) % 1 === 0 ? String(parseInt(rawGrade, 10)) : String(Number(rawGrade))) : rawGrade)
+    : null;
   const hasBadges = Boolean(certEntity || conditionName);
   const maxQty = getProductMaxQuantity(product);
   const inStock = product.in_stock !== false && maxQty > 0;
@@ -172,8 +176,8 @@ export default function ProductDetailClient({ product }) {
             {hasBadges && (
               <div className="mb-4 flex flex-wrap gap-2">
                 {certEntity && (
-                  <span className="inline-flex items-center gap-1.5 text-[11px] bg-purple-50 text-purple-700 border border-purple-200 px-3 py-1.5 rounded-sm font-medium">
-                    <Award size={12} />{certEntity} {product.certification_grade?.grade ?? product.certification_grade}
+                  <span className="inline-flex items-center gap-1.5 text-[11px] bg-red-50 text-red-700 border border-red-200 px-3 py-1.5 rounded-sm font-medium">
+                    <Award size={12} />{certEntity} {formattedGrade}
                   </span>
                 )}
                 {conditionName && (
