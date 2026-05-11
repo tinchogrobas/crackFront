@@ -116,7 +116,7 @@ export default function MaintenancePage({ message }) {
           className="flex items-center justify-center w-full"
         >
           <img
-            src="/brand/whiteBgColor.png"
+            src="/brand/mantenimientofoto.png"
             alt="CRACK"
             className="w-auto max-w-full"
             style={{ height: 'clamp(96px, 22vw, 180px)' }}
