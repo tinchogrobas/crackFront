@@ -708,7 +708,7 @@ function CheckoutContent() {
               <h2 className="text-sm font-bold tracking-[0.15em] text-[#1A1A1A] mb-6">TU PEDIDO</h2>
 
               {/* Lista de items */}
-              <div className="space-y-3 mb-6 max-h-60 overflow-y-auto">
+              <div className="space-y-3 mb-6 max-h-60 overflow-y-auto pr-3">
                 {stockChecking ? (
                   <div className="flex items-center gap-2 text-xs text-[#6B6560]">
                     <Loader2 size={14} className="animate-spin" />
