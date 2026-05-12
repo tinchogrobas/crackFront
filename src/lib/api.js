@@ -108,6 +108,8 @@ export async function getExchangeRate() {
  * @param {string} orderData.customer_email
  * @param {string} [orderData.customer_phone]
  * @param {string} [orderData.shipping_type] - 'home' | 'pickup'
+ * @param {string} [orderData.shipping_method] - 'branch_normal' | 'branch_express' | 'home'
+ * @param {string} [orderData.shipping_zone] - 'ba' | 'province'
  * @param {string} [orderData.shipping_address]
  * @param {string} [orderData.shipping_city]
  * @param {string} [orderData.shipping_province]
