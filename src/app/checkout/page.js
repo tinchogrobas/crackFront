@@ -76,7 +76,7 @@ function CheckoutContent() {
     customer_phone: '',
     shipping_type: 'delivery',
     shipping_region: 'ba',
-    shipping_branch_speed: 'normal',
+    shipping_delivery_method: 'home',
     payment_method: 'mercadopago',
     shipping_address: '',
     shipping_city: '',
@@ -337,13 +337,15 @@ function CheckoutContent() {
         customer_phone: form.customer_phone.trim(),
         shipping_type: form.shipping_type === 'delivery' ? 'home' : 'pickup',
         shipping_method: shippingMethod,
-        shipping_zone: shippingZone,
+        shipping_zone: form.shipping_type === 'delivery' ? shippingZone : '',
         payment_method: form.payment_method,
         shipping_address: form.shipping_address.trim(),
         shipping_city: form.shipping_city.trim(),
         shipping_province: form.shipping_province,
         shipping_zip: form.shipping_zip.trim(),
-        shipping_branch: form.shipping_type === 'pickup' ? PICKUP_BRANCH_ADDRESS : form.shipping_branch.trim(),
+        shipping_branch: form.shipping_type === 'pickup'
+          ? PICKUP_BRANCH_ADDRESS
+          : ((shippingMethod === 'branch_normal' || shippingMethod === 'branch_express') ? 'Sucursal de correo' : ''),
         discount_code: discountCode || '',
         items: items.map((item) => ({ product_id: item.id, quantity: item.quantity })),
       });
@@ -424,12 +426,14 @@ function CheckoutContent() {
   const hasBlockingIssues = stockIssues.length > 0;
   const subtotal = getSubtotal();
   const shippingZone = form.shipping_region === 'ba' ? 'ba' : 'province';
-  const shippingMethod = form.shipping_type === 'delivery'
-    ? 'home'
-    : (form.shipping_branch_speed === 'express' ? 'branch_express' : 'branch_normal');
-  const shippingPrice = form.shipping_type === 'delivery'
-    ? Number(paymentConfig?.shipping_prices?.home?.[shippingZone]?.normal || 0)
-    : Number(paymentConfig?.shipping_prices?.branch?.[shippingZone]?.[form.shipping_branch_speed] || 0);
+  const shippingMethod = form.shipping_type === 'pickup'
+    ? 'pickup_store'
+    : form.shipping_delivery_method;
+  const shippingPrice = form.shipping_type === 'pickup'
+    ? 0
+    : (shippingMethod === 'home'
+      ? Number(paymentConfig?.shipping_prices?.home?.[shippingZone]?.normal || 0)
+      : Number(paymentConfig?.shipping_prices?.branch?.[shippingZone]?.[shippingMethod === 'branch_express' ? 'express' : 'normal'] || 0));
   const codeDiscountAmount = discountPercent > 0
     ? subtotal * discountPercent / 100
     : (discountFixed || 0);
@@ -533,210 +537,192 @@ function CheckoutContent() {
             </motion.div>
 
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <h2 className="text-sm font-bold tracking-[0.15em] text-[#1A1A1A] mb-5">ENVÍO</h2>
+              <h2 className="text-sm font-bold tracking-[0.15em] text-[#1A1A1A] mb-6">ENVÍO</h2>
 
-              {/* Selector de zona */}
-              <div className="flex gap-2 mb-5">
-                {[
-                  { key: 'ba', label: 'Buenos Aires / CABA' },
-                  { key: 'province', label: 'Interior del país' },
-                ].map((zone) => (
+              <div className="grid grid-cols-2 gap-2 rounded-2xl bg-[#F3F1EC] p-1.5 mb-6">
+                {['delivery', 'pickup'].map((type) => (
                   <button
-                    key={zone.key}
+                    key={type}
                     type="button"
-                    onClick={() => updateForm('shipping_region', zone.key)}
-                    className={`flex-1 rounded-xl border py-2.5 text-xs font-semibold transition-all ${
-                      form.shipping_region === zone.key
-                        ? 'border-[#C8972E] bg-[#FFF8E8] text-[#8B6520]'
-                        : 'border-[#E8E4DD] bg-white text-[#6B6560] hover:border-[#D4CFC6]'
+                    onClick={() => updateForm('shipping_type', type)}
+                    className={`flex items-center justify-center gap-2 rounded-xl border px-4 py-4 text-sm font-semibold transition-all ${
+                      form.shipping_type === type
+                        ? 'border-[#D9D3C7] bg-white text-[#111111] shadow-[0_6px_18px_rgba(17,17,17,0.06)]'
+                        : 'border-transparent bg-transparent text-[#3A3530] hover:bg-white/70'
                     }`}
                   >
-                    {zone.label}
+                    {type === 'delivery' ? <Truck size={18} strokeWidth={2.2} /> : <MapPin size={18} strokeWidth={2.2} />}
+                    <span>{type === 'delivery' ? 'Envío' : 'Retiro'}</span>
                   </button>
                 ))}
               </div>
 
-              {/* Cards de método de envío */}
-              <div className="space-y-2 mb-6">
-                {[
-                  {
-                    id: 'pickup-normal',
-                    type: 'pickup',
-                    speed: 'normal',
-                    icon: <Store size={18} strokeWidth={1.8} />,
-                    title: 'Retiro en sucursal',
-                    badge: 'Normal',
-                    badgeColor: 'bg-[#F3F1EC] text-[#6B6560]',
-                    desc: '3 a 5 días hábiles',
-                    price: Number(paymentConfig?.shipping_prices?.branch?.[shippingZone]?.normal || 0),
-                  },
-                  {
-                    id: 'pickup-express',
-                    type: 'pickup',
-                    speed: 'express',
-                    icon: <Zap size={18} strokeWidth={1.8} />,
-                    title: 'Retiro en sucursal',
-                    badge: 'Express',
-                    badgeColor: 'bg-amber-50 text-amber-700 border border-amber-200',
-                    desc: '1 a 2 días hábiles',
-                    price: Number(paymentConfig?.shipping_prices?.branch?.[shippingZone]?.express || 0),
-                  },
-                  {
-                    id: 'delivery',
-                    type: 'delivery',
-                    speed: 'normal',
-                    icon: <Truck size={18} strokeWidth={1.8} />,
-                    title: 'Envío a domicilio',
-                    badge: null,
-                    badgeColor: '',
-                    desc: 'Por Andreani',
-                    price: Number(paymentConfig?.shipping_prices?.home?.[shippingZone]?.normal || 0),
-                  },
-                ].map((opt) => {
-                  const isSelected =
-                    form.shipping_type === opt.type &&
-                    (opt.type === 'delivery' || form.shipping_branch_speed === opt.speed);
-                  return (
-                    <button
-                      key={opt.id}
-                      type="button"
-                      onClick={() => {
-                        updateForm('shipping_type', opt.type);
-                        if (opt.type === 'pickup') updateForm('shipping_branch_speed', opt.speed);
-                      }}
-                      className={`w-full flex items-center gap-3.5 rounded-xl border px-4 py-3.5 text-left transition-all ${
-                        isSelected
-                          ? 'border-[#C8972E] bg-[#FFFCF5] shadow-[0_4px_16px_rgba(200,151,46,0.10)]'
-                          : 'border-[#E8E4DD] bg-white hover:border-[#D4CFC6] hover:shadow-sm'
-                      }`}
-                    >
-                      {/* Radio dot */}
-                      <span
-                        className={`flex h-5 w-5 min-w-[20px] items-center justify-center rounded-full border-2 transition-colors ${
-                          isSelected ? 'border-[#C8972E]' : 'border-[#C4BCB4]'
-                        }`}
-                      >
-                        {isSelected && <span className="h-2.5 w-2.5 rounded-full bg-[#C8972E]" />}
-                      </span>
-                      {/* Icon */}
-                      <span
-                        className={`flex h-9 w-9 min-w-[36px] items-center justify-center rounded-lg transition-colors ${
-                          isSelected ? 'bg-[#FFF0CE] text-[#C8972E]' : 'bg-[#F5F1EA] text-[#6B6560]'
-                        }`}
-                      >
-                        {opt.icon}
-                      </span>
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm font-semibold text-[#1A1A1A]">{opt.title}</span>
-                          {opt.badge && (
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${opt.badgeColor}`}>
-                              {opt.badge}
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-[11px] text-[#6B6560]">{opt.desc}</span>
-                      </div>
-                      {/* Price */}
-                      <span className={`text-sm font-bold whitespace-nowrap shrink-0 ${
-                        isSelected ? 'text-[#C8972E]' : 'text-[#1A1A1A]'
-                      }`}>
-                        {opt.price > 0 ? formatPrice(opt.price) : <span className="text-green-600">Gratis</span>}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Campos de dirección o info de retiro */}
               <AnimatePresence mode="wait" initial={false}>
                 {form.shipping_type === 'delivery' ? (
                   <motion.div
-                    key="delivery-fields"
+                    key="delivery"
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -4 }}
                     transition={{ duration: 0.2 }}
-                    className="grid grid-cols-1 sm:grid-cols-2 gap-4"
                   >
-                    <div className="sm:col-span-2">
-                      <label className={labelClass}>Dirección *</label>
-                      <input type="text" value={form.shipping_address} onChange={(e) => updateForm('shipping_address', e.target.value)} className={inputClass('shipping_address')} placeholder="Calle y número" />
-                      <FieldError field="shipping_address" />
-                    </div>
-                    <div>
-                      <label className={labelClass}>Ciudad *</label>
-                      <input type="text" value={form.shipping_city} onChange={(e) => updateForm('shipping_city', e.target.value)} className={inputClass('shipping_city')} placeholder="Ciudad" />
-                      <FieldError field="shipping_city" />
-                    </div>
-                    <div>
-                      <label className={labelClass}>Provincia *</label>
-                      <div className="relative">
-                        <select
-                          value={form.shipping_province}
-                          onChange={(e) => {
-                            updateForm('shipping_province', e.target.value);
-                            const baProvinces = ['Buenos Aires', 'CABA'];
-                            updateForm('shipping_region', baProvinces.includes(e.target.value) ? 'ba' : 'province');
-                          }}
-                          className={`${inputClass('shipping_province')} appearance-none pr-10`}
+                    <div className="flex gap-2 mb-4">
+                      {[
+                        { key: 'ba', label: 'Buenos Aires / CABA' },
+                        { key: 'province', label: 'Interior del país' },
+                      ].map((zone) => (
+                        <button
+                          key={zone.key}
+                          type="button"
+                          onClick={() => updateForm('shipping_region', zone.key)}
+                          className={`flex-1 rounded-xl border py-3 text-xs font-semibold transition-all ${
+                            form.shipping_region === zone.key
+                              ? 'border-[#C8972E] bg-[#FFF8E8] text-[#8B6520]'
+                              : 'border-[#E8E4DD] bg-white text-[#6B6560] hover:border-[#D4CFC6]'
+                          }`}
                         >
-                          <option value="">Seleccionar provincia</option>
-                          {provinces.map((p) => (<option key={p} value={p}>{p}</option>))}
-                        </select>
-                        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6B6560]">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
-                        </span>
-                      </div>
-                      <FieldError field="shipping_province" />
+                          {zone.label}
+                        </button>
+                      ))}
                     </div>
-                    <div>
-                      <label className={labelClass}>Código postal *</label>
-                      <input type="text" value={form.shipping_zip} onChange={(e) => updateForm('shipping_zip', e.target.value)} className={inputClass('shipping_zip')} placeholder="1234" />
-                      <FieldError field="shipping_zip" />
+
+                    <div className="space-y-2 mb-5">
+                      {[
+                        {
+                          key: 'branch_normal',
+                          title: 'Retiro en sucursal',
+                          subtitle: '3 a 5 días hábiles',
+                          badge: 'Normal',
+                          icon: <Store size={16} strokeWidth={1.9} />,
+                          price: Number(paymentConfig?.shipping_prices?.branch?.[shippingZone]?.normal || 0),
+                        },
+                        {
+                          key: 'branch_express',
+                          title: 'Retiro en sucursal',
+                          subtitle: '1 a 2 días hábiles',
+                          badge: 'Express',
+                          icon: <Zap size={16} strokeWidth={1.9} />,
+                          price: Number(paymentConfig?.shipping_prices?.branch?.[shippingZone]?.express || 0),
+                        },
+                        {
+                          key: 'home',
+                          title: 'Envío a domicilio',
+                          subtitle: 'Por Andreani',
+                          badge: '',
+                          icon: <Truck size={16} strokeWidth={1.9} />,
+                          price: Number(paymentConfig?.shipping_prices?.home?.[shippingZone]?.normal || 0),
+                        },
+                      ].map((option) => {
+                        const selected = form.shipping_delivery_method === option.key;
+                        return (
+                          <button
+                            key={option.key}
+                            type="button"
+                            onClick={() => updateForm('shipping_delivery_method', option.key)}
+                            className={`w-full rounded-2xl border px-4 py-4 text-left transition-all ${selected
+                              ? 'border-[#C8972E] bg-[#FFFCF5] shadow-[0_6px_16px_rgba(200,151,46,0.10)]'
+                              : 'border-[#E8E4DD] bg-white hover:border-[#D4CFC6]'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className={`flex h-5 w-5 min-h-5 min-w-5 items-center justify-center rounded-full border-2 ${selected ? 'border-[#C8972E]' : 'border-[#B7B0A6]'}`}>
+                                <span className={`h-2.5 w-2.5 rounded-full ${selected ? 'bg-[#C8972E]' : 'bg-transparent'}`} />
+                              </span>
+                              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#F5F1EA] text-[#6B6560]">{option.icon}</span>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-semibold text-[#1A1A1A]">{option.title}</p>
+                                  {option.badge ? (
+                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${option.badge === 'Express' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-[#F3F1EC] text-[#6B6560]'}`}>
+                                      {option.badge}
+                                    </span>
+                                  ) : null}
+                                </div>
+                                <p className="text-xs text-[#6B6560] mt-0.5">{option.subtitle}</p>
+                              </div>
+                              <p className={`text-2sm font-bold ${selected ? 'text-[#C8972E]' : 'text-[#1A1A1A]'}`}>{formatPrice(option.price)}</p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="sm:col-span-2">
+                        <label className={labelClass}>Dirección *</label>
+                        <input type="text" value={form.shipping_address} onChange={(e) => updateForm('shipping_address', e.target.value)} className={inputClass('shipping_address')} placeholder="Calle y número" />
+                        <FieldError field="shipping_address" />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Ciudad *</label>
+                        <input type="text" value={form.shipping_city} onChange={(e) => updateForm('shipping_city', e.target.value)} className={inputClass('shipping_city')} placeholder="Ciudad" />
+                        <FieldError field="shipping_city" />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Provincia *</label>
+                        <div className="relative">
+                          <select
+                            value={form.shipping_province}
+                            onChange={(e) => {
+                              updateForm('shipping_province', e.target.value);
+                              const baProvinces = ['Buenos Aires', 'CABA'];
+                              updateForm('shipping_region', baProvinces.includes(e.target.value) ? 'ba' : 'province');
+                            }}
+                            className={`${inputClass('shipping_province')} appearance-none pr-10`}
+                          >
+                            <option value="">Seleccionar provincia</option>
+                            {provinces.map((p) => (<option key={p} value={p}>{p}</option>))}
+                          </select>
+                          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#6B6560]">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+                          </span>
+                        </div>
+                        <FieldError field="shipping_province" />
+                      </div>
+                      <div>
+                        <label className={labelClass}>Código postal *</label>
+                        <input type="text" value={form.shipping_zip} onChange={(e) => updateForm('shipping_zip', e.target.value)} className={inputClass('shipping_zip')} placeholder="1234" />
+                        <FieldError field="shipping_zip" />
+                      </div>
                     </div>
                   </motion.div>
                 ) : (
                   <motion.div
-                    key="pickup-info"
+                    key="pickup"
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -4 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <div className="pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0" aria-hidden="true">
-                      <iframe
-                        title="Precarga de mapa de retiro"
-                        src={PICKUP_BRANCH_MAP_EMBED_SRC}
-                        loading="eager"
-                        referrerPolicy="no-referrer-when-downgrade"
-                        tabIndex={-1}
-                      />
-                    </div>
-                    <div className="rounded-xl border border-[#E8E4DD] bg-[#F8F6F1] px-4 py-3.5 flex items-start gap-3">
-                      <MapPin size={16} className="text-[#C8972E] mt-0.5 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-[#1A1A1A] mb-0.5">Punto de retiro</p>
-                        <p className="text-xs text-[#6B6560]">{PICKUP_BRANCH_ADDRESS}</p>
-                        <button
-                          type="button"
-                          onClick={() => setPickupMapOpen((v) => !v)}
-                          className="mt-2 text-[11px] tracking-[0.08em] uppercase font-medium text-[#C8972E] hover:text-[#B8851F] transition-colors"
-                        >
-                          {pickupMapOpen ? 'Ocultar mapa ↑' : 'Ver en mapa ↓'}
-                        </button>
+                    <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3.5 mb-4 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <MapPin size={14} className="text-green-700" />
+                        <p className="text-xs font-semibold text-green-700">PickUp en tienda</p>
                       </div>
+                      <span className="text-sm font-bold text-green-700">Gratis</span>
                     </div>
+
+                    <label className={labelClass}>Punto de retiro</label>
+                    <div className="w-full bg-[#F8F6F1] border border-[#E8E4DD] rounded-lg px-4 py-3 text-sm text-[#3A3530] mb-3">
+                      {PICKUP_BRANCH_ADDRESS}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setPickupMapOpen((v) => !v)}
+                      className="text-[11px] tracking-[0.1em] uppercase font-medium text-[#6B6560] hover:text-[#1A1A1A] transition-colors"
+                    >
+                      {pickupMapOpen ? 'Ocultar mapa' : 'Ver mapa'}
+                    </button>
                     <AnimatePresence initial={false}>
                       {pickupMapOpen && (
                         <motion.div
                           key="pickup-map"
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
+                          initial={{ height: 0, opacity: 0, y: -4 }}
+                          animate={{ height: 'auto', opacity: 1, y: 0 }}
+                          exit={{ height: 0, opacity: 0, y: -4 }}
                           transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-                          className="overflow-hidden mt-2"
+                          className="overflow-hidden mt-3"
                         >
                           <div className="rounded-lg border border-[#E8E4DD] bg-white overflow-hidden">
                             <iframe
