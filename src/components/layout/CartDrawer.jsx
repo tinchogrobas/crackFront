@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus, Minus, ShoppingBag, Tag, AlertTriangle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+
 import toast from 'react-hot-toast';
 import { syncCartWithBackend } from '@/lib/cartSync';
 import { getProductMaxQuantity, useCartStore } from '@/store/cartStore';
