@@ -171,6 +171,26 @@ export default function TiendaClient({ pageSize, initialData, initialFilters, op
   }, [search]);
 
   useEffect(() => {
+    const navEntries = typeof window !== 'undefined' && typeof window.performance?.getEntriesByType === 'function'
+      ? window.performance.getEntriesByType('navigation')
+      : [];
+    const navType = navEntries[0]?.type;
+
+    if (navType === 'back_forward') {
+      router.refresh();
+    }
+
+    const handlePageShow = (event) => {
+      if (event.persisted) {
+        router.refresh();
+      }
+    };
+
+    window.addEventListener('pageshow', handlePageShow);
+    return () => window.removeEventListener('pageshow', handlePageShow);
+  }, [router]);
+
+  useEffect(() => {
     if (totalPages <= 1) return;
     if (currentPage < totalPages) prefetchPage(currentPage + 1);
     if (currentPage > 1) prefetchPage(currentPage - 1);

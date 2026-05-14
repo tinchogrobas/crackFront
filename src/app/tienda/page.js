@@ -4,7 +4,6 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || '
 const PAGE_SIZE = 12;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 const FILTERS_REVALIDATE_SECONDS = 60 * 30;
-const PRODUCTS_REVALIDATE_SECONDS = 20;
 
 function toSingleValue(value) {
   if (Array.isArray(value)) return value[0] || '';
@@ -165,8 +164,9 @@ export default async function TiendaPage({ searchParams }) {
   if (maxPrice) productQs.set('max_price', maxPrice);
   if (hasDiscount) productQs.set('has_discount', 'true');
 
+  // Stock must be fresh after checkout returns; avoid stale cached product lists.
   const productsData = await serverApiFetch(`/products/?${productQs.toString()}`, {
-    revalidateSeconds: PRODUCTS_REVALIDATE_SECONDS,
+    revalidateSeconds: 0,
   });
   const products = productsData?.results || [];
   const total = Number(productsData?.count || 0);

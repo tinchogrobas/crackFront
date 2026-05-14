@@ -5,13 +5,40 @@ import ProductCard from '@/components/ui/ProductCard';
 import SkeletonCard from '@/components/ui/SkeletonCard';
 import { getNewArrivals } from '@/lib/api';
 
+let newArrivalsCache = null;
+let newArrivalsPromise = null;
+
 export default function NewProducts() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState(newArrivalsCache || []);
+  const [loading, setLoading] = useState(!newArrivalsCache);
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    getNewArrivals().then(setProducts).finally(() => setLoading(false));
+    if (newArrivalsCache) {
+      setProducts(newArrivalsCache);
+      setLoading(false);
+      return;
+    }
+
+    if (!newArrivalsPromise) {
+      newArrivalsPromise = getNewArrivals()
+        .then((data) => {
+          newArrivalsCache = Array.isArray(data) ? data : [];
+          return newArrivalsCache;
+        })
+        .catch(() => {
+          newArrivalsCache = [];
+          return newArrivalsCache;
+        })
+        .finally(() => {
+          newArrivalsPromise = null;
+        });
+    }
+
+    newArrivalsPromise.then((data) => {
+      setProducts(data);
+      setLoading(false);
+    });
   }, []);
 
   const scroll = (dir) => {

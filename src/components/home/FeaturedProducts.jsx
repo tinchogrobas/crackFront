@@ -4,10 +4,37 @@ import Link from 'next/link';
 import ProductCard from '@/components/ui/ProductCard';
 import { getFeaturedProducts } from '@/lib/api';
 
+let featuredProductsCache = null;
+let featuredProductsPromise = null;
+
 export default function FeaturedProducts() {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState(featuredProductsCache || []);
   const ref = useRef(null);
-  useEffect(() => { getFeaturedProducts().then(setProducts); }, []);
+
+  useEffect(() => {
+    if (featuredProductsCache) {
+      setProducts(featuredProductsCache);
+      return;
+    }
+
+    if (!featuredProductsPromise) {
+      featuredProductsPromise = getFeaturedProducts()
+        .then((data) => {
+          featuredProductsCache = Array.isArray(data) ? data : [];
+          return featuredProductsCache;
+        })
+        .catch(() => {
+          featuredProductsCache = [];
+          return featuredProductsCache;
+        })
+        .finally(() => {
+          featuredProductsPromise = null;
+        });
+    }
+
+    featuredProductsPromise.then(setProducts);
+  }, []);
+
   const scroll = (d) => ref.current?.scrollBy({ left: d * 320, behavior: 'smooth' });
   if (!products.length) return null;
   return (
