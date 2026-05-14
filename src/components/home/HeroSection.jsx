@@ -17,13 +17,49 @@ export default function HeroSection() {
       <div className="relative w-full px-5 sm:px-10 lg:px-16 pb-8 sm:pb-10 pt-0 sm:pt-0 flex flex-col items-center sm:items-start text-center sm:text-left">
 
         {/* Título visual */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.5 }}
-          className="-mb-1 sm:-mb-2 w-full"
-        >
-          <div className="relative inline-block">
+        <div className="-mb-1 sm:-mb-2 w-full">
+          {/* Mobile: logo dorado "crack" con efecto de aparición */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.7, filter: 'blur(12px)' }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              filter: 'blur(0px)',
+            }}
+            transition={{ duration: 1.1, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            className="sm:hidden inline-block"
+          >
+            <motion.div
+              initial={{ filter: 'drop-shadow(0 0 0px rgba(200,151,46,0))' }}
+              animate={{
+                filter: [
+                  'drop-shadow(0 0 0px rgba(200,151,46,0))',
+                  'drop-shadow(0 0 36px rgba(200,151,46,0.85)) drop-shadow(0 0 70px rgba(200,151,46,0.4))',
+                  'drop-shadow(0 0 22px rgba(200,151,46,0.55)) drop-shadow(0 0 50px rgba(200,151,46,0.25)) drop-shadow(0 6px 18px rgba(0,0,0,0.55))',
+                ],
+              }}
+              transition={{ duration: 1.6, delay: 0.6, times: [0, 0.55, 1], ease: 'easeOut' }}
+            >
+              <Image
+                src="/brand/logo2.png"
+                alt="Crack Store Online"
+                width={800}
+                height={280}
+                priority
+                fetchPriority="high"
+                sizes="90vw"
+                className="h-[120px] w-auto"
+              />
+            </motion.div>
+          </motion.div>
+
+          {/* Desktop: landing logo original */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.5 }}
+            className="hidden sm:inline-block relative"
+          >
             <Image
               src="/brand/landing%20logo.png"
               alt="Crack Store Online"
@@ -31,14 +67,14 @@ export default function HeroSection() {
               height={220}
               priority
               fetchPriority="high"
-              sizes="(max-width: 640px) 90vw, 980px"
-              className="h-[40px] sm:h-[105px] w-auto"
+              sizes="980px"
+              className="h-[105px] w-auto"
               style={{
                 filter: 'drop-shadow(0 0 20px rgba(200,151,46,0.4)) drop-shadow(0 0 40px rgba(200,151,46,0.2)) drop-shadow(0 4px 12px rgba(0,0,0,0.5))',
               }}
             />
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
 
         {/* Subtítulo */}
         <motion.p
