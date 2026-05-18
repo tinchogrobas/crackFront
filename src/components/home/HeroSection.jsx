@@ -14,43 +14,31 @@ export default function HeroSection() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
       </div>
 
-      <div className="relative w-full px-5 sm:px-10 lg:px-16 pb-8 sm:pb-10 pt-0 sm:pt-0 flex flex-col items-center sm:items-start text-center sm:text-left">
+      <div className="relative w-full px-5 sm:px-10 lg:px-16 pb-8 sm:pb-10 pt-0 sm:pt-0 translate-y-14 sm:translate-y-0 flex flex-col items-center sm:items-start text-center sm:text-left">
 
         {/* Título visual */}
-        <div className="-mb-1 sm:-mb-2 w-full">
-          {/* Mobile: logo dorado "crack" con efecto de aparición */}
+        <div className="mb-7 sm:-mb-2 w-full flex justify-center sm:justify-start">
+          {/* Mobile: logo dorado "crack" (home-mobile.png) */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.7, filter: 'blur(12px)' }}
-            animate={{
-              opacity: 1,
-              scale: 1,
-              filter: 'blur(0px)',
-            }}
+            initial={{ opacity: 0, scale: 0.85, filter: 'blur(8px)' }}
+            animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
             transition={{ duration: 1.1, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
             className="sm:hidden inline-block"
+            style={{
+              filter: 'drop-shadow(0 6px 18px rgba(0,0,0,0.55))',
+            }}
           >
-            <motion.div
-              initial={{ filter: 'drop-shadow(0 0 0px rgba(200,151,46,0))' }}
-              animate={{
-                filter: [
-                  'drop-shadow(0 0 0px rgba(200,151,46,0))',
-                  'drop-shadow(0 0 36px rgba(200,151,46,0.85)) drop-shadow(0 0 70px rgba(200,151,46,0.4))',
-                  'drop-shadow(0 0 22px rgba(200,151,46,0.55)) drop-shadow(0 0 50px rgba(200,151,46,0.25)) drop-shadow(0 6px 18px rgba(0,0,0,0.55))',
-                ],
-              }}
-              transition={{ duration: 1.6, delay: 0.6, times: [0, 0.55, 1], ease: 'easeOut' }}
-            >
-              <Image
-                src="/brand/logo2.png"
-                alt="Crack Store Online"
-                width={800}
-                height={280}
-                priority
-                fetchPriority="high"
-                sizes="90vw"
-                className="h-[120px] w-auto"
-              />
-            </motion.div>
+            <Image
+              src="/brand/home-mobile.png"
+              alt="Crack Store Online"
+              width={800}
+              height={280}
+              priority
+              fetchPriority="high"
+              sizes="80vw"
+              className="w-auto mx-auto"
+              style={{ height: 'clamp(110px, 30vw, 180px)' }}
+            />
           </motion.div>
 
           {/* Desktop: landing logo original */}
@@ -81,7 +69,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.62 }}
-          className="mb-8 sm:mb-9 gradient-text-shimmer uppercase tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]"
+          className="mb-12 sm:mb-9 uppercase tracking-[0.2em]"
           style={{
             fontFamily: 'Roboto, sans-serif',
             fontWeight: 700,
@@ -89,10 +77,13 @@ export default function HeroSection() {
             lineHeight: '16px',
           }}
         >
-          <span className="hidden sm:inline" style={{ fontSize: '15px', lineHeight: '20px' }}>
+          <span
+            className="hidden sm:inline gradient-text-shimmer drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]"
+            style={{ fontSize: '15px', lineHeight: '20px' }}
+          >
             Tu tienda favorita de Pokémon TCG en Argentina
           </span>
-          <span className="sm:hidden">
+          <span className="sm:hidden text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
             Tu tienda favorita de Pokémon TCG en Argentina
           </span>
         </motion.p>
