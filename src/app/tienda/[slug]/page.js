@@ -230,14 +230,17 @@ export default async function ProductPage({ params }) {
 
       <div className="pt-28 max-w-[1200px] mx-auto px-5 sm:px-8">
         <nav aria-label="Breadcrumb">
-          <ol className="flex items-center flex-wrap gap-1 text-[12px]">
+          <ol className="flex items-center gap-1 text-[12px] overflow-hidden">
             {crumbs.map((crumb, i) => {
               const isLast = i === crumbs.length - 1;
               return (
-                <li key={i} className="flex items-center gap-1">
-                  {i > 0 && <ChevronSep size={11} className="text-[#D4CFC6]" />}
+                <li
+                  key={i}
+                  className={`flex items-center gap-1 ${isLast ? 'flex-1 min-w-0' : 'flex-shrink-0'}`}
+                >
+                  {i > 0 && <ChevronSep size={11} className="text-[#D4CFC6] flex-shrink-0" />}
                   {isLast ? (
-                    <span className="text-[#3A3530] font-medium truncate max-w-[200px] sm:max-w-none">
+                    <span className="text-[#3A3530] font-medium truncate min-w-0">
                       {crumb.name}
                     </span>
                   ) : (

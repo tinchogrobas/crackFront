@@ -48,8 +48,17 @@ export default function Footer() {
           <div>
             <p className="text-[11px] tracking-[0.2em] text-[#C8972E]/60 uppercase font-medium mb-5">Seguinos</p>
             <div className="flex flex-col gap-3">
-              {[{ label: 'Instagram', href: '#' }, { label: 'WhatsApp', href: '#' }].map((social) => (
-                <a key={social.label} href={social.href} className="group inline-flex items-center gap-1 text-[13px] text-[#6B6560] hover:text-[#C8972E] transition-colors">
+              {[
+                { label: 'Instagram', href: 'https://instagram.com/crack.tcg' },
+                { label: 'WhatsApp', href: 'https://wa.me/541150588131' },
+              ].map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex items-center gap-1 text-[13px] text-[#6B6560] hover:text-[#C8972E] transition-colors"
+                >
                   {social.label}
                   <ArrowUpRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                 </a>

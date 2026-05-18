@@ -89,7 +89,7 @@ export default function ProductDetailClient({ product }) {
   };
 
   return (
-    <div className="pt-10 md:pt-28 pb-20">
+    <div className="pt-5 md:pt-28 pb-20">
       <div className="max-w-[1200px] mx-auto px-5 sm:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
           {/* Image — with 3D tilt and contact shadow */}
@@ -296,7 +296,7 @@ export default function ProductDetailClient({ product }) {
             )}
 
             {inStock ? (
-              <div className="flex flex-col sm:flex-row gap-3 mb-8">
+              <div className="flex items-stretch gap-3 mb-8">
                 {maxQty > 1 && (
                   <QuantitySelector quantity={quantity} onIncrease={() => setQuantity(Math.min(quantity + 1, maxQty))} onDecrease={() => setQuantity(Math.max(quantity - 1, 1))} max={maxQty} />
                 )}
@@ -304,7 +304,7 @@ export default function ProductDetailClient({ product }) {
                   onClick={handleAddToCart}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}
-                  className="flex-1 bg-[#C8972E] text-white text-[12px] tracking-[0.05em] font-bold py-4 px-8 hover:bg-[#B8851F] transition-colors flex items-center justify-center gap-2 rounded-sm shadow-lg shadow-[#C8972E]/20"
+                  className="flex-1 min-w-0 bg-[#C8972E] text-white text-[12px] tracking-[0.05em] font-bold py-4 px-4 sm:px-8 hover:bg-[#B8851F] transition-colors flex items-center justify-center gap-2 rounded-sm shadow-lg shadow-[#C8972E]/20"
                 >
                   <ShoppingBag size={15} />
                   Agregar al carrito

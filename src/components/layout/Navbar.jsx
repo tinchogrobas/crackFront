@@ -51,7 +51,7 @@ export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAUL
     <>
       {/* Top announcement bar */}
       {showTopBanner && (
-        <div className="bg-gradient-to-r from-[#C8972E] to-[#B8851F] text-white text-center h-9 fixed top-0 left-0 right-0 z-[60] px-4 overflow-hidden flex items-center justify-center">
+        <div className="bg-gradient-to-r from-[#C8972E] to-[#B8851F] text-white text-center h-9 fixed top-0 left-0 right-0 z-30 px-4 overflow-hidden flex items-center justify-center">
           {/* Mobile: marquee del mensaje configurable */}
           <div className="sm:hidden">
             <div className="animate-marquee-slow whitespace-nowrap inline-flex gap-16 text-[10px] tracking-[0.08em] font-bold uppercase">
