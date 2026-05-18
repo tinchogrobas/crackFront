@@ -156,21 +156,15 @@ function MarkReadContent() {
                       </p>
                       <p className="whitespace-pre-line text-[14px] leading-relaxed text-[#2F2A25]">{contact.message}</p>
                     </div>
-
-                    <div className="mt-3 flex flex-wrap gap-2 text-[12px] text-[#6B6560]">
-                      <span className="rounded-full border border-[#E8E4DD] bg-white px-3 py-1">Creado: {contact.created_at}</span>
-                      {contact.read_at ? <span className="rounded-full border border-[#E8E4DD] bg-white px-3 py-1">Leido: {contact.read_at}</span> : null}
-                      {contact.read_by_email ? <span className="rounded-full border border-[#E8E4DD] bg-white px-3 py-1">Marcado por: {contact.read_by_email}</span> : null}
-                    </div>
                   </div>
                 ) : null}
 
                 <div className="mt-8 flex justify-center">
                   <Link
-                    href="/admin/core/contactmessage/"
+                    href="/tienda"
                     className="inline-flex items-center justify-center gap-2 rounded-md bg-[#C8972E] px-7 py-3 text-[12px] font-bold uppercase tracking-[0.08em] text-white transition-colors hover:bg-[#B8851F]"
                   >
-                    Ir al admin
+                    Ir a la tienda
                     <ArrowRight size={15} />
                   </Link>
                 </div>
