@@ -172,6 +172,13 @@ export async function sendContact(data) {
   });
 }
 
+export async function confirmContactMarkRead(token) {
+  return apiFetch('/contact/mark-read/confirm/', {
+    method: 'POST',
+    body: JSON.stringify({ token }),
+  });
+}
+
 export async function getSiteConfig() {
   return apiFetch('/site-config/');
 }
