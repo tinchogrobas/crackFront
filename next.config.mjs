@@ -18,6 +18,11 @@ const nextConfig = {
         destination: `${backendUrl}/admin/`,
         permanent: false,
       },
+      {
+        source: '/wa',
+        destination: 'https://wa.me/541150588131',
+        permanent: false,
+      },
     ];
   },
 };

@@ -8,37 +8,64 @@ import { getNewArrivals } from '@/lib/api';
 let newArrivalsCache = null;
 let newArrivalsPromise = null;
 
+export function invalidateNewArrivalsCache() {
+  newArrivalsCache = null;
+  newArrivalsPromise = null;
+}
+
 export default function NewProducts() {
   const [products, setProducts] = useState(newArrivalsCache || []);
   const [loading, setLoading] = useState(!newArrivalsCache);
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    if (newArrivalsCache) {
-      setProducts(newArrivalsCache);
-      setLoading(false);
-      return;
-    }
+    let cancelled = false;
 
-    if (!newArrivalsPromise) {
-      newArrivalsPromise = getNewArrivals()
-        .then((data) => {
-          newArrivalsCache = Array.isArray(data) ? data : [];
-          return newArrivalsCache;
-        })
-        .catch(() => {
-          newArrivalsCache = [];
-          return newArrivalsCache;
-        })
-        .finally(() => {
-          newArrivalsPromise = null;
-        });
-    }
+    const load = (force = false) => {
+      if (force) {
+        newArrivalsCache = null;
+        newArrivalsPromise = null;
+      }
 
-    newArrivalsPromise.then((data) => {
-      setProducts(data);
-      setLoading(false);
-    });
+      if (newArrivalsCache) {
+        setProducts(newArrivalsCache);
+        setLoading(false);
+        return;
+      }
+
+      if (!newArrivalsPromise) {
+        newArrivalsPromise = getNewArrivals()
+          .then((data) => {
+            newArrivalsCache = Array.isArray(data) ? data : [];
+            return newArrivalsCache;
+          })
+          .catch(() => {
+            newArrivalsCache = [];
+            return newArrivalsCache;
+          })
+          .finally(() => {
+            newArrivalsPromise = null;
+          });
+      }
+
+      newArrivalsPromise.then((data) => {
+        if (cancelled) return;
+        setProducts(data);
+        setLoading(false);
+      });
+    };
+
+    load();
+
+    const handlePageShow = (event) => {
+      if (event.persisted) load(true);
+    };
+    window.addEventListener('pageshow', handlePageShow);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener('pageshow', handlePageShow);
+    };
   }, []);
 
   const scroll = (dir) => {

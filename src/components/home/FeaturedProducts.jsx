@@ -7,32 +7,61 @@ import { getFeaturedProducts } from '@/lib/api';
 let featuredProductsCache = null;
 let featuredProductsPromise = null;
 
+export function invalidateFeaturedProductsCache() {
+  featuredProductsCache = null;
+  featuredProductsPromise = null;
+}
+
 export default function FeaturedProducts() {
   const [products, setProducts] = useState(featuredProductsCache || []);
   const ref = useRef(null);
 
   useEffect(() => {
-    if (featuredProductsCache) {
-      setProducts(featuredProductsCache);
-      return;
-    }
+    let cancelled = false;
 
-    if (!featuredProductsPromise) {
-      featuredProductsPromise = getFeaturedProducts()
-        .then((data) => {
-          featuredProductsCache = Array.isArray(data) ? data : [];
-          return featuredProductsCache;
-        })
-        .catch(() => {
-          featuredProductsCache = [];
-          return featuredProductsCache;
-        })
-        .finally(() => {
-          featuredProductsPromise = null;
-        });
-    }
+    const load = (force = false) => {
+      if (force) {
+        featuredProductsCache = null;
+        featuredProductsPromise = null;
+      }
 
-    featuredProductsPromise.then(setProducts);
+      if (featuredProductsCache) {
+        setProducts(featuredProductsCache);
+        return;
+      }
+
+      if (!featuredProductsPromise) {
+        featuredProductsPromise = getFeaturedProducts()
+          .then((data) => {
+            featuredProductsCache = Array.isArray(data) ? data : [];
+            return featuredProductsCache;
+          })
+          .catch(() => {
+            featuredProductsCache = [];
+            return featuredProductsCache;
+          })
+          .finally(() => {
+            featuredProductsPromise = null;
+          });
+      }
+
+      featuredProductsPromise.then((data) => {
+        if (cancelled) return;
+        setProducts(data);
+      });
+    };
+
+    load();
+
+    const handlePageShow = (event) => {
+      if (event.persisted) load(true);
+    };
+    window.addEventListener('pageshow', handlePageShow);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener('pageshow', handlePageShow);
+    };
   }, []);
 
   const scroll = (d) => ref.current?.scrollBy({ left: d * 320, behavior: 'smooth' });

@@ -5,6 +5,13 @@ import { useRouter } from 'next/navigation';
 import { verifyMercadoPagoPayment } from '@/lib/api';
 import { useCartStore } from '@/store/cartStore';
 import CheckoutStatusView from '@/components/checkout/CheckoutStatusView';
+import { invalidateNewArrivalsCache } from '@/components/home/NewProducts';
+import { invalidateFeaturedProductsCache } from '@/components/home/FeaturedProducts';
+
+function invalidateHomeProductCaches() {
+  invalidateNewArrivalsCache();
+  invalidateFeaturedProductsCache();
+}
 
 function ConfirmacionContent() {
   const router = useRouter();
@@ -33,6 +40,7 @@ function ConfirmacionContent() {
     if (cashOrder) {
       setVerifying(false);
       clearCart();
+      invalidateHomeProductCaches();
       setIsPending(false);
       return;
     }
@@ -66,6 +74,7 @@ function ConfirmacionContent() {
           setPaymentVerified(true);
           setIsPending(false);
           clearCart();
+          invalidateHomeProductCaches();
         } else {
           if (data.payment_status === 'rejected' || data.payment_status === 'cancelled') {
             const params = new URLSearchParams();
