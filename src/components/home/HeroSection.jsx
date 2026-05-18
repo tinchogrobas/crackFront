@@ -37,7 +37,7 @@ export default function HeroSection() {
               fetchPriority="high"
               sizes="80vw"
               className="w-auto mx-auto"
-              style={{ height: 'clamp(110px, 30vw, 180px)' }}
+              style={{ height: 'clamp(90px, 24vw, 145px)' }}
             />
           </motion.div>
 
