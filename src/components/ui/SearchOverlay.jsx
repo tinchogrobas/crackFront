@@ -18,7 +18,6 @@ const POPULAR_LINKS = [
 
 export default function SearchOverlay({ isOpen, onClose }) {
   const router = useRouter();
-  
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [popularProducts, setPopularProducts] = useState([]);
