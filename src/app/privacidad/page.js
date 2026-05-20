@@ -9,7 +9,7 @@ const sections = [
     title: '1. Responsable del tratamiento',
     body: [
       'El responsable del tratamiento de los datos personales recolectados a través de cracktcg.com es CRACK® TCG, con domicilio en Deheza 2921, PB, Saavedra, Ciudad Autónoma de Buenos Aires, República Argentina.',
-      'Para consultas sobre privacidad podés escribirnos a contacto@cracktcg.com.',
+      'Para consultas sobre privacidad podés escribirnos a cracktcg@gmail.com',
     ],
   },
   {
@@ -76,7 +76,7 @@ const sections = [
     id: 'derechos',
     title: '8. Tus derechos (ARCO)',
     body: [
-      'Como titular de los datos, tenés derecho a acceder, rectificar, actualizar y suprimir tus datos personales, así como a oponerte a su tratamiento con fines de marketing. Para ejercerlos, escribinos a contacto@cracktcg.com acreditando tu identidad.',
+      'Como titular de los datos, tenés derecho a acceder, rectificar, actualizar y suprimir tus datos personales, así como a oponerte a su tratamiento con fines de marketing. Para ejercerlos, escribinos a cracktcg@gmail.comcktcg.com acreditando tu identidad.',
       'Responderemos dentro de los plazos previstos por la Ley 25.326 (10 días para acceso; 5 días para rectificación y supresión). El ejercicio es gratuito en los intervalos que fija la normativa.',
       'La AGENCIA DE ACCESO A LA INFORMACIÓN PÚBLICA, en su carácter de Órgano de Control de la Ley 25.326, tiene la atribución de atender denuncias y reclamos sobre el incumplimiento de las normas de protección de datos personales.',
     ],
@@ -113,7 +113,7 @@ const sections = [
     id: 'contacto',
     title: '13. Contacto',
     body: [
-      'Consultas, ejercicio de derechos ARCO o reclamos: contacto@cracktcg.com. Domicilio: Deheza 2921, PB, Saavedra, Ciudad Autónoma de Buenos Aires, Argentina.',
+      'Consultas, ejercicio de derechos ARCO o reclamos: cracktcg@gmail.comcktcg.com. Domicilio: Deheza 2921, PB, Saavedra, Ciudad Autónoma de Buenos Aires, Argentina.',
     ],
   },
 ];
@@ -173,7 +173,7 @@ export default function PrivacidadPage() {
 
         <div className="mt-16 pt-8 border-t border-[#E8E4DD]">
           <p className="text-[12px] text-[#6B6560]/60">
-            Para ejercer tus derechos ARCO: <a href="mailto:contacto@cracktcg.com" className="text-[#C8972E] hover:underline">contacto@cracktcg.com</a>
+            Para ejercer tus derechos ARCO: <a href="mailto:cracktcg@gmail.comcktcg.com" className="text-[#C8972E] hover:underline">cracktcg@gmail.comcktcg.com</a>
           </p>
         </div>
       </div>

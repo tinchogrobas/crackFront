@@ -615,7 +615,7 @@ function CheckoutContent() {
                               {
                                 key: 'branch_normal',
                                 title: 'Retiro en sucursal',
-                                subtitle: '3 a 5 días hábiles',
+                                subtitle: '4 a 7 días hábiles',
                                 badge: 'Normal',
                                 icon: <Store size={16} strokeWidth={1.9} />,
                                 price: Number(paymentConfig?.shipping_prices?.branch?.[shippingZone]?.normal || 0),
@@ -623,7 +623,7 @@ function CheckoutContent() {
                               {
                                 key: 'branch_express',
                                 title: 'Retiro en sucursal',
-                                subtitle: '1 a 2 días hábiles',
+                                subtitle: '2 a 3 días hábiles',
                                 badge: 'Express',
                                 icon: <Zap size={16} strokeWidth={1.9} />,
                                 price: Number(paymentConfig?.shipping_prices?.branch?.[shippingZone]?.express || 0),
@@ -631,7 +631,7 @@ function CheckoutContent() {
                               {
                                 key: 'home',
                                 title: 'Envío a domicilio',
-                                subtitle: 'Por Andreani',
+                                subtitle: 'Por Andreani / Correo Argentino',
                                 badge: '',
                                 icon: <Truck size={16} strokeWidth={1.9} />,
                                 price: Number(paymentConfig?.shipping_prices?.home?.[shippingZone]?.normal || 0),
@@ -763,7 +763,7 @@ function CheckoutContent() {
                       </div>
                       <div className="mt-3 flex items-center gap-2 text-[11px] text-[#6B6560]">
                         <CreditCard size={14} />
-                        <span>Tarjeta, débito y saldo en cuenta</span>
+                        <span>Crédito, débito y saldo en cuenta</span>
                       </div>
                       <div className="mt-2 flex items-center gap-2 text-[11px] text-[#6B6560]">
                         <Landmark size={14} />

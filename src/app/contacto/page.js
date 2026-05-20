@@ -55,7 +55,7 @@ export default function ContactoPage() {
           <motion.div className="space-y-10" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
             <div className="space-y-6">
               {[
-                { icon: Mail, label: 'Email', value: 'contacto@crack.com.ar', href: 'mailto:contacto@crack.com.ar' },
+                { icon: Mail, label: 'Email', value: 'cracktcg@gmail.com', href: 'mailto:cracktcg@gmail.com' },
                 { icon: Phone, label: 'WhatsApp', value: '+54 11 5058-8131', href: 'https://wa.me/541150588131', external: true },
                 { icon: MapPin, label: 'Ubicación', value: 'Deheza 2921, PB, Saavedra, Buenos Aires, Argentina' },
               ].map(({ icon: Icon, label, value, href, external }) => {
@@ -88,8 +88,11 @@ export default function ContactoPage() {
             <div>
               <p className="text-[11px] tracking-[0.15em] text-[#6B6560]/60 uppercase mb-4">Seguinos!</p>
               <div className="flex gap-4">
-                {['Instagram', 'WhatsApp'].map((s) => (
-                  <a key={s} href="#" className="text-[13px] text-[#6B6560] hover:text-[#C8972E] transition-colors">{s}</a>
+                {[
+                  { label: 'Instagram', href: 'https://instagram.com/crack.tcg' },
+                  { label: 'WhatsApp', href: 'https://wa.me/541150588131' },
+                ].map(({ label, href }) => (
+                  <a key={label} href={href} className="text-[13px] text-[#6B6560] hover:text-[#C8972E] transition-colors">{label}</a>
                 ))}
               </div>
             </div>

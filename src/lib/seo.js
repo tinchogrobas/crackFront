@@ -16,7 +16,7 @@ export const COUNTRY = 'AR';
 export const CURRENCY = 'ARS';
 
 export const CONTACT = {
-  email: 'contacto@cracktcg.com',
+  email: 'cracktcg@gmail.com',
   country: 'Argentina',
 };
 

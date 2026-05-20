@@ -45,7 +45,7 @@ const sections = [
     body: [
       'Conforme al artículo 34 de la Ley 24.240 de Defensa del Consumidor, el Usuario dispone de 10 (diez) días corridos desde la recepción del producto para ejercer el derecho de arrepentimiento, siempre que el producto se devuelva en su estado original y empaque.',
       'Quedan excluidos del derecho de arrepentimiento los productos sellados o blisters originales cuya integridad haya sido violada, y los sobres/mystery packs una vez abiertos, dado que su valor depende del contenido no revelado.',
-      'Si recibiste un producto con defecto o que no coincide con la descripción, escribinos a contacto@cracktcg.com dentro de las 72 horas de recibido para coordinar la devolución o reemplazo. Los costos de envío del retorno en casos de error nuestro corren por cuenta de CRACK.',
+      'Si recibiste un producto con defecto o que no coincide con la descripción, escribinos a cracktcg@gmail.com dentro de las 72 horas de recibido para coordinar la devolución o reemplazo. Los costos de envío del retorno en casos de error nuestro corren por cuenta de CRACK.',
     ],
   },
   {
@@ -98,7 +98,7 @@ const sections = [
     id: 'contacto',
     title: '12. Contacto',
     body: [
-      'Para cualquier consulta sobre estos Términos, escribinos a contacto@cracktcg.com o desde la página de Contacto. También podés acercarte a nuestro domicilio en Deheza 2921, PB, Saavedra, Ciudad Autónoma de Buenos Aires.',
+      'Para cualquier consulta sobre estos Términos, escribinos a cracktcg@gmail.comcktcg.com o desde la página de Contacto. También podés acercarte a nuestro domicilio en Deheza 2921, PB, Saavedra, Ciudad Autónoma de Buenos Aires.',
     ],
   },
 ];
@@ -158,7 +158,7 @@ export default function TerminosPage() {
 
         <div className="mt-16 pt-8 border-t border-[#E8E4DD]">
           <p className="text-[12px] text-[#6B6560]/60">
-            Para consultas legales o de consumidor: <a href="mailto:contacto@cracktcg.com" className="text-[#C8972E] hover:underline">contacto@cracktcg.com</a>
+            Para consultas legales o de consumidor: <a href="mailto:cracktcg@gmail.comcktcg.com" className="text-[#C8972E] hover:underline">cracktcg@gmail.comcktcg.com</a>
           </p>
         </div>
       </div>
