@@ -289,22 +289,42 @@ function CheckoutContent() {
       errors.customer_phone = 'Ingresá un teléfono válido';
     }
 
-    // Campos de envío
+    // Validación de campos de envío según modalidad
     if (form.shipping_type === 'delivery') {
-      if (!form.shipping_address.trim()) {
-        errors.shipping_address = 'La dirección es obligatoria';
-      }
-      if (!form.shipping_city.trim()) {
-        errors.shipping_city = 'La ciudad es obligatoria';
-      }
-      if (!form.shipping_province) {
-        errors.shipping_province = 'Seleccioná una provincia';
-      }
-      const zip = form.shipping_zip.trim();
-      if (!zip) {
-        errors.shipping_zip = 'El código postal es obligatorio';
-      } else if (!/^\d{4}$/.test(zip)) {
-        errors.shipping_zip = 'El código postal debe tener 4 dígitos';
+      // Envío a domicilio
+      if (form.shipping_delivery_method === 'home') {
+        if (!form.shipping_address.trim()) {
+          errors.shipping_address = 'La dirección es obligatoria para envío a domicilio.';
+        }
+        if (!form.shipping_city.trim()) {
+          errors.shipping_city = 'La ciudad es obligatoria para envío a domicilio.';
+        }
+        if (!form.shipping_province) {
+          errors.shipping_province = 'Seleccioná una provincia.';
+        }
+        const zip = form.shipping_zip.trim();
+        if (!zip) {
+          errors.shipping_zip = 'El código postal es obligatorio para envío a domicilio.';
+        } else if (!/^\d{4}$/.test(zip)) {
+          errors.shipping_zip = 'El código postal debe tener 4 dígitos.';
+        }
+      } else if (form.shipping_delivery_method === 'branch_normal' || form.shipping_delivery_method === 'branch_express') {
+        // Envío a sucursal
+        if (!form.shipping_address.trim()) {
+          errors.shipping_address = 'La dirección de la sucursal es obligatoria.';
+        }
+        if (!form.shipping_city.trim()) {
+          errors.shipping_city = 'La ciudad de la sucursal es obligatoria.';
+        }
+        if (!form.shipping_province) {
+          errors.shipping_province = 'Seleccioná la provincia de la sucursal.';
+        }
+        const zip = form.shipping_zip.trim();
+        if (!zip) {
+          errors.shipping_zip = 'El código postal de la sucursal es obligatorio.';
+        } else if (!/^\d{4}$/.test(zip)) {
+          errors.shipping_zip = 'El código postal debe tener 4 dígitos.';
+        }
       }
     }
 
@@ -601,8 +621,15 @@ function CheckoutContent() {
                     transition={{ duration: 0.2 }}
                   >
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Campos de dirección dinámicos según modalidad */}
                       <div className="sm:col-span-2">
-                        <label className={labelClass}>Provincia *</label>
+                        <label className={labelClass}>
+                          {form.shipping_delivery_method === 'home'
+                            ? 'Provincia *'
+                            : form.shipping_delivery_method === 'branch_normal' || form.shipping_delivery_method === 'branch_express'
+                            ? 'Provincia de la sucursal *'
+                            : 'Provincia *'}
+                        </label>
                         <div className="relative">
                           <select
                             value={form.shipping_province}
@@ -619,18 +646,66 @@ function CheckoutContent() {
                         <FieldError field="shipping_province" />
                       </div>
                       <div className="sm:col-span-2">
-                        <label className={labelClass}>Dirección *</label>
-                        <input type="text" value={form.shipping_address} onChange={(e) => updateForm('shipping_address', e.target.value)} className={inputClass('shipping_address')} placeholder="Calle y número" />
+                        <label className={labelClass}>
+                          {form.shipping_delivery_method === 'home'
+                            ? 'Dirección *'
+                            : form.shipping_delivery_method === 'branch_normal' || form.shipping_delivery_method === 'branch_express'
+                            ? 'Dirección de la sucursal *'
+                            : 'Dirección *'}
+                        </label>
+                        <input
+                          type="text"
+                          value={form.shipping_address}
+                          onChange={(e) => updateForm('shipping_address', e.target.value)}
+                          className={inputClass('shipping_address')}
+                          placeholder={form.shipping_delivery_method === 'home'
+                            ? 'Calle y número'
+                            : form.shipping_delivery_method === 'branch_normal' || form.shipping_delivery_method === 'branch_express'
+                            ? 'Dirección de la sucursal'
+                            : 'Calle y número'}
+                        />
                         <FieldError field="shipping_address" />
                       </div>
                       <div>
-                        <label className={labelClass}>Ciudad *</label>
-                        <input type="text" value={form.shipping_city} onChange={(e) => updateForm('shipping_city', e.target.value)} className={inputClass('shipping_city')} placeholder="Ciudad" />
+                        <label className={labelClass}>
+                          {form.shipping_delivery_method === 'home'
+                            ? 'Ciudad *'
+                            : form.shipping_delivery_method === 'branch_normal' || form.shipping_delivery_method === 'branch_express'
+                            ? 'Ciudad de la sucursal *'
+                            : 'Ciudad *'}
+                        </label>
+                        <input
+                          type="text"
+                          value={form.shipping_city}
+                          onChange={(e) => updateForm('shipping_city', e.target.value)}
+                          className={inputClass('shipping_city')}
+                          placeholder={form.shipping_delivery_method === 'home'
+                            ? 'Ciudad'
+                            : form.shipping_delivery_method === 'branch_normal' || form.shipping_delivery_method === 'branch_express'
+                            ? 'Ciudad de la sucursal'
+                            : 'Ciudad'}
+                        />
                         <FieldError field="shipping_city" />
                       </div>
                       <div>
-                        <label className={labelClass}>Código postal *</label>
-                        <input type="text" value={form.shipping_zip} onChange={(e) => updateForm('shipping_zip', e.target.value)} className={inputClass('shipping_zip')} placeholder="1234" />
+                        <label className={labelClass}>
+                          {form.shipping_delivery_method === 'home'
+                            ? 'Código postal *'
+                            : form.shipping_delivery_method === 'branch_normal' || form.shipping_delivery_method === 'branch_express'
+                            ? 'Código postal de la sucursal *'
+                            : 'Código postal *'}
+                        </label>
+                        <input
+                          type="text"
+                          value={form.shipping_zip}
+                          onChange={(e) => updateForm('shipping_zip', e.target.value)}
+                          className={inputClass('shipping_zip')}
+                          placeholder={form.shipping_delivery_method === 'home'
+                            ? '1234'
+                            : form.shipping_delivery_method === 'branch_normal' || form.shipping_delivery_method === 'branch_express'
+                            ? 'Código postal de la sucursal'
+                            : '1234'}
+                        />
                         <FieldError field="shipping_zip" />
                       </div>
                     </div>
