@@ -338,17 +338,48 @@ function CheckoutContent() {
         customer_name: form.customer_name.trim(),
         customer_email: form.customer_email.trim(),
         customer_phone: form.customer_phone.trim(),
-        shipping_type: form.shipping_type === 'delivery' ? 'home' : 'pickup',
-        shipping_method: shippingMethod,
-        shipping_zone: form.shipping_type === 'delivery' ? shippingZone : '',
+        // Corrección: mapeo explícito de shipping_type y shipping_method
+        ...(() => {
+          // Retiro en tienda física
+          if (form.shipping_type === 'pickup' && form.shipping_delivery_method === undefined) {
+            return {
+              shipping_type: 'pickup',
+              shipping_method: 'pickup_store',
+              shipping_zone: '',
+              shipping_branch: PICKUP_BRANCH_ADDRESS,
+            };
+          }
+          // Retiro en sucursal/correo
+          if (form.shipping_type === 'delivery' && (form.shipping_delivery_method === 'branch_normal' || form.shipping_delivery_method === 'branch_express')) {
+            return {
+              shipping_type: 'pickup',
+              shipping_method: form.shipping_delivery_method,
+              shipping_zone: shippingZone,
+              shipping_branch: 'Sucursal de correo',
+            };
+          }
+          // Envío a domicilio
+          if (form.shipping_type === 'delivery' && form.shipping_delivery_method === 'home') {
+            return {
+              shipping_type: 'home',
+              shipping_method: 'home',
+              shipping_zone: shippingZone,
+              shipping_branch: '',
+            };
+          }
+          // Fallback seguro
+          return {
+            shipping_type: 'home',
+            shipping_method: 'home',
+            shipping_zone: shippingZone,
+            shipping_branch: '',
+          };
+        })(),
         payment_method: form.payment_method,
         shipping_address: form.shipping_address.trim(),
         shipping_city: form.shipping_city.trim(),
         shipping_province: form.shipping_province,
         shipping_zip: form.shipping_zip.trim(),
-        shipping_branch: form.shipping_type === 'pickup'
-          ? PICKUP_BRANCH_ADDRESS
-          : ((shippingMethod === 'branch_normal' || shippingMethod === 'branch_express') ? 'Sucursal de correo' : ''),
         discount_code: discountCode || '',
         items: items.map((item) => ({ product_id: item.id, quantity: item.quantity })),
       });
