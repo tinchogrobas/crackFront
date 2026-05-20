@@ -349,10 +349,10 @@ function CheckoutContent() {
               shipping_branch: PICKUP_BRANCH_ADDRESS,
             };
           }
-          // Retiro en sucursal/correo
+          // Envío a sucursal/correo (normal o express)
           if (form.shipping_type === 'delivery' && (form.shipping_delivery_method === 'branch_normal' || form.shipping_delivery_method === 'branch_express')) {
             return {
-              shipping_type: 'pickup',
+              shipping_type: 'home',
               shipping_method: form.shipping_delivery_method,
               shipping_zone: shippingZone,
               shipping_branch: 'Sucursal de correo',
@@ -645,7 +645,7 @@ function CheckoutContent() {
                             {[
                               {
                                 key: 'branch_normal',
-                                title: 'Retiro en sucursal',
+                                title: 'Envío a sucursal',
                                 subtitle: '4 a 7 días hábiles',
                                 badge: 'Normal',
                                 icon: <Store size={16} strokeWidth={1.9} />,
@@ -653,7 +653,7 @@ function CheckoutContent() {
                               },
                               {
                                 key: 'branch_express',
-                                title: 'Retiro en sucursal',
+                                title: 'Envío a sucursal (Express)',
                                 subtitle: '2 a 3 días hábiles',
                                 badge: 'Express',
                                 icon: <Zap size={16} strokeWidth={1.9} />,
