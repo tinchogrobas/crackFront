@@ -388,7 +388,6 @@ function CheckoutContent() {
             return {
               shipping_type: 'pickup',
               shipping_method: 'pickup_store',
-              shipping_zone: '',
               shipping_branch: PICKUP_BRANCH_ADDRESS,
             };
           }
