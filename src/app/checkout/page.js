@@ -232,6 +232,29 @@ function CheckoutContent() {
     }
   };
 
+  const handleShippingTypeChange = (type) => {
+    setForm((prev) => {
+      if (type === 'pickup') {
+        return {
+          ...prev,
+          shipping_type: 'pickup',
+          shipping_delivery_method: 'pickup_store',
+        };
+      }
+
+      return {
+        ...prev,
+        shipping_type: 'delivery',
+        shipping_delivery_method:
+          prev.shipping_delivery_method === 'branch_normal' ||
+          prev.shipping_delivery_method === 'branch_express' ||
+          prev.shipping_delivery_method === 'home'
+            ? prev.shipping_delivery_method
+            : 'home',
+      };
+    });
+  };
+
   const handleValidateDiscount = async () => {
     if (!code.trim()) return;
     setValidating(true);
@@ -361,7 +384,7 @@ function CheckoutContent() {
         // Corrección: mapeo explícito de shipping_type y shipping_method
         ...(() => {
           // Retiro en tienda física
-          if (form.shipping_type === 'pickup' && form.shipping_delivery_method === undefined) {
+          if (form.shipping_type === 'pickup') {
             return {
               shipping_type: 'pickup',
               shipping_method: 'pickup_store',
@@ -598,7 +621,7 @@ function CheckoutContent() {
                   <button
                     key={type}
                     type="button"
-                    onClick={() => updateForm('shipping_type', type)}
+                    onClick={() => handleShippingTypeChange(type)}
                     className={`flex items-center justify-center gap-2 rounded-xl border px-4 py-4 text-sm font-semibold transition-all ${
                       form.shipping_type === type
                         ? 'border-[#D9D3C7] bg-white text-[#111111] shadow-[0_6px_18px_rgba(17,17,17,0.06)]'
