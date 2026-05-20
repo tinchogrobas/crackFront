@@ -32,8 +32,14 @@ export default function Footer() {
           <div>
             <p className="text-[11px] tracking-[0.2em] text-[#C8972E]/60 uppercase font-medium mb-5">Tienda</p>
             <div className="flex flex-col gap-3">
-              {['Singles', 'Slabs', 'Sellados', 'Accesorios', 'Mystery Packs'].map((item) => (
-                <Link key={item} href="/tienda" className="text-[13px] text-[#6B6560] hover:text-[#1A1A1A] transition-colors">{item}</Link>
+              {[
+                { label: 'Singles', href: '/tienda?category=singles' },
+                { label: 'Slabs', href: '/tienda?category=slabs' },
+                { label: 'Sellados', href: '/tienda?category=sellados' },
+                { label: 'Accesorios', href: '/tienda?category=accesorios' },
+                { label: 'Mystery Packs', href: '/tienda?category=mystery-packs' },
+              ].map((item) => (
+                <Link key={item.label} href={item.href} className="text-[13px] text-[#6B6560] hover:text-[#1A1A1A] transition-colors">{item.label}</Link>
               ))}
             </div>
           </div>
