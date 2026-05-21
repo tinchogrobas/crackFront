@@ -255,6 +255,37 @@ function CheckoutContent() {
     });
   };
 
+  const handleDeliveryMethodChange = (method) => {
+    setForm((prev) => {
+      if (prev.shipping_delivery_method === method) return prev;
+      const prevIsBranch =
+        prev.shipping_delivery_method === 'branch_normal' ||
+        prev.shipping_delivery_method === 'branch_express';
+      const nextIsBranch = method === 'branch_normal' || method === 'branch_express';
+      // Al cambiar entre envío a domicilio y envío a sucursal, limpiar los datos
+      // de envío para que se completen con los datos reales de la nueva modalidad.
+      if (prevIsBranch !== nextIsBranch) {
+        return {
+          ...prev,
+          shipping_delivery_method: method,
+          shipping_province: '',
+          shipping_address: '',
+          shipping_city: '',
+          shipping_zip: '',
+        };
+      }
+      return { ...prev, shipping_delivery_method: method };
+    });
+    setFieldErrors((prev) => {
+      const next = { ...prev };
+      delete next.shipping_province;
+      delete next.shipping_address;
+      delete next.shipping_city;
+      delete next.shipping_zip;
+      return next;
+    });
+  };
+
   const handleValidateDiscount = async () => {
     if (!code.trim()) return;
     setValidating(true);
@@ -770,7 +801,7 @@ function CheckoutContent() {
                                 <button
                                   key={option.key}
                                   type="button"
-                                  onClick={() => updateForm('shipping_delivery_method', option.key)}
+                                  onClick={() => handleDeliveryMethodChange(option.key)}
                                   className={`w-full rounded-2xl border px-4 py-4 text-left transition-all ${selected
                                     ? 'border-[#C8972E] bg-[#FFFCF5] shadow-[0_6px_16px_rgba(200,151,46,0.10)]'
                                     : 'border-[#E8E4DD] bg-white hover:border-[#D4CFC6]'
