@@ -106,7 +106,7 @@ export default function ProductDetailClient({ product }) {
               >
                 {images[selectedImage] ? (
                   <>
-                    <div className="absolute inset-0 flex items-center justify-center pb-7 md:pb-10 lg:pb-5">
+                    <div className="absolute inset-0 flex items-center justify-center md:pb-10 lg:pb-5">
                       <div className="w-full h-full px-[6%] pt-[6%] pb-[18%] md:px-[10%] md:pt-[8%] md:pb-[23%] lg:px-[3%] lg:pt-[3%] lg:pb-[9%]">
                         <div className="relative w-full h-full">
                           <Image
