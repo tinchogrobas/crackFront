@@ -43,6 +43,8 @@ export default function ProductDetailClient({ product }) {
   const images = [product.image_url, product.image_url_2, product.image_url_3].filter(Boolean);
   const hasDiscount = product.discount_percent > 0;
   const categoryName = typeof product.category === 'object' ? product.category.name : product.category;
+  const categorySlug = typeof product.category === 'object' ? (product.category?.slug || '') : '';
+  const isSingles = `${categorySlug} ${categoryName || ''}`.toLowerCase().includes('single');
   const conditionName = product.condition ? (typeof product.condition === 'object' ? product.condition.name : product.condition) : null;
   const certEntity = product.certification_entity ? (typeof product.certification_entity === 'object' ? product.certification_entity.abbreviation || product.certification_entity.name : product.certification_entity) : null;
   const rawGrade = product.certification_grade?.grade ?? product.certification_grade;
@@ -115,6 +117,7 @@ export default function ProductDetailClient({ product }) {
                             fill
                             className="object-contain zoom-image"
                             data-zoom-src={images[selectedImage]}
+                            data-is-singles={isSingles ? 'true' : undefined}
                             sizes="(max-width: 1024px) 100vw, 700px"
                             priority
                           />

@@ -35,7 +35,8 @@ export function initProductZoom(root = document) {
     // Click → modal (en mobile también)
     const onClick = (e) => {
       e.preventDefault();
-      openZoomModal(getSrc(), img.alt || '');
+      const isSingles = img.dataset.isSingles === 'true';
+      openZoomModal(getSrc(), img.alt || '', { isSingles });
     };
     img.addEventListener('click', onClick);
     cleanups.push(() => img.removeEventListener('click', onClick));
@@ -140,7 +141,7 @@ export function initProductZoom(root = document) {
 
 // ────────────────────────── MODAL ──────────────────────────
 
-function openZoomModal(src, alt) {
+function openZoomModal(src, alt, opts = {}) {
   closeZoomModal();
 
   const overlay = document.createElement('div');
@@ -155,7 +156,7 @@ function openZoomModal(src, alt) {
   const img = document.createElement('img');
   img.src = src;
   img.alt = alt;
-  img.className = 'zoom-modal-image';
+  img.className = 'zoom-modal-image' + (opts.isSingles ? ' is-singles' : '');
   img.draggable = false;
 
   const closeBtn = document.createElement('button');

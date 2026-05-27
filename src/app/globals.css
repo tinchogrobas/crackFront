@@ -438,11 +438,9 @@ details.accordion[open] .icon-minus { display: block; }
 
 @media (max-width: 640px) {
   .zoom-modal-hint {
-    bottom: 16px;
-    font-size: 10px;
-    letter-spacing: 0.04em;
-    padding: 0 16px;
-    white-space: normal;
-    text-align: center;
+    display: none;
+  }
+  .zoom-modal-image.is-singles {
+    clip-path: inset(2.5%);
   }
 }
