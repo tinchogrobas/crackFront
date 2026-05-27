@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 
+
 import { syncCartWithBackend } from '@/lib/cartSync';
 import { getProductMaxQuantity, useCartStore } from '@/store/cartStore';
 import { formatPrice } from '@/lib/formatPrice';
