@@ -199,11 +199,24 @@ export default function ProductDetailClient({ product }) {
                 {[
                   ['Número', catalog.number],
                   ['Rareza', catalog.rarity && catalog.rarity !== 'None' ? catalog.rarity : null],
-                  ['Idioma', catalog.language === 'ja' ? '🇯🇵 Japonés' : '🇺🇸 Inglés'],
+                  ['Idioma', catalog.language ? (catalog.language === 'ja' ? 'Japonés' : 'Inglés') : null],
                 ].filter(([, value]) => value).map(([label, value]) => (
                   <div key={label}>
                     <dt className="text-[10px] tracking-[0.12em] text-[#6B6560]/60 uppercase mb-0.5">{label}</dt>
-                    <dd className="text-[13px] font-semibold text-[#3A3530] truncate" title={value}>{value}</dd>
+                    {label === 'Idioma' ? (
+                      <dd className="flex items-center gap-2 text-[13px] font-semibold text-[#3A3530]">
+                        <Image
+                          src={catalog.language === 'ja' ? '/flags/flag-jp.svg' : '/flags/flag-en.svg'}
+                          alt={value}
+                          width={20}
+                          height={15}
+                          className="w-5 h-[15px] rounded-[3px] object-cover shadow-sm ring-1 ring-black/5"
+                        />
+                        {value}
+                      </dd>
+                    ) : (
+                      <dd className="text-[13px] font-semibold text-[#3A3530] truncate" title={value}>{value}</dd>
+                    )}
                   </div>
                 ))}
               </dl>

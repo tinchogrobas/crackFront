@@ -98,15 +98,17 @@ export default function ProductCard({ product }) {
           </span>
         ) : null}
 
-        {/* Idioma — solo si la carta está en el catálogo. Bandera en vez de texto (EN/JP) */}
+        {/* Idioma — solo si la carta está en el catálogo. Chip de bandera con la proporción real (4:3), no forzada a cuadrado */}
         {catalog && (
           <span className={`absolute left-3 z-10 ${hasDiscount ? 'top-10' : 'top-3'}`}>
-            <span
-              className="flex items-center justify-center w-6 h-6 bg-white/90 backdrop-blur-sm rounded border border-[#E8E4DD] text-[13px] leading-none shadow-sm"
+            <Image
+              src={catalog.language === 'ja' ? '/flags/flag-jp.svg' : '/flags/flag-en.svg'}
+              alt={catalog.language === 'ja' ? 'Japonés' : 'Inglés'}
               title={catalog.language === 'ja' ? 'Japonés' : 'Inglés'}
-            >
-              {catalog.language === 'ja' ? '🇯🇵' : '🇺🇸'}
-            </span>
+              width={20}
+              height={15}
+              className="w-6 h-[18px] rounded-[4px] object-cover shadow-sm ring-1 ring-black/5 border border-white/80"
+            />
           </span>
         )}
 
