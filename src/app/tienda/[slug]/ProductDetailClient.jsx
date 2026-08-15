@@ -52,6 +52,9 @@ export default function ProductDetailClient({ product }) {
     ? (Number.isFinite(Number(rawGrade)) ? (Number(rawGrade) % 1 === 0 ? String(parseInt(rawGrade, 10)) : String(Number(rawGrade))) : rawGrade)
     : null;
   const hasBadges = Boolean(certEntity || conditionName);
+  // Datos de la carta del catálogo (TCGplayer): expansión, número, rareza e
+  // idioma. Llegan anidados en el producto, no hay que pedirlos aparte.
+  const catalog = product.catalog;
   const maxQty = getProductMaxQuantity(product);
   const inStock = product.in_stock !== false && maxQty > 0;
   const suggestedProducts = Array.isArray(product.suggested_products) ? product.suggested_products.slice(0, 3) : [];
@@ -187,6 +190,24 @@ export default function ProductDetailClient({ product }) {
                   <ConditionBadge conditionName={conditionName} />
                 )}
               </div>
+            )}
+
+            {/* Ficha de la carta — sale del catálogo, no se carga a mano.
+                Sellados y accesorios no tienen catalog, así que no se muestra. */}
+            {catalog && (
+              <dl className="mb-5 grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3 border-y border-[#E8E4DD] py-4">
+                {[
+                  ['Expansión', catalog.set_abbreviation || catalog.set_name],
+                  ['Número', catalog.number],
+                  ['Rareza', catalog.rarity && catalog.rarity !== 'None' ? catalog.rarity : null],
+                  ['Idioma', catalog.language === 'ja' ? 'Japonés' : 'Inglés'],
+                ].filter(([, value]) => value).map(([label, value]) => (
+                  <div key={label}>
+                    <dt className="text-[10px] tracking-[0.12em] text-[#6B6560]/60 uppercase mb-0.5">{label}</dt>
+                    <dd className="text-[13px] font-semibold text-[#3A3530] truncate" title={value}>{value}</dd>
+                  </div>
+                ))}
+              </dl>
             )}
 
             {/* Price */}
