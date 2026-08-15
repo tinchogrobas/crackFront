@@ -197,10 +197,9 @@ export default function ProductDetailClient({ product }) {
             {catalog && (
               <dl className="mb-5 grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3 border-y border-[#E8E4DD] py-4">
                 {[
-                  ['Expansión', catalog.set_abbreviation || catalog.set_name],
                   ['Número', catalog.number],
                   ['Rareza', catalog.rarity && catalog.rarity !== 'None' ? catalog.rarity : null],
-                  ['Idioma', catalog.language === 'ja' ? 'Japonés' : 'Inglés'],
+                  ['Idioma', catalog.language === 'ja' ? '🇯🇵 Japonés' : '🇺🇸 Inglés'],
                 ].filter(([, value]) => value).map(([label, value]) => (
                   <div key={label}>
                     <dt className="text-[10px] tracking-[0.12em] text-[#6B6560]/60 uppercase mb-0.5">{label}</dt>

@@ -98,17 +98,15 @@ export default function ProductCard({ product }) {
           </span>
         ) : null}
 
-        {/* Idioma y rareza — solo si la carta está en el catálogo */}
+        {/* Idioma — solo si la carta está en el catálogo. Bandera en vez de texto (EN/JP) */}
         {catalog && (
-          <span className={`absolute left-3 z-10 flex items-center gap-1.5 ${hasDiscount ? 'top-10' : 'top-3'}`}>
-            <span className="bg-white/90 backdrop-blur-sm text-[#1A1A1A]/70 text-[9px] font-bold px-2 py-0.5 rounded border border-[#E8E4DD] tracking-wide">
-              {catalog.language === 'ja' ? 'JP' : 'EN'}
+          <span className={`absolute left-3 z-10 ${hasDiscount ? 'top-10' : 'top-3'}`}>
+            <span
+              className="flex items-center justify-center w-6 h-6 bg-white/90 backdrop-blur-sm rounded border border-[#E8E4DD] text-[13px] leading-none shadow-sm"
+              title={catalog.language === 'ja' ? 'Japonés' : 'Inglés'}
+            >
+              {catalog.language === 'ja' ? '🇯🇵' : '🇺🇸'}
             </span>
-            {catalog.rarity && catalog.rarity !== 'None' && (
-              <span className="hidden sm:inline bg-white/90 backdrop-blur-sm text-[#6B6560] text-[9px] font-medium px-2 py-0.5 rounded border border-[#E8E4DD] max-w-[110px] truncate">
-                {catalog.rarity}
-              </span>
-            )}
           </span>
         )}
 
