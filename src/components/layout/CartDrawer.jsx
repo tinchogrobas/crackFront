@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus, Minus, ShoppingBag, Tag, AlertTriangle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { imgProps } from '@/lib/imageProps';
 import toast from 'react-hot-toast';
 
 
@@ -182,7 +182,8 @@ export default function CartDrawer({ isOpen, onClose }) {
                     <div key={item.id} className={`flex gap-4 rounded-xl p-3 ${issue ? 'border border-red-200 bg-red-50/70' : ''}`}>
                       <Link href={`/tienda/${item.slug}`} onClick={onClose} className="w-16 h-20 bg-[#F5F1EA] overflow-hidden flex-shrink-0 relative border border-[#E8E4DD] hover:border-[#C8972E]/40 transition-colors">
                         {item.image_url ? (
-                          <Image src={item.image_url} alt={item.name} fill className="object-contain p-1" sizes="64px" />
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img {...imgProps(item.image_url, 'line')} alt={item.name} className="absolute inset-0 w-full h-full object-contain p-1" />
                         ) : (
                           <div className="w-full h-full bg-[#F5F1EA]" />
                         )}

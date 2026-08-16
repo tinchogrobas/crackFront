@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, X, Loader2 } from 'lucide-react';
-import Image from 'next/image';
+import { imgProps } from '@/lib/imageProps';
 import Link from 'next/link';
 import { searchProducts, getFeaturedProducts } from '@/lib/api';
 import { formatPrice } from '@/lib/formatPrice';
@@ -263,12 +263,11 @@ export default function SearchOverlay({ isOpen, onClose }) {
                                 style={{ transitionDelay: delay }}
                               >
                                 {product.image_url ? (
-                                  <Image
-                                    src={product.image_url}
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img
+                                    {...imgProps(product.image_url, 'card', { sizes: '(max-width: 640px) 50vw, 25vw' })}
                                     alt={product.name}
-                                    fill
-                                    className="object-contain p-3 group-hover/card:scale-105 transition-transform duration-300"
-                                    sizes="(max-width: 640px) 50vw, 25vw"
+                                    className="absolute inset-0 w-full h-full object-contain p-3 group-hover/card:scale-105 transition-transform duration-300"
                                   />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center">
@@ -325,12 +324,11 @@ export default function SearchOverlay({ isOpen, onClose }) {
                             style={{ transitionDelay: delay }}
                           >
                             {product.image_url ? (
-                              <Image
-                                src={product.image_url}
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                {...imgProps(product.image_url, 'card')}
                                 alt={product.name}
-                                fill
-                                className="object-contain p-3 group-hover/card:scale-105 transition-transform duration-300"
-                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                className="absolute inset-0 w-full h-full object-contain p-3 group-hover/card:scale-105 transition-transform duration-300"
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">

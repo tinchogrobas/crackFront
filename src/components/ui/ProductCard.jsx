@@ -1,11 +1,11 @@
 'use client';
 import { useRef } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { ShoppingBag, Eye, ShieldCheck } from 'lucide-react';
 import ConditionBadge from '@/components/ui/ConditionBadge';
 import { getProductMaxQuantity, useCartStore } from '@/store/cartStore';
 import { formatPrice } from '@/lib/formatPrice';
+import { imgProps } from '@/lib/imageProps';
 import toast from 'react-hot-toast';
 
 export default function ProductCard({ product }) {
@@ -69,7 +69,12 @@ export default function ProductCard({ product }) {
 
         {product.image_url ? (
           <>
-            <Image src={product.image_url} alt={product.name} fill className="object-contain px-1 pt-10 pb-12 sm:p-11 sm:pb-24 product-image-zoom relative z-[1]" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              {...imgProps(product.image_url, 'card')}
+              alt={product.name}
+              className="absolute inset-0 w-full h-full object-contain px-1 pt-10 pb-12 sm:p-11 sm:pb-24 product-image-zoom z-[1]"
+            />
             {/* Contact shadow — elliptical ground shadow beneath product */}
             <div className="contact-shadow" />
           </>

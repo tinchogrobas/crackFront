@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, ChevronLeft, ChevronRight, Award, Truck, BadgeCheck, PackageCheck, ChevronRight as ChevronSep } from 'lucide-react';
@@ -10,6 +9,7 @@ import { formatPrice } from '@/lib/formatPrice';
 import QuantitySelector from '@/components/ui/QuantitySelector';
 import { getPaymentConfig } from '@/lib/api';
 import { initProductZoom } from '@/lib/productZoom';
+import { imgProps } from '@/lib/imageProps';
 import toast from 'react-hot-toast';
 
 export default function ProductDetailClient({ product }) {
@@ -114,15 +114,15 @@ export default function ProductDetailClient({ product }) {
                     <div className="absolute inset-0 flex items-center justify-center md:pb-10 lg:pb-5">
                       <div className="w-full h-full px-[6%] pt-[6%] pb-[18%] md:px-[10%] md:pt-[8%] md:pb-[23%] lg:px-[3%] lg:pt-[3%] lg:pb-[9%]">
                         <div className="relative w-full h-full">
-                          <Image
-                            src={images[selectedImage]}
+                          {/* data-zoom-src apunta a la resolución máxima a propósito:
+                              el zoom no usa la variante del srcset. */}
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            {...imgProps(images[selectedImage], 'detail', { eager: true })}
                             alt={product.name}
-                            fill
-                            className="object-contain zoom-image"
+                            className="absolute inset-0 w-full h-full object-contain zoom-image"
                             data-zoom-src={images[selectedImage]}
                             data-is-singles={isSingles ? 'true' : undefined}
-                            sizes="(max-width: 1024px) 100vw, 700px"
-                            priority
                           />
                         </div>
                       </div>
@@ -155,7 +155,8 @@ export default function ProductDetailClient({ product }) {
               <div className="flex gap-2 mt-4 lg:mt-20 justify-center">
                 {images.map((img, i) => (
                   <button key={i} onClick={() => setSelectedImage(i)} className={`w-16 h-20 overflow-hidden rounded border-2 transition-all ${selectedImage === i ? 'border-[#C8972E] shadow-md' : 'border-[#E8E4DD] hover:border-[#D4CFC6]'}`}>
-                    <div className="relative w-full h-full bg-white"><Image src={img} alt="" fill className="object-contain p-1.5" sizes="64px" /></div>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <div className="relative w-full h-full bg-white"><img {...imgProps(img, 'thumb')} alt="" className="absolute inset-0 w-full h-full object-contain p-1.5" /></div>
                   </button>
                 ))}
               </div>
@@ -370,12 +371,11 @@ export default function ProductDetailClient({ product }) {
                         className="relative w-20 h-24 flex-shrink-0 bg-[#FAFAF7] rounded-sm overflow-hidden border border-[#F0ECE5] hover:border-[#C8972E]/30 transition-colors"
                       >
                         {activeSuggested.image_url ? (
-                          <Image
-                            src={activeSuggested.image_url}
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            {...imgProps(activeSuggested.image_url, 'line')}
                             alt={activeSuggested.name}
-                            fill
-                            className="object-contain p-1.5"
-                            sizes="80px"
+                            className="absolute inset-0 w-full h-full object-contain p-1.5"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">

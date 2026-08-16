@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, X, Loader2 } from 'lucide-react';
-import Image from 'next/image';
+import { imgProps } from '@/lib/imageProps';
 import { searchProducts } from '@/lib/api';
 import { formatPrice } from '@/lib/formatPrice';
 
@@ -119,7 +119,8 @@ export default function SearchBar({ scrolled, onClose }) {
                 >
                   <div className="w-10 h-10 bg-[#F5F1EA] rounded-lg overflow-hidden flex-shrink-0 relative border border-[#E8E4DD]">
                     {product.image_url
-                      ? <Image src={product.image_url} alt={product.name} fill className="object-contain p-1" sizes="40px" />
+                      // eslint-disable-next-line @next/next/no-img-element
+                      ? <img {...imgProps(product.image_url, 'search')} alt={product.name} className="absolute inset-0 w-full h-full object-contain p-1" />
                       : <div className="w-full h-full" />
                     }
                   </div>

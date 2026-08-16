@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import { imgProps } from '@/lib/imageProps';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCartStore } from '@/store/cartStore';
 import { syncCartWithBackend } from '@/lib/cartSync';
@@ -1009,7 +1010,8 @@ function CheckoutContent() {
                     return (
                       <div key={item.id} className={`flex gap-3 ${hasIssue ? 'opacity-50' : ''}`}>
                         <div className="w-12 h-12 bg-[#F5F1EA] rounded-lg overflow-hidden flex-shrink-0 relative">
-                          {item.image_url && <Image src={item.image_url} alt={item.name} fill className="object-contain p-1" sizes="48px" />}
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          {item.image_url && <img {...imgProps(item.image_url, 'line')} alt={item.name} className="absolute inset-0 w-full h-full object-contain p-1" />}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-[#1A1A1A] truncate">{item.name}</p>

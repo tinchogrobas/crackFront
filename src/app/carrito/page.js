@@ -1,9 +1,9 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Minus, Plus, X, ShoppingBag } from 'lucide-react';
+import { imgProps } from '@/lib/imageProps';
 import { syncCartWithBackend } from '@/lib/cartSync';
 import { getProductMaxQuantity, useCartStore } from '@/store/cartStore';
 import { formatPrice } from '@/lib/formatPrice';
@@ -87,7 +87,8 @@ export default function CarritoPage() {
             >
               <div className="w-20 h-20 bg-[#F5F1EA] rounded-lg overflow-hidden flex-shrink-0 relative">
                 {item.image_url ? (
-                  <Image src={item.image_url} alt={item.name} fill className="object-cover" sizes="80px" />
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img {...imgProps(item.image_url, 'line')} alt={item.name} className="absolute inset-0 w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full bg-[#F5F1EA]" />
                 )}
