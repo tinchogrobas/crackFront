@@ -21,6 +21,23 @@ const MODAL_STEP = 0.25;
 
 let currentModal = null;
 
+// Cache de imágenes hi-res ya descargadas: evita el flash blanco de la lupa
+// esperando que cargue `data-zoom-src` (la original, sin optimizar por Next).
+const preloadedSrcs = new Set();
+
+function preload(src) {
+  if (!src || preloadedSrcs.has(src) || typeof window === 'undefined') return Promise.resolve();
+  return new Promise((resolve) => {
+    const im = new window.Image();
+    im.onload = () => {
+      preloadedSrcs.add(src);
+      resolve();
+    };
+    im.onerror = () => resolve();
+    im.src = src;
+  });
+}
+
 export function initProductZoom(root = document) {
   const isTouch =
     typeof window !== 'undefined' &&
@@ -47,6 +64,10 @@ export function initProductZoom(root = document) {
       return;
     }
     img.classList.add('zoom-image-hover');
+
+    // Precarga la hi-res apenas se pinta la carta, así llega cacheada
+    // para cuando el usuario pase el mouse.
+    preload(getSrc());
 
     let lens = null;
 
@@ -96,10 +117,22 @@ export function initProductZoom(root = document) {
       if (!src) return;
       const l = ensureLens();
       l.style.backgroundImage = `url("${src}")`;
+      l.dataset.ready = preloadedSrcs.has(src) ? 'true' : 'false';
+      if (l.dataset.ready === 'false') {
+        preload(src).then(() => {
+          if (lens === l) l.dataset.ready = 'true';
+        });
+      }
     };
 
     const onMove = (e) => {
       if (!lens) return;
+      // Todavía no terminó de bajar la hi-res: mejor no mostrar nada que un
+      // círculo blanco tapando la carta.
+      if (lens.dataset.ready !== 'true') {
+        lens.style.opacity = '0';
+        return;
+      }
       const d = getDisplayedRect();
       const x = e.clientX - d.left;
       const y = e.clientY - d.top;
