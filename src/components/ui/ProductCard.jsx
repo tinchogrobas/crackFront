@@ -1,5 +1,6 @@
 'use client';
 import { useRef } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { ShoppingBag, Eye, ShieldCheck } from 'lucide-react';
 import ConditionBadge from '@/components/ui/ConditionBadge';
