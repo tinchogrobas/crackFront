@@ -1,6 +1,5 @@
 'use client';
 import { useRef } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { ShoppingBag, Eye, ShieldCheck } from 'lucide-react';
 import ConditionBadge from '@/components/ui/ConditionBadge';
@@ -107,7 +106,7 @@ export default function ProductCard({ product }) {
         {/* Idioma — solo si la carta está en el catálogo. Chip de bandera con la proporción real (4:3), no forzada a cuadrado */}
         {catalog && (
           <span className={`absolute left-3 z-10 ${hasDiscount ? 'top-10' : 'top-3'}`}>
-            <Image
+            <img
               src={catalog.language === 'ja' ? '/flags/flag-jp.svg' : '/flags/flag-en.svg'}
               alt={catalog.language === 'ja' ? 'Japonés' : 'Inglés'}
               title={catalog.language === 'ja' ? 'Japonés' : 'Inglés'}

@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, ChevronLeft, ChevronRight, Award, Truck, BadgeCheck, PackageCheck, ChevronRight as ChevronSep } from 'lucide-react';
@@ -207,7 +206,7 @@ export default function ProductDetailClient({ product }) {
                     <dt className="text-[10px] tracking-[0.12em] text-[#6B6560]/60 uppercase mb-0.5">{label}</dt>
                     {label === 'Idioma' ? (
                       <dd className="flex items-center gap-2 text-[13px] font-semibold text-[#3A3530]">
-                        <Image
+                        <img
                           src={catalog.language === 'ja' ? '/flags/flag-jp.svg' : '/flags/flag-en.svg'}
                           alt={value}
                           width={20}
