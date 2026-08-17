@@ -174,15 +174,17 @@ input:focus, select:focus, textarea:focus {
   background-clip: text;
 }
 
-/* === Shimmer on gradient text === */
+/* === Shimmer on gradient text ===
+   El pico del barrido no puede acercarse al blanco: sobre fondos claros
+   (#FAFAF7) los caracteres se vuelven ilegibles al pasar el brillo. */
 .gradient-text-shimmer {
   background: linear-gradient(
     105deg,
     #C8972E 0%,
     #B8851F 30%,
-    #E8C96E 48%,
-    #FFF5D6 50%,
-    #E8C96E 52%,
+    #DDB253 48%,
+    #EFD08A 50%,
+    #DDB253 52%,
     #B8851F 70%,
     #C8972E 100%
   );

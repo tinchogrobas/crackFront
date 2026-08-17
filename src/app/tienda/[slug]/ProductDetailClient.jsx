@@ -94,7 +94,7 @@ export default function ProductDetailClient({ product }) {
   };
 
   return (
-    <div className="pt-5 md:pt-28 pb-20">
+    <div className="pt-5 md:pt-8 pb-20">
       <div className="max-w-[1200px] mx-auto px-5 sm:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
           {/* Image — with 3D tilt and contact shadow */}
@@ -163,27 +163,23 @@ export default function ProductDetailClient({ product }) {
             )}
           </motion.div>
 
-          {/* Info */}
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="flex flex-col">
-            <p className="text-[11px] tracking-[0.2em] text-[#6B6560]/60 uppercase mb-3">
+          {/* Info — sin animación de entrada a propósito. Con SSR el HTML llega
+              con el contenido visible y el browser lo pinta; si acá se declara
+              un `initial: opacity 0`, al hidratar framer-motion lo apaga y lo
+              vuelve a encender, y el botón de compra parpadea. */}
+          <div className="flex flex-col">
+            <p className="text-[11px] tracking-[0.16em] text-[#5F5A54] uppercase mb-2.5">
               {product.tcg?.name} — {categoryName}
             </p>
-            <div className="overflow-hidden mb-5">
-              <motion.h1
-                initial={{ y: '100%', opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                className="text-2xl sm:text-3xl font-black tracking-[-0.02em] text-[#3A3530]"
-              >
-                {product.name}
-              </motion.h1>
-            </div>
+            <h1 className="text-[26px] sm:text-[32px] lg:text-[38px] font-black leading-[1.08] sm:leading-[1.05] tracking-[-0.03em] text-[#2F2A25]">
+              {product.name}
+            </h1>
 
             {/* Badges */}
             {hasBadges && (
-              <div className="mb-4 flex flex-wrap gap-2">
+              <div className="mt-4 flex flex-wrap items-center gap-2">
                 {certEntity && (
-                  <span className="inline-flex items-center gap-1.5 text-[11px] bg-red-50 text-red-700 border border-red-200 px-3 py-1.5 rounded-sm font-medium">
+                  <span className="inline-flex items-center gap-1.5 text-[11px] bg-[#2F2A25] text-white px-3 py-1.5 rounded-full font-bold tracking-wide">
                     <Award size={12} />{certEntity} {formattedGrade}
                   </span>
                 )}
@@ -194,18 +190,22 @@ export default function ProductDetailClient({ product }) {
             )}
 
             {/* Ficha de la carta — sale del catálogo, no se carga a mano.
-                Sellados y accesorios no tienen catalog, así que no se muestra. */}
+                Sellados y accesorios no tienen catalog, así que no se muestra.
+                Las tres columnas se ajustan a su contenido y el sobrante queda al
+                final de la fila, así los datos leen como un grupo en vez de
+                repartirse en tercios con IDIOMA varado contra el borde derecho.
+                El minmax(0,...) es lo que deja funcionar el truncate del valor. */}
             {catalog && (
-              <dl className="mb-5 grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3 border-y border-[#E8E4DD] py-4">
+              <dl className="mt-6 border-t border-[#E8E4DD] pt-6 grid grid-cols-2 sm:grid-cols-[max-content_minmax(0,max-content)_1fr] gap-x-10 gap-y-4">
                 {[
                   ['Número', catalog.number],
                   ['Rareza', catalog.rarity && catalog.rarity !== 'None' ? catalog.rarity : null],
                   ['Idioma', catalog.language ? (catalog.language === 'ja' ? 'Japonés' : 'Inglés') : null],
                 ].filter(([, value]) => value).map(([label, value]) => (
                   <div key={label}>
-                    <dt className="text-[10px] tracking-[0.12em] text-[#6B6560]/60 uppercase mb-0.5">{label}</dt>
+                    <dt className="text-[11px] tracking-[0.16em] text-[#5F5A54] uppercase mb-1.5">{label}</dt>
                     {label === 'Idioma' ? (
-                      <dd className="flex items-center gap-2 text-[13px] font-semibold text-[#3A3530]">
+                      <dd className="flex items-center gap-2 text-[14px] font-semibold text-[#2F2A25]">
                         <img
                           src={catalog.language === 'ja' ? '/flags/flag-jp.svg' : '/flags/flag-en.svg'}
                           alt={value}
@@ -216,7 +216,7 @@ export default function ProductDetailClient({ product }) {
                         {value}
                       </dd>
                     ) : (
-                      <dd className="text-[13px] font-semibold text-[#3A3530] truncate" title={value}>{value}</dd>
+                      <dd className="text-[14px] font-semibold text-[#2F2A25] truncate" title={value}>{value}</dd>
                     )}
                   </div>
                 ))}
@@ -231,86 +231,84 @@ export default function ProductDetailClient({ product }) {
                 : null;
 
               return (
-                <div className="mb-5 flex flex-col gap-5">
-                  <div className="flex flex-col items-start gap-2 text-left">
-                    {hasDiscount ? (
+                <div className="mt-6 border-t border-[#E8E4DD] pt-6">
+                  {/* El precio va en sólido: es el dato más importante de la
+                      página y el shimmer lo dejaba ilegible al pasar por el
+                      punto claro del gradiente. */}
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
+                    <span className="text-[34px] sm:text-[38px] font-black leading-none tracking-[-0.03em] text-[#2F2A25]">
+                      {formatPrice(hasDiscount ? product.final_price : basePrice)}
+                    </span>
+                    {hasDiscount && (
                       <>
-                        <motion.span
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.5, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                          className="text-3xl font-black leading-none gradient-text-shimmer"
-                        >
-                          {formatPrice(product.final_price)}
-                        </motion.span>
-                        <div className="flex flex-wrap items-center justify-start gap-x-3 gap-y-2">
-                          <span className="text-lg font-medium text-[#6B6560]/45 line-through">{formatPrice(product.price_ars)}</span>
-                          <span className="inline-flex items-center rounded-full bg-[#C8972E]/10 px-2.5 py-1 text-[12px] font-bold text-[#C8972E]">-{product.discount_percent}%</span>
-                        </div>
+                        <span className="text-[16px] font-medium text-[#6B6560]/45 line-through">{formatPrice(product.price_ars)}</span>
+                        <span className="inline-flex items-center rounded-full bg-[#C8972E]/10 px-2.5 py-1 text-[11px] font-bold tracking-wide text-[#B8851F]">-{product.discount_percent}%</span>
                       </>
-                    ) : (
-                      <motion.span
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.5, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                        className="text-3xl font-black leading-none gradient-text-shimmer"
-                      >
-                        {formatPrice(basePrice)}
-                      </motion.span>
                     )}
                   </div>
 
                   {cashPrice && inStock && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: 0.6 }}
-                      className="flex items-center justify-start gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3.5 text-left"
-                    >
-                      <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
-                        </svg>
-                      </div>
-                      <div className="min-w-0 flex-1 space-y-1">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-green-700">
-                          Efectivo · Transferencia · Crypto
-                        </p>
-                        <div className="flex flex-wrap items-center justify-start gap-x-2 gap-y-1.5">
-                          <span className="text-xl font-black leading-none text-green-700">{formatPrice(cashPrice)}</span>
-                          <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-1 text-[12px] font-bold text-green-600">
-                            -{cashDiscount.percent}% OFF
-                          </span>
-                        </div>
-                      </div>
-                    </motion.div>
+                    <p className="mt-3 text-[13px] leading-relaxed text-[#6B6560]">
+                      <span className="font-black text-[#2F2A25]">{formatPrice(cashPrice)}</span>
+                      {' '}con efectivo, transferencia o crypto
+                      <span className="ml-1.5 font-bold text-green-600">-{cashDiscount.percent}%</span>
+                    </p>
                   )}
+
+                  <p className="mt-3 text-[12px]">
+                    {inStock ? (
+                      <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-green-500" /><span className="text-[#6B6560]">En stock{product.stock_quantity ? ` · ${product.stock_quantity} disponibles` : ''}</span></span>
+                    ) : (
+                      <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-500" /><span className="text-red-600">Sin stock</span></span>
+                    )}
+                  </p>
                 </div>
               );
             })()}
 
-            <p className="text-[13px] mb-6">
-              {inStock ? (
-                <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" /><span className="text-green-600">En stock{product.stock_quantity ? ` · ${product.stock_quantity} disponibles` : ''}</span></span>
-              ) : (
-                <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-500" /><span className="text-red-600">Sin stock</span></span>
-              )}
-            </p>
+            {inStock ? (
+              <div className="flex items-stretch gap-3 mt-6">
+                {maxQty > 1 && (
+                  <QuantitySelector quantity={quantity} onIncrease={() => setQuantity(Math.min(quantity + 1, maxQty))} onDecrease={() => setQuantity(Math.max(quantity - 1, 1))} max={maxQty} />
+                )}
+                <motion.button
+                  onClick={handleAddToCart}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="flex-1 min-w-0 bg-[#C8972E] text-white text-[12px] sm:text-[13px] tracking-[0.06em] sm:tracking-[0.12em] uppercase font-bold py-[18px] px-4 sm:px-8 hover:bg-[#B8851F] transition-colors flex items-center justify-center gap-2 sm:gap-2.5 rounded-md shadow-lg shadow-[#C8972E]/20"
+                >
+                  <ShoppingBag size={16} />
+                  Agregar al carrito
+                </motion.button>
+              </div>
+            ) : (
+              <div className="mt-6 p-4 bg-[#FAFAF7] border border-[#E8E4DD] rounded-lg">
+                <p className="text-[13px] text-[#6B6560] mb-3">
+                  Este producto está temporalmente agotado. Explorá productos similares en la tienda.
+                </p>
+                <Link
+                  href="/tienda"
+                  className="inline-flex items-center gap-2 text-[12px] font-bold text-[#C8972E] hover:text-[#B8851F] transition-colors"
+                >
+                  Ver tienda →
+                </Link>
+              </div>
+            )}
 
-            <div className="h-px bg-gradient-to-r from-transparent via-[#E8E4DD] to-transparent mb-6" />
-
+            {/* La descripción va debajo del CTA a propósito: arriba empujaba el
+                botón de compra abajo del fold. */}
             {product.description && (
-              <div className="mb-8">
+              <div className="mt-6 border-t border-[#E8E4DD]">
                 <button
                   type="button"
                   onClick={() => setDescOpen((v) => !v)}
-                  className="w-full flex items-center justify-between py-3 text-left"
+                  className="w-full flex items-center justify-between py-4 text-left"
                 >
-                  <span className="text-[13px] font-semibold tracking-[0.05em] uppercase text-[#3A3530]">Descripción</span>
+                  <span className="text-[12px] font-bold tracking-[0.16em] uppercase text-[#2F2A25]">Descripción</span>
                   <motion.svg
                     animate={{ rotate: descOpen ? 0 : -90 }}
                     transition={{ duration: 0.25, ease: 'easeInOut' }}
-                    width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3A3530" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                    width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2F2A25" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                   >
                     <path d="M6 9l6 6 6-6" />
                   </motion.svg>
@@ -325,46 +323,16 @@ export default function ProductDetailClient({ product }) {
                       transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
                       className="overflow-hidden"
                     >
-                      <div className="pb-4 text-[13px] text-[#6B6560] leading-relaxed" dangerouslySetInnerHTML={{ __html: product.description }} />
+                      <div className="pb-5 text-[14px] text-[#6B6560] leading-relaxed" dangerouslySetInnerHTML={{ __html: product.description }} />
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
             )}
 
-            {inStock ? (
-              <div className="flex items-stretch gap-3 mb-8">
-                {maxQty > 1 && (
-                  <QuantitySelector quantity={quantity} onIncrease={() => setQuantity(Math.min(quantity + 1, maxQty))} onDecrease={() => setQuantity(Math.max(quantity - 1, 1))} max={maxQty} />
-                )}
-                <motion.button
-                  onClick={handleAddToCart}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="flex-1 min-w-0 bg-[#C8972E] text-white text-[12px] tracking-[0.05em] font-bold py-4 px-4 sm:px-8 hover:bg-[#B8851F] transition-colors flex items-center justify-center gap-2 rounded-sm shadow-lg shadow-[#C8972E]/20"
-                >
-                  <ShoppingBag size={15} />
-                  Agregar al carrito
-                </motion.button>
-              </div>
-            ) : (
-              <div className="mb-8 p-4 bg-[#FAFAF7] border border-[#E8E4DD] rounded-sm">
-                <p className="text-[12px] text-[#6B6560] mb-3">
-                  Este producto está temporalmente agotado. Explorá productos similares en la tienda.
-                </p>
-                <Link
-                  href="/tienda"
-                  className="inline-flex items-center gap-2 text-[12px] font-bold text-[#C8972E] hover:text-[#B8851F] transition-colors"
-                >
-                  Ver tienda →
-                </Link>
-              </div>
-            )}
-
             {hasSuggested && (
-              <div className="mb-8">
-                <div className="h-px bg-gradient-to-r from-transparent via-[#E8E4DD] to-transparent mb-6" />
-                <h3 className="text-[13px] font-bold tracking-[0.08em] uppercase text-[#2F2A25] mb-4">
+              <div className="mt-6 border-t border-[#E8E4DD] pt-6">
+                <h3 className="text-[12px] font-bold tracking-[0.16em] uppercase text-[#2F2A25] mb-4">
                   Completa tu pedido
                 </h3>
 
@@ -376,11 +344,11 @@ export default function ProductDetailClient({ product }) {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.22, ease: 'easeOut' }}
-                      className="flex items-center gap-4 bg-white border border-[#E8E4DD] rounded-sm p-3"
+                      className="flex items-center gap-4 bg-white border border-[#E8E4DD] rounded-lg p-3"
                     >
                       <Link
                         href={`/tienda/${activeSuggested.slug}`}
-                        className="relative w-20 h-24 flex-shrink-0 bg-[#FAFAF7] rounded-sm overflow-hidden border border-[#F0ECE5] hover:border-[#C8972E]/30 transition-colors"
+                        className="relative w-20 h-24 flex-shrink-0 bg-[#FAFAF7] rounded-md overflow-hidden border border-[#F0ECE5] hover:border-[#C8972E]/30 transition-colors"
                       >
                         {activeSuggested.image_url ? (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -397,11 +365,11 @@ export default function ProductDetailClient({ product }) {
                       </Link>
 
                       <div className="flex-1 min-w-0">
-                        <p className="text-[10px] uppercase tracking-[0.14em] text-[#C8972E] font-semibold mb-0.5 truncate">
+                        <p className="text-[11px] uppercase tracking-[0.16em] text-[#5F5A54] font-semibold mb-1 truncate">
                           {activeSuggested.category}
                         </p>
                         <Link href={`/tienda/${activeSuggested.slug}`} className="no-underline">
-                          <p className="text-[13px] font-bold text-[#2F2A25] leading-snug line-clamp-2 hover:text-[#C8972E] transition-colors">
+                          <p className="text-[14px] font-bold text-[#2F2A25] leading-snug line-clamp-2 hover:text-[#C8972E] transition-colors">
                             {activeSuggested.name}
                           </p>
                         </Link>
@@ -422,7 +390,7 @@ export default function ProductDetailClient({ product }) {
                             toast.error('Stock máximo alcanzado');
                           }
                         }}
-                        className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-sm border border-[#E8E4DD] bg-[#FAFAF7] text-[#2F2A25] hover:border-[#C8972E] hover:text-[#C8972E] transition-colors"
+                        className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-md border border-[#E8E4DD] bg-[#FAFAF7] text-[#2F2A25] hover:border-[#C8972E] hover:text-[#C8972E] transition-colors"
                         aria-label="Agregar al carrito"
                       >
                         <ShoppingBag size={16} />
@@ -467,20 +435,19 @@ export default function ProductDetailClient({ product }) {
               </div>
             )}
 
-            <div className="mt-auto pt-8 border-t border-[#E8E4DD] grid grid-cols-3 gap-4">
+            <div className="mt-6 pt-6 border-t border-[#E8E4DD] grid grid-cols-3 gap-4">
               {[
-                { icon: Truck, label: 'Envío seguro', sub: 'A todo el país' },
-                { icon: BadgeCheck, label: 'Originales', sub: '100% auténticas' },
-                { icon: PackageCheck, label: 'Protección', sub: 'Embalaje premium' },
+                { icon: Truck, label: 'Envío a todo el país' },
+                { icon: BadgeCheck, label: '100% originales' },
+                { icon: PackageCheck, label: 'Embalaje premium' },
               ].map((b) => (
-                <div key={b.label} className="text-center flex flex-col items-center gap-1.5">
-                  <b.icon size={18} className="text-[#C8972E]" />
-                  <p className="text-[11px] font-medium text-[#6B6560]">{b.label}</p>
-                  <p className="text-[10px] text-[#6B6560]/50">{b.sub}</p>
+                <div key={b.label} className="flex flex-col items-center gap-2 text-center">
+                  <b.icon size={17} className="text-[#5F5A54]" />
+                  <p className="text-[11px] leading-snug text-[#6B6560]">{b.label}</p>
                 </div>
               ))}
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>
