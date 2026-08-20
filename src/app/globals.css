@@ -446,3 +446,145 @@ details.accordion[open] .icon-minus { display: block; }
     clip-path: inset(2.5%);
   }
 }
+
+/* === Hero sky ===
+   Reemplaza el video del home: cielo turquesa con nubes que cruzan la pantalla
+   y personajes flotando (misma mecánica que pokemon.com/us/news).
+
+   Tres capas de transform independientes para que no se pisen entre sí:
+     .sky__cloud / .sky__char  -> parallax de scroll (lo escribe el JS en --parallax-y)
+     .sky__drift / .sky__float -> animación CSS infinita
+     .sky__sway                -> balanceo extra de los personajes
+
+   Anidarlas es lo que permite combinar scroll + loop sin recalcular nada en JS. */
+.sky {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  /* isolate: encierra los z-index internos (nubes, personajes, degradado) para
+     que ninguno se pinte por encima del contenido del hero. */
+  z-index: 0;
+  isolation: isolate;
+  /* Cielo claro, en la misma familia que el crema del sitio (#FAFAF7): arranca
+     apenas saturado arriba (donde apoya la navbar oscura) y se funde con el
+     fondo de la página abajo, así el corte con el marquee no se ve. */
+  background: linear-gradient(
+    180deg,
+    #B9EBF4 0%,
+    #D3F4F9 30%,
+    #E6FAFC 58%,
+    #F4FCFA 80%,
+    #FAFAF7 100%
+  );
+}
+
+.sky__layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+.sky--ready .sky__layer {
+  opacity: 1;
+}
+
+.sky__clouds { z-index: 0; }
+.sky__characters { z-index: 1; }
+.sky__clouds--front { z-index: 2; }
+
+/* Lane: la nube nace fuera de pantalla a la izquierda y sale por la derecha.
+   --lane-x corre la fase para que cada nube pase por su columna (--cloud-left). */
+.sky__cloud {
+  position: absolute;
+  top: calc(var(--cloud-top) * 1%);
+  left: 50%;
+  width: var(--cloud-width);
+  opacity: var(--cloud-opacity, 0.75);
+  filter: blur(var(--cloud-blur, 0px));
+  transform: translate3d(0, var(--parallax-y, 0px), 0);
+  will-change: transform;
+  pointer-events: none;
+}
+.sky__drift {
+  --lane-x: calc((50 - var(--cloud-left)) * 1vw);
+  animation: sky-cloud-pass var(--cloud-duration, 90s) linear infinite;
+  animation-delay: var(--cloud-delay, 0s);
+  will-change: transform;
+}
+.sky__cloud img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+@keyframes sky-cloud-pass {
+  from { transform: translate3d(calc(-50vw - 50% - var(--lane-x)), 0, 0); }
+  to   { transform: translate3d(calc(50vw + 50% - var(--lane-x)), 0, 0); }
+}
+
+.sky__char {
+  position: absolute;
+  transform: translate3d(0, var(--parallax-y, 0px), 0);
+  will-change: transform;
+  pointer-events: none;
+}
+.sky__float {
+  animation: sky-float var(--float-duration, 10s) ease-in-out infinite;
+  animation-delay: var(--float-delay, 0s);
+  will-change: transform;
+}
+.sky__sway {
+  display: block;
+  animation: sky-sway var(--sway-duration, 9s) ease-in-out infinite;
+  animation-delay: var(--sway-delay, 0s);
+  transform-origin: 50% 15%;
+}
+.sky__char img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+@keyframes sky-float {
+  0%, 100% { transform: translate3d(0, calc(-1 * var(--float-amp, 6px)), 0); }
+  50%      { transform: translate3d(0, var(--float-amp, 6px), 0); }
+}
+
+@keyframes sky-sway {
+  0%, 100% { transform: rotate(calc(-1 * var(--sway-amp, 3deg))); }
+  50%      { transform: rotate(var(--sway-amp, 3deg)); }
+}
+
+/* Degradado inferior: le devuelve contraste al logo blanco y al botón, y empalma
+   el cielo con el crema del marquee que viene abajo. */
+.sky__vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    /* Neblina baja: separa el texto de las nubes y empalma con el crema. */
+    linear-gradient(to top, rgba(250, 250, 247, 0.92) 0%, rgba(250, 250, 247, 0.45) 20%, rgba(250, 250, 247, 0) 46%),
+    /* Un toque de cielo más profundo arriba, detrás de la navbar. */
+    linear-gradient(to bottom, rgba(43, 168, 190, 0.22) 0%, rgba(43, 168, 190, 0) 26%);
+}
+
+@media (max-width: 639px) {
+  .sky__vignette {
+    background:
+      linear-gradient(to top, rgba(250, 250, 247, 0.92) 0%, rgba(250, 250, 247, 0.6) 34%, rgba(250, 250, 247, 0.15) 62%, rgba(250, 250, 247, 0) 100%),
+      linear-gradient(to bottom, rgba(43, 168, 190, 0.22) 0%, rgba(43, 168, 190, 0) 26%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sky__drift,
+  .sky__float,
+  .sky__sway {
+    animation: none !important;
+  }
+  .sky__layer {
+    transition: none;
+  }
+}

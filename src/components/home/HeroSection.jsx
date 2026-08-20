@@ -3,18 +3,14 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
+import HeroSky from './HeroSky';
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-[65svh] sm:min-h-0 sm:aspect-[16/6] flex items-center sm:items-end overflow-hidden">
-      <div className="absolute inset-0">
-        <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover">
-          <source src="/video/hero.mp4" type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-      </div>
+    <section className="relative min-h-[65svh] sm:min-h-[min(460px,88svh)] sm:max-h-[min(720px,86svh)] sm:aspect-[16/6] flex items-center sm:items-end overflow-hidden">
+      <HeroSky />
 
-      <div className="relative w-full px-5 sm:px-10 lg:px-16 pb-8 sm:pb-10 pt-0 sm:pt-0 translate-y-14 sm:translate-y-0 flex flex-col items-center sm:items-start text-center sm:text-left">
+      <div className="relative z-10 w-full px-5 sm:px-10 lg:px-16 pb-8 sm:pb-10 pt-0 sm:pt-0 translate-y-14 sm:translate-y-0 flex flex-col items-center sm:items-start text-center sm:text-left">
 
         {/* Título visual */}
         <div className="mb-7 sm:-mb-2 w-full flex justify-center sm:justify-start">
@@ -25,7 +21,7 @@ export default function HeroSection() {
             transition={{ duration: 1.1, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
             className="sm:hidden inline-block"
             style={{
-              filter: 'drop-shadow(0 6px 18px rgba(0,0,0,0.55))',
+              filter: 'drop-shadow(0 8px 20px rgba(11,58,68,0.22))',
             }}
           >
             <Image
@@ -49,16 +45,16 @@ export default function HeroSection() {
             className="hidden sm:inline-block relative"
           >
             <Image
-              src="/brand/landing%20logo.png"
+              src="/brand/landing-logo-ink.png"
               alt="Crack Store Online"
               width={980}
               height={220}
               priority
               fetchPriority="high"
               sizes="980px"
-              className="h-[105px] w-auto"
+              className="h-[clamp(62px,7.4vw,118px)] w-auto"
               style={{
-                filter: 'drop-shadow(0 0 20px rgba(200,151,46,0.4)) drop-shadow(0 0 40px rgba(200,151,46,0.2)) drop-shadow(0 4px 12px rgba(0,0,0,0.5))',
+                filter: 'drop-shadow(0 6px 16px rgba(11,58,68,0.18))',
               }}
             />
           </motion.div>
@@ -83,7 +79,7 @@ export default function HeroSection() {
           >
             Tu tienda favorita de Pokémon TCG en Argentina
           </span>
-          <span className="sm:hidden text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+          <span className="sm:hidden text-[#1A1A1A]/70">
             Tu tienda favorita de Pokémon TCG en Argentina
           </span>
         </motion.p>
@@ -96,7 +92,7 @@ export default function HeroSection() {
         >
           <Link
             href="/tienda"
-            className="group inline-flex items-center gap-3 border-2 border-white text-white text-[11px] sm:text-[12px] tracking-[0.15em] uppercase font-bold px-8 py-3.5 sm:px-8 sm:py-3.5 hover:bg-white hover:text-[#1A1A1A] transition-all duration-300"
+            className="group inline-flex items-center gap-3 bg-[#1A1A1A] text-white text-[11px] sm:text-[12px] tracking-[0.18em] uppercase font-bold px-9 py-4 shadow-[0_12px_30px_rgba(11,58,68,0.28)] hover:bg-[#C8972E] hover:shadow-[0_14px_34px_rgba(200,151,46,0.45)] hover:-translate-y-0.5 transition-all duration-300"
           >
             Comprar ahora
             <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
