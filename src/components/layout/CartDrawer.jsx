@@ -224,23 +224,19 @@ export default function CartDrawer({ isOpen, onClose }) {
                             Quitar
                           </button>
                         )}
-                        {item.is_unique ? (
-                          <span className="text-[10px] text-[#6B6560]/50 px-1">×1</span>
-                        ) : (
-                          <div className="flex items-center gap-1.5">
-                            <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-6 h-6 flex items-center justify-center border border-[#E8E4DD] text-[#6B6560] hover:text-[#1A1A1A] hover:border-[#D4CFC6] transition-colors">
-                              <Minus size={10} />
-                            </button>
-                            <span className="text-[12px] font-medium w-5 text-center text-[#1A1A1A]">{item.quantity}</span>
-                            <button
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                              disabled={maxQty === 0 || (Number.isFinite(maxQty) && item.quantity >= maxQty)}
-                              className="w-6 h-6 flex items-center justify-center border border-[#E8E4DD] text-[#6B6560] hover:text-[#1A1A1A] hover:border-[#D4CFC6] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                            >
-                              <Plus size={10} />
-                            </button>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-1.5">
+                          <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-6 h-6 flex items-center justify-center border border-[#E8E4DD] text-[#6B6560] hover:text-[#1A1A1A] hover:border-[#D4CFC6] transition-colors">
+                            <Minus size={10} />
+                          </button>
+                          <span className="text-[12px] font-medium w-5 text-center text-[#1A1A1A]">{item.quantity}</span>
+                          <button
+                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            disabled={maxQty === 0 || (Number.isFinite(maxQty) && item.quantity >= maxQty)}
+                            className="w-6 h-6 flex items-center justify-center border border-[#E8E4DD] text-[#6B6560] hover:text-[#1A1A1A] hover:border-[#D4CFC6] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                          >
+                            <Plus size={10} />
+                          </button>
+                        </div>
                       </div>
                     </div>
                     );

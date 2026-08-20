@@ -257,7 +257,7 @@ export default function ProductDetailClient({ product }) {
 
                   <p className="mt-3 text-[12px]">
                     {inStock ? (
-                      <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-green-500" /><span className="text-[#6B6560]">En stock{product.stock_quantity ? ` · ${product.stock_quantity} disponibles` : ''}</span></span>
+                      <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-green-500" /><span className="text-[#6B6560]">En stock{product.stock_quantity ? ` · ${product.stock_quantity} ${product.stock_quantity === 1 ? 'disponible' : 'disponibles'}` : ''}</span></span>
                     ) : (
                       <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-500" /><span className="text-red-600">Sin stock</span></span>
                     )}

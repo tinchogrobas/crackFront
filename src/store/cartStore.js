@@ -2,19 +2,15 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-const UNIQUE_CATEGORIES = new Set(['slab', 'slabs', 'single', 'singles']);
-
 export function getProductCategoryName(product) {
   return typeof product?.category === 'object' ? product.category?.name : product?.category;
 }
 
-export function isUniqueProduct(product) {
-  return UNIQUE_CATEGORIES.has((getProductCategoryName(product) || '').trim().toLowerCase());
-}
-
+// El tope lo pone el stock, no la categoría. Un single repetido en el mismo
+// estado es una publicación con stock N: si el vendedor tiene tres, el cliente
+// puede llevarse tres. Lo que abre otra publicación es otra condición.
 export function getProductMaxQuantity(product) {
   if (!product || product.in_stock === false) return 0;
-  if (isUniqueProduct(product)) return 1;
   if (Number.isInteger(product.stock_quantity)) return product.stock_quantity;
   return Number.POSITIVE_INFINITY;
 }
@@ -38,7 +34,6 @@ function normalizeCartItem(product, quantity, currentItem = {}) {
     category: categoryName,
     stock_quantity: product.stock_quantity ?? null,
     in_stock: product.in_stock !== false,
-    is_unique: isUniqueProduct(product),
     quantity: nextQuantity,
   };
 }
