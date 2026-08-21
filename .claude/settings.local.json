@@ -45,7 +45,14 @@
       "Read(//c/c/Users/AR039894/Desktop/crackFront/**)",
       "Bash(python -m py_compile apps/products/views.py)",
       "Bash(git -C \"C:\\\\Users\\\\Martin\\\\Desktop\\\\crackfront\" status)",
-      "Bash(git -C \"C:\\\\Users\\\\Martin\\\\Desktop\\\\crackbackend\" status)"
+      "Bash(git -C \"C:\\\\Users\\\\Martin\\\\Desktop\\\\crackbackend\" status)",
+      "WebFetch(domain:izanamicollectibles.com.ar)",
+      "PowerShell([Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; try { $r = Invoke-WebRequest -Uri \"https://izanamicollectibles.com.ar/calculadora-ebay\" -UserAgent \"Mozilla/5.0 \\(Windows NT 10.0; Win64; x64\\) AppleWebKit/537.36 \\(KHTML, like Gecko\\) Chrome/126.0.0.0 Safari/537.36\" -UseBasicParsing -ErrorAction Stop; $r.StatusCode; $r.Content.Length; $r.Content | Out-File -Encoding utf8 \"C:\\\\Users\\\\AR039894\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-AR039894-Desktop-crackFront\\\\ab2e502b-a3d8-448d-b76b-5b7209063243\\\\scratchpad\\\\izanami.html\" } catch { \"ERROR: $\\($_.Exception.Message\\)\" })",
+      "WebSearch",
+      "WebFetch(domain:web.archive.org)",
+      "WebFetch(domain:archive.org)",
+      "WebFetch(domain:developer.ebay.com)",
+      "Bash(python *)"
     ],
     "additionalDirectories": [
       "C:\\Users\\AR039894\\Desktop\\crackbackend",

@@ -20,6 +20,7 @@ export default function TiendaClient({ pageSize, initialData, initialFilters, op
   const router = useRouter();
   const pathname = usePathname();
   const skipNextSearchNavRef = useRef(false);
+  const lastPriceNavRef = useRef({ min: initialFilters.minPrice || '', max: initialFilters.maxPrice || '' });
 
   const [products, setProducts] = useState(initialData.products || []);
   const [total, setTotal] = useState(initialData.total || 0);
@@ -56,8 +57,17 @@ export default function TiendaClient({ pageSize, initialData, initialFilters, op
     setSelectedCategories(initialFilters.selectedCategories || []);
     setSelectedConditions(initialFilters.selectedConditions || []);
     setSelectedCertEntities(initialFilters.selectedCertEntities || []);
-    setMinPrice(initialFilters.minPrice || '');
-    setMaxPrice(initialFilters.maxPrice || '');
+
+    const incomingMin = initialFilters.minPrice || '';
+    const incomingMax = initialFilters.maxPrice || '';
+    // Solo pisamos los inputs de precio si la URL cambio por afuera (back/forward, limpiar filtros).
+    // Si es el resultado de nuestra propia navegacion, dejamos lo que el usuario siga escribiendo.
+    if (incomingMin !== lastPriceNavRef.current.min || incomingMax !== lastPriceNavRef.current.max) {
+      setMinPrice(incomingMin);
+      setMaxPrice(incomingMax);
+    }
+    lastPriceNavRef.current = { min: incomingMin, max: incomingMax };
+
     setHasDiscount(Boolean(initialFilters.hasDiscount));
     setLoading(false);
   }, [initialData, initialFilters]);
@@ -171,6 +181,18 @@ export default function TiendaClient({ pageSize, initialData, initialFilters, op
   }, [search]);
 
   useEffect(() => {
+    if (minPrice === lastPriceNavRef.current.min && maxPrice === lastPriceNavRef.current.max) return;
+
+    const timeoutId = setTimeout(() => {
+      lastPriceNavRef.current = { min: minPrice, max: maxPrice };
+      setCurrentPage(1);
+      navigateWithState({ minPrice, maxPrice, currentPage: 1 });
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [minPrice, maxPrice]);
+
+  useEffect(() => {
     const navEntries = typeof window !== 'undefined' && typeof window.performance?.getEntriesByType === 'function'
       ? window.performance.getEntriesByType('navigation')
       : [];
@@ -235,6 +257,7 @@ export default function TiendaClient({ pageSize, initialData, initialFilters, op
     setSelectedCertEntities([]);
     setMinPrice('');
     setMaxPrice('');
+    lastPriceNavRef.current = { min: '', max: '' };
     setHasDiscount(false);
     setCurrentPage(1);
     navigateWithState({
@@ -321,26 +344,20 @@ export default function TiendaClient({ pageSize, initialData, initialFilters, op
         <div className="flex gap-2">
           <input
             type="number"
+            inputMode="numeric"
+            min="0"
             placeholder="Min"
             value={minPrice}
-            onChange={(e) => {
-              const value = e.target.value;
-              setMinPrice(value);
-              setCurrentPage(1);
-              navigateWithState({ minPrice: value, currentPage: 1 });
-            }}
+            onChange={(e) => setMinPrice(e.target.value)}
             className={inputCls}
           />
           <input
             type="number"
+            inputMode="numeric"
+            min="0"
             placeholder="Max"
             value={maxPrice}
-            onChange={(e) => {
-              const value = e.target.value;
-              setMaxPrice(value);
-              setCurrentPage(1);
-              navigateWithState({ maxPrice: value, currentPage: 1 });
-            }}
+            onChange={(e) => setMaxPrice(e.target.value)}
             className={inputCls}
           />
         </div>
