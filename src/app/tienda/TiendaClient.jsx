@@ -14,7 +14,7 @@ const sortOptions = [
   { value: 'name', label: 'Nombre A-Z' },
 ];
 
-const CONDITION_ORDER = ['DM', 'LP', 'MT', 'MP', 'NM'];
+const CONDITION_ORDER = ['MT', 'NM', 'MP', 'LP', 'HP', 'DM'];
 
 const Check = ({ label, checked, onChange }) => (
   <button onClick={onChange} className="flex items-center gap-2.5 group w-full text-left">
