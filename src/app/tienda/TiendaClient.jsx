@@ -16,6 +16,24 @@ const sortOptions = [
 
 const CONDITION_ORDER = ['DM', 'LP', 'MT', 'MP', 'NM'];
 
+const Check = ({ label, checked, onChange }) => (
+  <button onClick={onChange} className="flex items-center gap-2.5 group w-full text-left">
+    <div className={`w-3.5 h-3.5 border flex items-center justify-center transition-all ${checked ? 'bg-[#C8972E] border-[#C8972E]' : 'border-[#D4CFC6] group-hover:border-[#6B6560]'}`}>
+      {checked && <span className="text-white text-[8px] font-bold">✓</span>}
+    </div>
+    <span className={`text-[13px] transition-colors ${checked ? 'text-[#1A1A1A]' : 'text-[#6B6560] group-hover:text-[#1A1A1A]/70'}`}>{label}</span>
+  </button>
+);
+
+const Section = ({ title, children }) => (
+  <div className="mb-6">
+    <h3 className="text-[10px] tracking-[0.2em] text-[#6B6560]/50 uppercase mb-3 font-medium">{title}</h3>
+    <div className="space-y-2.5">{children}</div>
+  </div>
+);
+
+const inputCls = 'w-full bg-white border border-[#E8E4DD] px-3 py-2 text-[13px] text-[#1A1A1A] outline-none focus:border-[#C8972E]/40 placeholder:text-[#6B6560]/40';
+
 export default function TiendaClient({ pageSize, initialData, initialFilters, options }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -187,7 +205,7 @@ export default function TiendaClient({ pageSize, initialData, initialFilters, op
       lastPriceNavRef.current = { min: minPrice, max: maxPrice };
       setCurrentPage(1);
       navigateWithState({ minPrice, maxPrice, currentPage: 1 });
-    }, 500);
+    }, 700);
 
     return () => clearTimeout(timeoutId);
   }, [minPrice, maxPrice]);
@@ -292,24 +310,6 @@ export default function TiendaClient({ pageSize, initialData, initialFilters, op
     for (let p = start; p <= end; p += 1) pages.push(p);
     return pages;
   };
-
-  const Check = ({ label, checked, onChange }) => (
-    <button onClick={onChange} className="flex items-center gap-2.5 group w-full text-left">
-      <div className={`w-3.5 h-3.5 border flex items-center justify-center transition-all ${checked ? 'bg-[#C8972E] border-[#C8972E]' : 'border-[#D4CFC6] group-hover:border-[#6B6560]'}`}>
-        {checked && <span className="text-white text-[8px] font-bold">✓</span>}
-      </div>
-      <span className={`text-[13px] transition-colors ${checked ? 'text-[#1A1A1A]' : 'text-[#6B6560] group-hover:text-[#1A1A1A]/70'}`}>{label}</span>
-    </button>
-  );
-
-  const Section = ({ title, children }) => (
-    <div className="mb-6">
-      <h3 className="text-[10px] tracking-[0.2em] text-[#6B6560]/50 uppercase mb-3 font-medium">{title}</h3>
-      <div className="space-y-2.5">{children}</div>
-    </div>
-  );
-
-  const inputCls = 'w-full bg-white border border-[#E8E4DD] px-3 py-2 text-[13px] text-[#1A1A1A] outline-none focus:border-[#C8972E]/40 placeholder:text-[#6B6560]/40';
 
   const filters = (
     <div className="space-y-1">
