@@ -10,6 +10,7 @@ export const revalidate = 86400;
 const STATIC_ROUTES = [
   { path: '/', priority: 1.0, changefreq: 'daily' },
   { path: '/tienda', priority: 0.9, changefreq: 'hourly' },
+  { path: '/compra-ebay', priority: 0.7, changefreq: 'weekly' },
   { path: '/contacto', priority: 0.3, changefreq: 'yearly' },
   { path: '/terminos', priority: 0.2, changefreq: 'yearly' },
   { path: '/privacidad', priority: 0.2, changefreq: 'yearly' },

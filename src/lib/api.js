@@ -182,3 +182,39 @@ export async function confirmContactMarkRead(token) {
 export async function getSiteConfig() {
   return apiFetch('/site-config/');
 }
+
+// ─── Importación eBay ─────────────────────────────────────────────────────────
+
+/** Parámetros de la calculadora: tipos de ítem, límites y si la sección está activa. */
+export async function getEbayConfig() {
+  return apiFetch('/ebay/config/');
+}
+
+/**
+ * Cotiza una publicación de eBay.
+ * @param {string} url - Link de la publicación (largo, corto o el id pelado).
+ * @param {number} [quantity]
+ */
+export async function quoteEbayItem(url, quantity = 1) {
+  return apiFetch('/ebay/quote/', {
+    method: 'POST',
+    body: JSON.stringify({ url, quantity }),
+  });
+}
+
+/**
+ * Confirma el pedido de importación.
+ * El backend re-cotiza cada publicación: `quoted_price` viaja solo para que
+ * pueda detectar si el precio cambió, nunca se usa para calcular el total.
+ */
+export async function createEbayOrder(orderData) {
+  return apiFetch('/ebay/orders/', {
+    method: 'POST',
+    body: JSON.stringify(orderData),
+  });
+}
+
+/** Seguimiento público del pedido por su código. */
+export async function getEbayOrder(orderCode) {
+  return apiFetch(`/ebay/orders/${encodeURIComponent(orderCode)}/`);
+}
