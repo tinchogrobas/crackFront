@@ -25,7 +25,10 @@ export default function QuoteCard({ quote, onAdd, onReset, maxQuantity = 10 }) {
     [`Comisión (${Number(breakdown.commission_percent)}%)`, breakdown.commission],
     [`Tax (${Number(breakdown.tax_percent)}%)`, breakdown.tax],
     ['Subtotal publicación', breakdown.item_with_fees, true],
-    ['Envío eBay', breakdown.ebay_shipping],
+    // eBay no siempre puede calcular el envío para el destino. Cuando no lo
+    // informa, el número es una estimación nuestra y hay que decirlo: un 0 sin
+    // aclarar se lee como "envío gratis" y después el reclamo es nuestro.
+    ['Envío eBay', breakdown.ebay_shipping, false, !item.has_shipping_info],
     ['Envío a Argentina', breakdown.arg_shipping],
   ];
 
@@ -98,7 +101,7 @@ export default function QuoteCard({ quote, onAdd, onReset, maxQuantity = 10 }) {
       {/* Desglose */}
       <div className="px-5 sm:px-6 pb-5 sm:pb-6">
         <div className="rounded-xl border border-[#E8E4DD] divide-y divide-[#E8E4DD] overflow-hidden">
-          {rows.map(([label, value, emphasis]) => (
+          {rows.map(([label, value, emphasis, toConfirm]) => (
             <div
               key={label}
               className={`flex items-center justify-between px-4 py-2.5 ${
@@ -117,6 +120,11 @@ export default function QuoteCard({ quote, onAdd, onReset, maxQuantity = 10 }) {
                   emphasis ? 'font-bold text-[#1A1A1A]' : 'font-medium text-[#1A1A1A]'
                 }`}
               >
+                {toConfirm && (
+                  <span className="mr-2 text-[11px] font-semibold uppercase tracking-wide text-[#C8972E] tabular-nums-none">
+                    a confirmar
+                  </span>
+                )}
                 {formatUsd(value)}
               </span>
             </div>
@@ -126,8 +134,8 @@ export default function QuoteCard({ quote, onAdd, onReset, maxQuantity = 10 }) {
         {!item.has_shipping_info && (
           <p className="flex items-start gap-2 mt-3 text-[11px] text-[#6B6560] leading-relaxed">
             <Info size={13} className="shrink-0 mt-0.5 text-[#C8972E]" />
-            eBay no informó el costo de envío de esta publicación. Usamos el valor por defecto
-            de la tienda y lo ajustamos si hace falta al aprobar el pedido.
+            eBay no informó el costo de envío de esta publicación. El valor que ves es una
+            estimación nuestra: lo confirmamos al aprobar el pedido, antes de que pagues.
           </p>
         )}
 
