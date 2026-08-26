@@ -13,6 +13,26 @@ import OrderSuccess from '@/components/ebay/OrderSuccess';
 import { createEbayOrder, getEbayConfig, quoteEbayItem } from '@/lib/api';
 import { useEbayCartStore } from '@/store/ebayCartStore';
 
+/**
+ * Por qué no entró una unidad más.
+ *
+ * El tope puede venir del stock real de eBay o del límite de la tienda, y el
+ * motivo cambia lo que el cliente puede hacer: decirle "el máximo es 10" a
+ * alguien que quiso pedir la segunda unidad de una carta única lo deja
+ * pensando que es un bug nuestro.
+ */
+function cantAddMoreMessage(item, storeMax) {
+  const cap = Math.min(storeMax, item.max_quantity ?? storeMax);
+
+  if (cap >= storeMax) {
+    return `Ya llegaste al máximo de ${storeMax} unidades de esa publicación.`;
+  }
+  if (cap === 1) {
+    return 'En eBay queda una sola unidad de esta publicación, y ya la tenés en el pedido.';
+  }
+  return `En eBay quedan ${cap} unidades de esta publicación, y ya las tenés todas en el pedido.`;
+}
+
 export default function CompraEbayClient() {
   const [config, setConfig] = useState(null);
   const [configLoading, setConfigLoading] = useState(true);
@@ -83,7 +103,7 @@ export default function CompraEbayClient() {
 
     const added = addItem({ ...quote, quote: { ...quote.quote, quantity } }, maxQuantity);
     if (!added) {
-      toast.error(`Ya llegaste al máximo de ${maxQuantity} unidades de esa publicación.`);
+      toast.error(cantAddMoreMessage(quote.item, maxQuantity));
       return;
     }
 

@@ -34,9 +34,12 @@ export const useEbayCartStore = create(
         const items = get().items;
         const key = quote.item.item_id;
         const existing = items.find((item) => item.key === key);
+        // El tope real es el menor entre el de la tienda y el stock que informa
+        // eBay: de una publicación con una sola unidad no se piden dos.
+        const cap = Math.min(maxQuantity, quote.item.max_quantity ?? maxQuantity);
 
         if (existing) {
-          const nextQuantity = Math.min(existing.quantity + quote.quote.quantity, maxQuantity);
+          const nextQuantity = Math.min(existing.quantity + quote.quote.quantity, cap);
           if (nextQuantity === existing.quantity) return false;
           set({
             items: items.map((item) =>
@@ -56,11 +59,13 @@ export const useEbayCartStore = create(
               imageUrl: quote.item.image_url,
               url: quote.item.url,
               condition: quote.item.condition,
-              quantity: quote.quote.quantity,
+              quantity: Math.min(quote.quote.quantity, cap),
+              maxQuantity: cap,
               price: Number(quote.quote.price),
               commission: Number(quote.quote.commission),
               tax: Number(quote.quote.tax),
               ebayShipping: Number(quote.quote.ebay_shipping),
+              shippingToConfirm: quote.item.has_shipping_info === false,
               argShipping: Number(quote.quote.arg_shipping),
               unitTotal: Number(quote.quote.unit_total),
               quotedAt: Date.now(),
@@ -73,11 +78,12 @@ export const useEbayCartStore = create(
       removeItem: (key) => set({ items: get().items.filter((item) => item.key !== key) }),
 
       updateQuantity: (key, quantity, maxQuantity = 10) => {
-        const next = Math.max(1, Math.min(quantity, maxQuantity));
         set({
-          items: get().items.map((item) =>
-            item.key === key ? { ...item, quantity: next } : item
-          ),
+          items: get().items.map((item) => {
+            if (item.key !== key) return item;
+            const cap = Math.min(maxQuantity, item.maxQuantity ?? maxQuantity);
+            return { ...item, quantity: Math.max(1, Math.min(quantity, cap)) };
+          }),
         });
       },
 
@@ -89,6 +95,8 @@ export const useEbayCartStore = create(
       getTotals: () => {
         const items = get().items;
         const sum = (field) => items.reduce((total, item) => total + item[field] * item.quantity, 0);
+
+        const shippingToConfirm = items.some((item) => item.shippingToConfirm);
 
         const itemsTotal = sum('price');
         const commissionTotal = sum('commission');
@@ -102,6 +110,9 @@ export const useEbayCartStore = create(
           taxTotal,
           ebayShippingTotal,
           argShippingTotal,
+          // Hay al menos una publicación cuyo envío eBay todavía no se conoce:
+          // el total es parcial y el panel tiene que decirlo.
+          shippingToConfirm,
           total: itemsTotal + commissionTotal + taxTotal + ebayShippingTotal + argShippingTotal,
         };
       },

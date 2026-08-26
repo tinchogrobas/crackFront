@@ -18,7 +18,14 @@ export default function QuoteCard({ quote, onAdd, onReset, maxQuantity = 10 }) {
 
   const { item, quote: breakdown } = quote;
   const unitTotal = Number(breakdown.unit_total);
-  const lineTotal = unitTotal * quantity;
+
+  // El tope de la tienda es un máximo, no un mínimo: si eBay informa menos
+  // stock que eso, manda eBay. Sin este límite el cliente arma un pedido de 3
+  // unidades de una carta única y recién se entera al confirmarlo.
+  const maxAllowed = Math.max(1, Math.min(maxQuantity, item.max_quantity ?? maxQuantity));
+  const stockLimited = maxAllowed < maxQuantity;
+  const effectiveQuantity = Math.min(quantity, maxAllowed);
+  const lineTotal = unitTotal * effectiveQuantity;
 
   const rows = [
     ['Precio publicación', breakdown.price],
@@ -120,12 +127,13 @@ export default function QuoteCard({ quote, onAdd, onReset, maxQuantity = 10 }) {
                   emphasis ? 'font-bold text-[#1A1A1A]' : 'font-medium text-[#1A1A1A]'
                 }`}
               >
-                {toConfirm && (
-                  <span className="mr-2 text-[11px] font-semibold uppercase tracking-wide text-[#C8972E] tabular-nums-none">
-                    a confirmar
+                {toConfirm ? (
+                  <span className="text-[11px] font-semibold uppercase tracking-wide text-[#C8972E]">
+                    A confirmar
                   </span>
+                ) : (
+                  formatUsd(value)
                 )}
-                {formatUsd(value)}
               </span>
             </div>
           ))}
@@ -134,8 +142,17 @@ export default function QuoteCard({ quote, onAdd, onReset, maxQuantity = 10 }) {
         {!item.has_shipping_info && (
           <p className="flex items-start gap-2 mt-3 text-[11px] text-[#6B6560] leading-relaxed">
             <Info size={13} className="shrink-0 mt-0.5 text-[#C8972E]" />
-            eBay no informó el costo de envío de esta publicación. El valor que ves es una
-            estimación nuestra: lo confirmamos al aprobar el pedido, antes de que pagues.
+            eBay no informó el costo de envío de esta publicación. Te pasamos el valor exacto
+            al aprobar el pedido, antes de que pagues, y recién ahí entra en el total.
+          </p>
+        )}
+
+        {stockLimited && (
+          <p className="flex items-start gap-2 mt-3 text-[11px] text-[#6B6560] leading-relaxed">
+            <Info size={13} className="shrink-0 mt-0.5 text-[#C8972E]" />
+            {maxAllowed === 1
+              ? 'En eBay queda una sola unidad de esta publicación, así que solo podés pedir una.'
+              : `En eBay quedan ${maxAllowed} unidades de esta publicación.`}
           </p>
         )}
 
@@ -169,19 +186,19 @@ export default function QuoteCard({ quote, onAdd, onReset, maxQuantity = 10 }) {
             <button
               type="button"
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              disabled={quantity <= 1}
+              disabled={effectiveQuantity <= 1}
               aria-label="Quitar una unidad"
               className="w-10 h-full grid place-items-center text-[#6B6560] hover:text-[#1A1A1A] disabled:opacity-30 transition-colors"
             >
               <Minus size={14} />
             </button>
             <span className="w-9 text-center text-sm font-bold text-[#1A1A1A] tabular-nums">
-              {quantity}
+              {effectiveQuantity}
             </span>
             <button
               type="button"
-              onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
-              disabled={quantity >= maxQuantity}
+              onClick={() => setQuantity((q) => Math.min(maxAllowed, q + 1))}
+              disabled={effectiveQuantity >= maxAllowed}
               aria-label="Agregar una unidad"
               className="w-10 h-full grid place-items-center text-[#6B6560] hover:text-[#1A1A1A] disabled:opacity-30 transition-colors"
             >
@@ -191,7 +208,7 @@ export default function QuoteCard({ quote, onAdd, onReset, maxQuantity = 10 }) {
 
           <button
             type="button"
-            onClick={() => onAdd(quantity)}
+            onClick={() => onAdd(effectiveQuantity)}
             className="flex-1 min-w-[190px] h-11 px-6 rounded-xl bg-[#C8972E] text-white text-xs font-bold tracking-[0.12em] uppercase inline-flex items-center justify-center gap-2 hover:bg-[#B8851F] transition-colors"
           >
             <PlusIcon size={15} />

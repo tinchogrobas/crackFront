@@ -107,7 +107,7 @@ export default function OrderPanel({
                       <button
                         type="button"
                         onClick={() => onQuantityChange(item.key, item.quantity + 1)}
-                        disabled={item.quantity >= maxQuantity}
+                        disabled={item.quantity >= Math.min(maxQuantity, item.maxQuantity ?? maxQuantity)}
                         aria-label="Agregar una unidad"
                         className="w-7 h-full grid place-items-center text-[#6B6560] hover:text-[#1A1A1A] disabled:opacity-30 transition-colors"
                       >
@@ -130,13 +130,20 @@ export default function OrderPanel({
               ['Publicaciones', totals.itemsTotal],
               ['Comisión', totals.commissionTotal],
               ['Tax', totals.taxTotal],
-              ['Envío eBay', totals.ebayShippingTotal],
+              // Si alguna publicación no informó envío, el acumulado está
+              // incompleto: mostrar un número redondo sería mentir.
+              ['Envío eBay', totals.ebayShippingTotal, totals.shippingToConfirm],
               ['Envío a Argentina', totals.argShippingTotal],
-            ].map(([label, value]) => (
+            ].map(([label, value, partial]) => (
               <div key={label} className="flex items-center justify-between">
                 <span className="text-xs text-[#6B6560]">{label}</span>
                 <span className="text-xs font-medium text-[#1A1A1A] tabular-nums">
                   {formatUsd(value)}
+                  {partial && (
+                    <span className="ml-1.5 text-[10px] font-semibold uppercase tracking-wide text-[#C8972E]">
+                      + a confirmar
+                    </span>
+                  )}
                 </span>
               </div>
             ))}
@@ -163,6 +170,9 @@ export default function OrderPanel({
             <p className="mt-3 text-[11px] text-[#6B6560] leading-relaxed text-center">
               Los valores están en dólares. El envío dentro de Argentina se coordina
               aparte cuando el pedido llega a la tienda.
+              {totals.shippingToConfirm
+                ? ' El envío de eBay de una de las publicaciones te lo confirmamos al aprobar el pedido.'
+                : ''}
             </p>
           </div>
         </>
