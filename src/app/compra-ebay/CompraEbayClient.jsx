@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { AlertTriangle, Globe, Loader2, PackageSearch, Search } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Globe, Loader2, PackageSearch, Search } from 'lucide-react';
 
 import QuoteForm from '@/components/ebay/QuoteForm';
 import QuoteCard from '@/components/ebay/QuoteCard';
@@ -180,6 +180,14 @@ export default function CompraEbayClient() {
             {config?.intro_text ||
               'Ingresá el enlace de eBay y conocé el costo final de importación, con todos los gastos incluidos.'}
           </p>
+          <Link
+            href="/compra-ebay/orden"
+            className="inline-flex items-center gap-2 mt-4 text-xs font-semibold text-[#C8972E] hover:text-[#B8851F] transition-colors"
+          >
+            <PackageSearch size={14} />
+            ¿Ya hiciste un pedido? Seguí su estado
+            <ArrowRight size={13} />
+          </Link>
         </motion.header>
 
         {!sectionActive ? (

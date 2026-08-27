@@ -71,13 +71,22 @@ export default function SeguimientoClient({ codigo }) {
             Revisá que el código <strong className="text-[#1A1A1A]">{codigo}</strong> esté bien
             escrito. Lo tenés en el email de confirmación.
           </p>
-          <Link
-            href="/compra-ebay"
-            className="inline-flex items-center gap-2 mt-6 text-xs tracking-[0.15em] font-medium border border-[#E8E4DD] px-6 py-3 hover:bg-[#F5F1EA] transition-all"
-          >
-            <ArrowLeft size={13} />
-            VOLVER
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-3 mt-6">
+            <Link
+              href="/compra-ebay/orden"
+              className="flex-1 inline-flex items-center justify-center gap-2 text-xs tracking-[0.15em] font-medium bg-[#C8972E] text-white px-6 py-3 hover:bg-[#B8851F] transition-all"
+            >
+              <PackageSearch size={13} />
+              OTRO CÓDIGO
+            </Link>
+            <Link
+              href="/compra-ebay"
+              className="flex-1 inline-flex items-center justify-center gap-2 text-xs tracking-[0.15em] font-medium border border-[#E8E4DD] px-6 py-3 hover:bg-[#F5F1EA] transition-all"
+            >
+              <ArrowLeft size={13} />
+              VOLVER
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -99,7 +108,7 @@ export default function SeguimientoClient({ codigo }) {
           className="inline-flex items-center gap-2 text-xs font-medium text-[#6B6560] hover:text-[#1A1A1A] transition-colors mb-6"
         >
           <ArrowLeft size={13} />
-          Volver a la calculadora
+          Regresar a compras eBay
         </Link>
 
         {/* Cabecera */}
