@@ -81,33 +81,40 @@ export default function OrderPanel({
                       </p>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => onRemove(item.key)}
-                      aria-label={`Quitar ${item.title} del pedido`}
-                      className="shrink-0 w-7 h-7 grid place-items-center rounded-lg text-[#6B6560]/60 hover:text-[#1A1A1A] hover:bg-[#F5F1EA] transition-colors"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
+                    {/* Tacho arriba y cantidad debajo, como las líneas del
+                        carrito de la tienda: en una fila angosta el control
+                        entra al lado del contenido y no come un renglón entero. */}
+                    <div className="shrink-0 flex flex-col items-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => onRemove(item.key)}
+                        aria-label={`Quitar ${item.title} del pedido`}
+                        className="w-7 h-7 grid place-items-center rounded-lg text-[#6B6560]/60 hover:text-[#1A1A1A] hover:bg-[#F5F1EA] transition-colors"
+                      >
+                        <X size={14} />
+                      </button>
 
-                  <div className="flex items-center justify-between mt-2.5 pl-[60px]">
-                    <QuantityStepper
-                      size="sm"
-                      value={item.quantity}
-                      onChange={(quantity) => onQuantityChange(item.key, quantity)}
-                      max={Math.min(maxQuantity, item.maxQuantity ?? maxQuantity)}
-                      itemLabel={item.title}
-                      maxReasonText={
-                        (item.maxQuantity ?? maxQuantity) < maxQuantity
-                          ? 'No quedan más unidades de esta publicación en eBay.'
-                          : `El máximo por publicación es ${maxQuantity}.`
-                      }
-                    />
+                      <QuantityStepper
+                        variant="split"
+                        value={item.quantity}
+                        onChange={(quantity) => onQuantityChange(item.key, quantity)}
+                        max={Math.min(maxQuantity, item.maxQuantity ?? maxQuantity)}
+                        itemLabel={item.title}
+                        maxReasonText={
+                          (item.maxQuantity ?? maxQuantity) < maxQuantity
+                            ? 'No quedan más unidades de esta publicación en eBay.'
+                            : `El máximo por publicación es ${maxQuantity}.`
+                        }
+                      />
 
-                    <span className="text-[13px] font-bold text-[#1A1A1A] tabular-nums">
-                      {formatUsd(item.unitTotal * item.quantity)}
-                    </span>
+                      {/* Con una sola unidad el total de la línea repite el
+                          precio unitario: recién suma cuando son varias. */}
+                      {item.quantity > 1 && (
+                        <span className="text-[13px] font-bold text-[#1A1A1A] tabular-nums">
+                          {formatUsd(item.unitTotal * item.quantity)}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </motion.li>
               ))}

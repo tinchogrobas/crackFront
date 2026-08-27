@@ -4,19 +4,37 @@ import { Minus, Plus } from 'lucide-react';
 /**
  * Selector de cantidad de la sección de importación.
  *
- * Sigue el patrón del selector de la tienda (`ui/QuantitySelector`): los tres
- * segmentos separados por líneas, en vez de tres elementos sueltos dentro de
- * una caja. Ese borde es el que hace leer los `−` y `+` como botones y no como
- * decoración, que era el problema del control anterior.
+ * Dos variantes, cada una copiando el patrón que la tienda ya usa en ese
+ * contexto, para que la sección no invente un control propio:
  *
- * Cuando un extremo se agota el botón queda apagado y explica el motivo al
- * pasar el mouse: un `+` que no responde y no dice nada se lee como que la
- * página se colgó.
+ * - `split`: dos cuadraditos sueltos con el número en el medio, como el
+ *   carrito (`layout/CartDrawer`). Es el de las líneas de un pedido, donde el
+ *   control convive con el precio y el tacho en poco espacio.
+ * - `segmented`: los tres segmentos unidos por líneas divisorias, como el de
+ *   la ficha de producto (`ui/QuantitySelector`). Es el que va al lado de un
+ *   botón de acción, donde tiene que pesar lo mismo que él.
+ *
+ * En las dos, cuando un extremo se agota el botón queda apagado y explica el
+ * motivo al pasar el mouse: un `+` que no responde y no dice nada se lee como
+ * que la página se colgó.
  */
 
-const SIZES = {
-  sm: { box: 'h-8 rounded-lg', button: 'w-8', value: 'w-9 text-xs', icon: 12 },
-  md: { box: 'h-11 rounded-xl', button: 'w-11', value: 'w-12 text-sm', icon: 14 },
+const BASE_BUTTON =
+  'grid place-items-center text-[#6B6560] transition-colors disabled:cursor-not-allowed disabled:opacity-30';
+
+const VARIANTS = {
+  split: {
+    wrapper: 'inline-flex items-center gap-1.5',
+    button: `w-6 h-6 rounded-md border border-[#E8E4DD] hover:border-[#D4CFC6] hover:text-[#1A1A1A] disabled:hover:border-[#E8E4DD] ${BASE_BUTTON}`,
+    value: 'w-5 text-center text-[12px] font-semibold tabular-nums text-[#1A1A1A]',
+    icon: 10,
+  },
+  segmented: {
+    wrapper: 'inline-flex items-stretch h-11 overflow-hidden rounded-xl border border-[#E8E4DD] bg-white',
+    button: `w-11 hover:bg-[#F5F1EA] hover:text-[#1A1A1A] disabled:hover:bg-transparent disabled:hover:text-[#6B6560] ${BASE_BUTTON}`,
+    value: 'grid w-12 place-items-center border-x border-[#E8E4DD] text-sm font-bold tabular-nums text-[#1A1A1A]',
+    icon: 14,
+  },
 };
 
 export default function QuantityStepper({
@@ -24,33 +42,28 @@ export default function QuantityStepper({
   onChange,
   min = 1,
   max = 10,
-  size = 'md',
+  variant = 'segmented',
   itemLabel = '',
   maxReasonText = 'No hay más unidades disponibles.',
 }) {
-  const style = SIZES[size] || SIZES.md;
+  const style = VARIANTS[variant] || VARIANTS.segmented;
   const canDecrease = value > min;
   const canIncrease = value < max;
 
-  const buttonClass = `${style.button} grid place-items-center text-[#6B6560] transition-colors hover:bg-[#F5F1EA] hover:text-[#1A1A1A] disabled:cursor-not-allowed disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-[#6B6560]`;
-
   return (
-    <div className={`inline-flex items-stretch overflow-hidden border border-[#E8E4DD] bg-white ${style.box}`}>
+    <div className={style.wrapper}>
       <button
         type="button"
         onClick={() => canDecrease && onChange(value - 1)}
         disabled={!canDecrease}
         aria-label={itemLabel ? `Quitar una unidad de ${itemLabel}` : 'Quitar una unidad'}
         title={canDecrease ? undefined : 'Es la cantidad mínima.'}
-        className={buttonClass}
+        className={style.button}
       >
         <Minus size={style.icon} />
       </button>
 
-      <span
-        aria-live="polite"
-        className={`${style.value} grid place-items-center border-x border-[#E8E4DD] font-bold tabular-nums text-[#1A1A1A]`}
-      >
+      <span aria-live="polite" className={style.value}>
         {value}
       </span>
 
@@ -60,7 +73,7 @@ export default function QuantityStepper({
         disabled={!canIncrease}
         aria-label={itemLabel ? `Agregar una unidad de ${itemLabel}` : 'Agregar una unidad'}
         title={canIncrease ? undefined : maxReasonText}
-        className={buttonClass}
+        className={style.button}
       >
         <Plus size={style.icon} />
       </button>
