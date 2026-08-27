@@ -89,8 +89,8 @@ function CheckoutContent() {
     shipping_branch: '',
   });
   const [paymentConfig, setPaymentConfig] = useState({
-    cash_discount_enabled: true,
-    cash_discount_percent: 15,
+    card_surcharge_enabled: true,
+    card_surcharge_percent: 10,
     shipping_prices: {
       branch: { ba: { normal: 0, express: 0 }, province: { normal: 0, express: 0 } },
       home: { ba: { normal: 0 }, province: { normal: 0 } },
@@ -211,8 +211,8 @@ function CheckoutContent() {
       } catch {
         if (!cancelled) {
           setPaymentConfig({
-            cash_discount_enabled: true,
-            cash_discount_percent: 15,
+            card_surcharge_enabled: true,
+            card_surcharge_percent: 10,
             shipping_prices: {
               branch: { ba: { normal: 0, express: 0 }, province: { normal: 0, express: 0 } },
               home: { ba: { normal: 0 }, province: { normal: 0 } },
@@ -546,15 +546,20 @@ function CheckoutContent() {
     ? subtotal * discountPercent / 100
     : (discountFixed || 0);
   const subtotalAfterCode = Math.max(0, subtotal - codeDiscountAmount);
-  const cashDiscountAvailablePercent = paymentConfig?.cash_discount_enabled
-    ? Number(paymentConfig?.cash_discount_percent || 0)
+  // El recargo de Mercado Pago / tarjeta se calcula solo sobre los productos
+  // (después del cupón), nunca sobre el costo de envío. Mismo criterio que el
+  // backend en apps/orders/serializers.py.
+  const cardSurchargeAvailablePercent = paymentConfig?.card_surcharge_enabled
+    ? Number(paymentConfig?.card_surcharge_percent || 0)
     : 0;
-  const cashDiscountPreviewAmount = subtotalAfterCode * cashDiscountAvailablePercent / 100;
-  const cashDiscountPercent = (
-    form.payment_method === 'cash' && paymentConfig?.cash_discount_enabled
-  ) ? Number(paymentConfig?.cash_discount_percent || 0) : 0;
-  const cashDiscountAmount = subtotalAfterCode * cashDiscountPercent / 100;
-  const checkoutTotal = Math.max(0, subtotalAfterCode - cashDiscountAmount + shippingPrice);
+  const cardSurchargePreviewAmount = subtotalAfterCode * cardSurchargeAvailablePercent / 100;
+  const cardSurchargePercent = form.payment_method === 'mercadopago' ? cardSurchargeAvailablePercent : 0;
+  const cardSurchargeAmount = subtotalAfterCode * cardSurchargePercent / 100;
+  const checkoutTotal = Math.max(0, subtotalAfterCode + cardSurchargeAmount + shippingPrice);
+  // Precio de referencia del método NO elegido, para que se vea la diferencia.
+  const alternateTotal = form.payment_method === 'mercadopago'
+    ? Math.max(0, subtotalAfterCode + shippingPrice)
+    : Math.max(0, subtotalAfterCode + cardSurchargePreviewAmount + shippingPrice);
   const paymentRadioClass = (selected) => `mt-0.5 flex h-5 w-5 min-h-5 min-w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${selected ? 'border-[#C8972E] bg-[#FFF8E8]' : 'border-[#B7B0A6] bg-white'}`;
   const paymentRadioDotClass = (selected) => `h-2.5 w-2.5 rounded-full transition-colors ${selected ? 'bg-[#C8972E]' : 'bg-transparent'}`;
 
@@ -929,6 +934,13 @@ function CheckoutContent() {
                         <Landmark size={14} />
                         <span>Pago online inmediato</span>
                       </div>
+                      {cardSurchargeAvailablePercent > 0 && (
+                        <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-[#E8D6A8] bg-[#FFF8E8] px-3 py-1.5 text-[11px] font-semibold text-[#B8851F]">
+                          <BadgePercent size={13} />
+                          <span>+{cardSurchargeAvailablePercent}% de recargo</span>
+                          <span className="font-medium">{formatPrice(cardSurchargePreviewAmount)}</span>
+                        </div>
+                      )}
                     </div>
                     <div className="ml-auto flex items-start justify-end gap-1.5">
                       <div className="flex items-center justify-end gap-1.5 sm:hidden">
@@ -978,11 +990,11 @@ function CheckoutContent() {
                         <Banknote size={14} />
                         <span>Coordinación manual por WhatsApp o tienda</span>
                       </div>
-                      {cashDiscountAvailablePercent > 0 && (
+                      {cardSurchargeAvailablePercent > 0 && (
                         <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-[11px] font-semibold text-green-700">
                           <BadgePercent size={13} />
-                          <span>{cashDiscountAvailablePercent}% OFF</span>
-                          <span className="text-green-600">Ahorrás {formatPrice(cashDiscountPreviewAmount)}</span>
+                          <span>SIN RECARGO</span>
+                          <span className="text-green-600">Ahorrás {formatPrice(cardSurchargePreviewAmount)}</span>
                         </div>
                       )}
                     </div>
@@ -1086,19 +1098,31 @@ function CheckoutContent() {
                     <span className="text-green-600">-{formatPrice(discountFixed)}</span>
                   </div>
                 )}
-                {cashDiscountPercent > 0 && (
+                {cardSurchargePercent > 0 && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-green-600">Descuento efectivo ({cashDiscountPercent}%)</span>
-                    <span className="text-green-600">-{formatPrice(cashDiscountAmount)}</span>
+                    <span className="text-[#B8851F]">Recargo Mercado Pago / Tarjeta ({cardSurchargePercent}%)</span>
+                    <span className="text-[#B8851F]">+{formatPrice(cardSurchargeAmount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
                   <span className="text-[#6B6560]">Costo de envío</span>
                   <span className="text-[#1A1A1A]">{formatPrice(shippingPrice)}</span>
                 </div>
-                <div className="border-t border-[#E8E4DD] pt-3 flex justify-between text-lg font-bold">
-                  <span className="text-[#1A1A1A]">Total</span>
-                  <span className="text-[#1A1A1A]">{formatPrice(checkoutTotal)}</span>
+                <div className="border-t border-[#E8E4DD] pt-3">
+                  <div className="flex justify-between text-lg font-bold">
+                    <span className="text-[#1A1A1A]">Total</span>
+                    <span className="text-[#1A1A1A]">{formatPrice(checkoutTotal)}</span>
+                  </div>
+                  {cardSurchargeAvailablePercent > 0 && (
+                    <div className="mt-1.5 flex justify-between text-[12px] text-[#6B6560]">
+                      <span>
+                        {form.payment_method === 'mercadopago'
+                          ? 'En efectivo, transferencia o crypto'
+                          : 'Con Mercado Pago / Tarjeta de Crédito'}
+                      </span>
+                      <span className="font-semibold">{formatPrice(alternateTotal)}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 

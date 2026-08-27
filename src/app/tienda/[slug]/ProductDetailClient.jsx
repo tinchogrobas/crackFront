@@ -17,15 +17,15 @@ export default function ProductDetailClient({ product }) {
   const [quantity, setQuantity] = useState(1);
   const [descOpen, setDescOpen] = useState(false);
   const [suggestedIndex, setSuggestedIndex] = useState(0);
-  const [cashDiscount, setCashDiscount] = useState({ enabled: false, percent: 0 });
+  const [cardSurcharge, setCardSurcharge] = useState({ enabled: false, percent: 0 });
   const addToCart = useCartStore((s) => s.addToCart);
   const openCart = useCartStore((s) => s.openCart);
 
   useEffect(() => {
     getPaymentConfig()
       .then((data) => {
-        if (data?.cash_discount_enabled) {
-          setCashDiscount({ enabled: true, percent: Number(data.cash_discount_percent || 0) });
+        if (data?.card_surcharge_enabled) {
+          setCardSurcharge({ enabled: true, percent: Number(data.card_surcharge_percent || 0) });
         }
       })
       .catch(() => {});
@@ -225,9 +225,11 @@ export default function ProductDetailClient({ product }) {
 
             {/* Price */}
             {(() => {
-              const basePrice = parseFloat(product.final_price || product.price_ars || 0);
-              const cashPrice = cashDiscount.enabled && cashDiscount.percent > 0
-                ? basePrice * (1 - cashDiscount.percent / 100)
+              // El precio publicado es el precio en efectivo. Con Mercado Pago
+              // o tarjeta de crédito se suma el recargo configurado en el admin.
+              const cashPrice = parseFloat(product.final_price || product.price_ars || 0);
+              const cardPrice = cardSurcharge.enabled && cardSurcharge.percent > 0
+                ? cashPrice * (1 + cardSurcharge.percent / 100)
                 : null;
 
               return (
@@ -237,7 +239,7 @@ export default function ProductDetailClient({ product }) {
                       punto claro del gradiente. */}
                   <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
                     <span className="text-[34px] sm:text-[38px] font-black leading-none tracking-[-0.03em] text-[#2F2A25]">
-                      {formatPrice(hasDiscount ? product.final_price : basePrice)}
+                      {formatPrice(cashPrice)}
                     </span>
                     {hasDiscount && (
                       <>
@@ -245,13 +247,14 @@ export default function ProductDetailClient({ product }) {
                         <span className="inline-flex items-center rounded-full bg-[#C8972E]/10 px-2.5 py-1 text-[11px] font-bold tracking-wide text-[#B8851F]">-{product.discount_percent}%</span>
                       </>
                     )}
+                    <span className="text-[13px] font-medium text-[#6B6560]">en efectivo, transferencia o crypto</span>
                   </div>
 
-                  {cashPrice && inStock && (
+                  {cardPrice && inStock && (
                     <p className="mt-3 text-[13px] leading-relaxed text-[#6B6560]">
-                      <span className="font-black text-[#2F2A25]">{formatPrice(cashPrice)}</span>
-                      {' '}con efectivo, transferencia o crypto
-                      <span className="ml-1.5 font-bold text-green-600">-{cashDiscount.percent}%</span>
+                      <span className="font-black text-[#2F2A25]">{formatPrice(cardPrice)}</span>
+                      {' '}con Mercado Pago / Tarjeta de Crédito
+                      <span className="ml-1.5 font-bold text-[#B8851F]">+{cardSurcharge.percent}%</span>
                     </p>
                   )}
 
