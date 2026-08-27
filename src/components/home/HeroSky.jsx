@@ -107,12 +107,38 @@ export default function HeroSky() {
     <div ref={rootRef} className={`sky ${ready ? 'sky--ready' : ''}`} aria-hidden="true">
       <div className="sky__layer sky__clouds">{CLOUDS.map(renderCloud)}</div>
 
-      {/* Personajes: sólo de tablet para arriba. En mobile el hero es angosto y
-          alto, cualquier figura le compite al texto — ahí queda el cielo solo.
+      {/* Personajes. En mobile el hero es angosto y alto y cualquier figura le
+          compite al texto, así que ahí queda sólo Jirachi en la esquina; el
+          resto entra de sm: para arriba.
           `loading="lazy"` no es cosmético: mientras el bloque está en
-          `display:none` el browser no descarga los SVG, así el celular no paga
-          por lo que no ve. */}
+          `display:none` el browser no descarga la imagen, así cada breakpoint
+          paga sólo por lo que ve. */}
       <div className="sky__layer sky__characters">
+        {/* Jirachi — la única figura que se ve en mobile. Va arriba a la
+            derecha, flotando entre las nubes: las de fondo quedan detrás y
+            cloud-4 (la de primer plano, que nace justo en esa esquina) le pasa
+            por delante. Va apagado a propósito (opacidad baja + un pelo de
+            blur): es ambiente, no tiene que competirle al logo. De sm: para
+            arriba se apaga del todo porque ahí manda Dragonite. */}
+        <div
+          className="sky__char sm:hidden right-[4%] top-[24%] w-[clamp(84px,25vw,140px)] opacity-[0.68] blur-[0.3px]"
+          data-speed="0.3"
+          style={{
+            '--float-duration': '8.5s',
+            '--float-delay': '-1.5s',
+            '--float-amp': '10px',
+            '--sway-duration': '7s',
+            '--sway-delay': '-2.5s',
+            '--sway-amp': '4deg',
+          }}
+        >
+          <div className="sky__float">
+            <span className="sky__sway">
+              <img src="/home_page/jirachi.webp" alt="" width={800} height={582} loading="lazy" decoding="async" />
+            </span>
+          </div>
+        </div>
+
         {/* Dragonite — el ancla visual: a la derecha, bien despegado de la navbar
             y del bloque de texto. */}
         <div

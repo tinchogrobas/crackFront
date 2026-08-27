@@ -5,15 +5,45 @@
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
+/**
+ * Mensaje para el cliente cuando el backend no mandó uno propio.
+ *
+ * Lo que sale de acá se lee tal cual en pantalla, así que nunca lleva jerga:
+ * ni códigos, ni el statusText de HTTP, ni el "Failed to fetch" del navegador.
+ * El detalle técnico ya queda en `status` y `data` para quien lo necesite.
+ */
+function fallbackMessage(status) {
+  if (status === 400) return 'Revisá los datos e intentá de nuevo.';
+  if (status === 401 || status === 403) return 'No tenés permiso para hacer esto.';
+  if (status === 404) return 'No encontramos lo que buscabas.';
+  if (status === 409) return 'Algo cambió mientras completabas la operación. Actualizá la página y volvé a intentar.';
+  if (status === 429) return 'Estás haciendo muchas consultas seguidas. Esperá un momento y volvé a intentar.';
+  if (status === 503) return 'El servicio no está disponible en este momento. Volvé a intentar en unos minutos.';
+  if (status >= 500) return 'Tuvimos un problema de nuestro lado. Volvé a intentar en unos minutos.';
+  return 'No pudimos completar la operación. Volvé a intentar en unos minutos.';
+}
+
 async function apiFetch(path, options = {}) {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-    ...options,
-  });
+  let res;
+  try {
+    res = await fetch(`${BASE_URL}${path}`, {
+      headers: { 'Content-Type': 'application/json', ...options.headers },
+      ...options,
+    });
+  } catch {
+    // El servidor no contestó: sin internet, caído o CORS.
+    throw Object.assign(
+      new Error('No pudimos conectarnos. Revisá tu conexión a internet y volvé a intentar.'),
+      { status: 0, data: {} }
+    );
+  }
 
   if (!res.ok) {
-    const error = await res.json().catch(() => ({ detail: res.statusText }));
-    throw Object.assign(new Error(error.detail || 'API error'), { status: res.status, data: error });
+    const error = await res.json().catch(() => ({}));
+    throw Object.assign(new Error(error.detail || fallbackMessage(res.status)), {
+      status: res.status,
+      data: error,
+    });
   }
 
   return res.json();
@@ -181,4 +211,40 @@ export async function confirmContactMarkRead(token) {
 
 export async function getSiteConfig() {
   return apiFetch('/site-config/');
+}
+
+// ─── Importación eBay ─────────────────────────────────────────────────────────
+
+/** Parámetros de la calculadora: tipos de ítem, límites y si la sección está activa. */
+export async function getEbayConfig() {
+  return apiFetch('/ebay/config/');
+}
+
+/**
+ * Cotiza una publicación de eBay.
+ * @param {string} url - Link de la publicación (largo, corto o el id pelado).
+ * @param {number} [quantity]
+ */
+export async function quoteEbayItem(url, quantity = 1) {
+  return apiFetch('/ebay/quote/', {
+    method: 'POST',
+    body: JSON.stringify({ url, quantity }),
+  });
+}
+
+/**
+ * Confirma el pedido de importación.
+ * El backend re-cotiza cada publicación: `quoted_price` viaja solo para que
+ * pueda detectar si el precio cambió, nunca se usa para calcular el total.
+ */
+export async function createEbayOrder(orderData) {
+  return apiFetch('/ebay/orders/', {
+    method: 'POST',
+    body: JSON.stringify(orderData),
+  });
+}
+
+/** Seguimiento público del pedido por su código. */
+export async function getEbayOrder(orderCode) {
+  return apiFetch(`/ebay/orders/${encodeURIComponent(orderCode)}/`);
 }

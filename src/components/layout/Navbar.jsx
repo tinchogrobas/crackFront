@@ -7,6 +7,7 @@ import { ShoppingBag, Menu, X, Search, LogOut } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import CartDrawer from './CartDrawer';
 import SearchOverlay from '@/components/ui/SearchOverlay';
+import { GRADEOS_WHATSAPP_URL } from '@/lib/gradeos';
 
 const DEFAULT_BANNER_MESSAGE = 'Envíos a todo el país — 15% OFF con código CRACK15';
 
@@ -40,8 +41,12 @@ export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAUL
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // `external` manda a WhatsApp en vez de a una ruta del sitio, así que se
+  // renderiza con <a> y no con <Link>.
   const navLinks = [
     { href: '/tienda', label: 'Tienda' },
+    { href: '/compra-ebay', label: 'Compra eBay'},
+    { href: GRADEOS_WHATSAPP_URL, label: 'Gradeos', external: true },
     { href: '/contacto', label: 'Contacto' },
   ];
   const bannerMessage = (topBannerMessage || DEFAULT_BANNER_MESSAGE).trim();
@@ -99,20 +104,35 @@ export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAUL
                 <Menu size={20} />
               </button>
               <div className="hidden lg:flex items-center gap-8">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`text-[13px] font-semibold uppercase tracking-[0.12em] transition-colors duration-300 relative group ${
-                      scrolled
-                        ? 'text-[#6B6560] hover:text-[#1A1A1A]'
-                        : 'text-white/90 hover:text-[#C8972E]'
-                    }`}
-                  >
-                    {link.label}
-                    <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-[#C8972E] group-hover:w-full transition-all duration-300" />
-                  </Link>
-                ))}
+                {navLinks.map((link) => {
+                  const linkClass = `text-[13px] font-semibold uppercase tracking-[0.12em] transition-colors duration-300 relative group ${
+                    scrolled
+                      ? 'text-[#6B6560] hover:text-[#1A1A1A]'
+                      : 'text-white/90 hover:text-[#C8972E]'
+                  }`;
+                  const content = (
+                    <>
+                      {link.label}
+                      <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-[#C8972E] group-hover:w-full transition-all duration-300" />
+                    </>
+                  );
+
+                  return link.external ? (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={linkClass}
+                    >
+                      {content}
+                    </a>
+                  ) : (
+                    <Link key={link.href} href={link.href} className={linkClass}>
+                      {content}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
 
@@ -258,9 +278,21 @@ export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAUL
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.15 + i * 0.07 }}
                   >
-                    <Link href={link.href} onClick={() => setMobileMenuOpen(false)} className="font-display text-2xl font-bold text-[#6B6560] hover:text-[#1A1A1A] transition-colors">
-                      {link.label}
-                    </Link>
+                    {link.external ? (
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="font-display text-2xl font-bold text-[#6B6560] hover:text-[#1A1A1A] transition-colors"
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link href={link.href} onClick={() => setMobileMenuOpen(false)} className="font-display text-2xl font-bold text-[#6B6560] hover:text-[#1A1A1A] transition-colors">
+                        {link.label}
+                      </Link>
+                    )}
                   </motion.div>
                 ))}
               </div>
