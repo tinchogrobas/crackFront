@@ -1,6 +1,7 @@
 'use client';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ClipboardList, Minus, Plus, X } from 'lucide-react';
+import { ClipboardList, X } from 'lucide-react';
+import QuantityStepper from '@/components/ebay/QuantityStepper';
 import { formatUsd } from '@/lib/formatUsd';
 
 /**
@@ -91,29 +92,18 @@ export default function OrderPanel({
                   </div>
 
                   <div className="flex items-center justify-between mt-2.5 pl-[60px]">
-                    <div className="flex items-center rounded-lg border border-[#E8E4DD] h-8">
-                      <button
-                        type="button"
-                        onClick={() => onQuantityChange(item.key, item.quantity - 1)}
-                        disabled={item.quantity <= 1}
-                        aria-label="Quitar una unidad"
-                        className="w-7 h-full grid place-items-center text-[#6B6560] hover:text-[#1A1A1A] disabled:opacity-30 transition-colors"
-                      >
-                        <Minus size={12} />
-                      </button>
-                      <span className="w-7 text-center text-xs font-bold text-[#1A1A1A] tabular-nums">
-                        {item.quantity}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => onQuantityChange(item.key, item.quantity + 1)}
-                        disabled={item.quantity >= Math.min(maxQuantity, item.maxQuantity ?? maxQuantity)}
-                        aria-label="Agregar una unidad"
-                        className="w-7 h-full grid place-items-center text-[#6B6560] hover:text-[#1A1A1A] disabled:opacity-30 transition-colors"
-                      >
-                        <Plus size={12} />
-                      </button>
-                    </div>
+                    <QuantityStepper
+                      size="sm"
+                      value={item.quantity}
+                      onChange={(quantity) => onQuantityChange(item.key, quantity)}
+                      max={Math.min(maxQuantity, item.maxQuantity ?? maxQuantity)}
+                      itemLabel={item.title}
+                      maxReasonText={
+                        (item.maxQuantity ?? maxQuantity) < maxQuantity
+                          ? 'No quedan más unidades de esta publicación en eBay.'
+                          : `El máximo por publicación es ${maxQuantity}.`
+                      }
+                    />
 
                     <span className="text-[13px] font-bold text-[#1A1A1A] tabular-nums">
                       {formatUsd(item.unitTotal * item.quantity)}
