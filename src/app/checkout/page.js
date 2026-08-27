@@ -918,55 +918,51 @@ function CheckoutContent() {
                       : 'border-[#E8E4DD] text-[#6B6560] hover:border-[#D4CFC6] hover:shadow-[0_10px_30px_rgba(17,17,17,0.06)]'
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className={paymentRadioClass(form.payment_method === 'mercadopago')}>
-                          <span className={paymentRadioDotClass(form.payment_method === 'mercadopago')} />
-                        </span>
-                        <p className="text-sm font-semibold text-[#111111]">Mercado Pago</p>
-                      </div>
-                      <div className="mt-3 flex items-center gap-2 text-[11px] text-[#6B6560]">
-                        <CreditCard size={14} />
-                        <span>Crédito, débito y saldo en cuenta</span>
-                      </div>
-                      <div className="mt-2 flex items-center gap-2 text-[11px] text-[#6B6560]">
-                        <Landmark size={14} />
-                        <span>Pago online inmediato</span>
-                      </div>
-                      {cardSurchargeAvailablePercent > 0 && (
-                        <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-[#E8D6A8] bg-[#FFF8E8] px-3 py-1.5 text-[11px] font-semibold text-[#B8851F]">
-                          <BadgePercent size={13} />
-                          <span>+{cardSurchargeAvailablePercent}% de recargo</span>
-                          <span className="font-medium">{formatPrice(cardSurchargePreviewAmount)}</span>
-                        </div>
-                      )}
+                  {/* Los logos viven en el renglón del título y no en una
+                      columna aparte: así las descripciones ocupan el ancho de
+                      la card y entran en una línea, igual que en la de efectivo.
+                      Si no entran al lado del título, bajan solos a su renglón. */}
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className={paymentRadioClass(form.payment_method === 'mercadopago')}>
+                        <span className={paymentRadioDotClass(form.payment_method === 'mercadopago')} />
+                      </span>
+                      <p className="text-sm font-semibold text-[#111111]">Mercado Pago</p>
                     </div>
-                    <div className="ml-auto flex items-start justify-end gap-1.5">
-                      <div className="flex items-center justify-end gap-1.5 sm:hidden">
-                        <span className="flex h-8 min-w-[52px] items-center justify-center rounded-md border border-[#D8DFEA] bg-white shadow-sm">
-                          <Image src="/payments/mercadopago.BK20nVmQ.svg" alt="Mercado Pago" width={28} height={18} className="h-5 w-auto" />
+                    <div className="flex items-center gap-1.5">
+                      {mercadoPagoBadges.map((badge) => (
+                        <span key={badge.label} className={`flex h-8 min-w-[48px] items-center justify-center rounded-md border shadow-sm ${badge.className}`}>
+                          <Image src={badge.imageSrc} alt={badge.label} width={30} height={18} className="h-5 w-auto" />
                         </span>
-                      </div>
-                      <div className="hidden sm:flex items-start justify-end gap-1.5">
-                        {mercadoPagoBadges.map((badge) => (
-                          <span key={badge.label} className={`flex h-8 min-w-[52px] items-center justify-center rounded-md border shadow-sm ${badge.className}`}>
-                            <Image src={badge.imageSrc} alt={badge.label} width={30} height={18} className="h-5 w-auto" />
-                          </span>
-                        ))}
-                        <span className="group/plus relative flex h-8 min-w-[36px] items-center justify-center rounded-md border border-[#D8DFEA] bg-white text-[11px] font-semibold text-[#3A3530] shadow-sm transition-transform duration-200 hover:-translate-y-0.5">
-                          +3
-                          <span className="pointer-events-none absolute -top-12 right-0 hidden items-center gap-1 rounded-xl bg-[#1A1A1A] px-2 py-2 opacity-0 shadow-[0_12px_30px_rgba(0,0,0,0.28)] transition-all duration-150 group-hover/plus:flex group-hover/plus:opacity-100">
-                            {mercadoPagoHoverBadges.map((badge) => (
-                              <span key={badge.label} className={`flex h-7 min-w-[42px] items-center justify-center rounded-md border px-2 ${badge.className}`}>
-                                <Image src={badge.imageSrc} alt={badge.label} width={26} height={16} className="h-4 w-auto" />
-                              </span>
-                            ))}
-                          </span>
+                      ))}
+                      <span className="group/plus relative flex h-8 min-w-[34px] items-center justify-center rounded-md border border-[#D8DFEA] bg-white text-[11px] font-semibold text-[#3A3530] shadow-sm transition-transform duration-200 hover:-translate-y-0.5">
+                        +3
+                        <span className="pointer-events-none absolute -top-12 right-0 hidden items-center gap-1 rounded-xl bg-[#1A1A1A] px-2 py-2 opacity-0 shadow-[0_12px_30px_rgba(0,0,0,0.28)] transition-all duration-150 group-hover/plus:flex group-hover/plus:opacity-100">
+                          {mercadoPagoHoverBadges.map((badge) => (
+                            <span key={badge.label} className={`flex h-7 min-w-[42px] items-center justify-center rounded-md border px-2 ${badge.className}`}>
+                              <Image src={badge.imageSrc} alt={badge.label} width={26} height={16} className="h-4 w-auto" />
+                            </span>
+                          ))}
                         </span>
-                      </div>
+                      </span>
                     </div>
                   </div>
+
+                  <div className="mt-3.5 flex items-center gap-2 text-[11px] text-[#6B6560]">
+                    <CreditCard size={14} className="shrink-0" />
+                    <span>Crédito, débito y saldo en cuenta</span>
+                  </div>
+                  <div className="mt-2 flex items-center gap-2 text-[11px] text-[#6B6560]">
+                    <Landmark size={14} className="shrink-0" />
+                    <span>Pago online inmediato</span>
+                  </div>
+                  {cardSurchargeAvailablePercent > 0 && (
+                    <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-[#E8D6A8] bg-[#FFF8E8] px-3 py-1.5 text-[11px] font-semibold text-[#B8851F]">
+                      <BadgePercent size={13} className="shrink-0" />
+                      <span className="whitespace-nowrap">+{cardSurchargeAvailablePercent}% de recargo</span>
+                      <span className="font-medium whitespace-nowrap">{formatPrice(cardSurchargePreviewAmount)}</span>
+                    </div>
+                  )}
                 </button>
 
                 <button
@@ -978,27 +974,26 @@ function CheckoutContent() {
                       : 'border-[#E8E4DD] text-[#6B6560] hover:border-[#D4CFC6]'
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className={paymentRadioClass(form.payment_method === 'cash')}>
-                          <span className={paymentRadioDotClass(form.payment_method === 'cash')} />
-                        </span>
-                        <p className="text-sm font-semibold text-[#111111]">Efectivo / Transferencia / Crypto</p>
-                      </div>
-                      <div className="mt-3 flex items-center gap-2 text-[11px] text-[#6B6560]">
-                        <Banknote size={14} />
-                        <span>Coordinación manual por WhatsApp o tienda</span>
-                      </div>
-                      {cardSurchargeAvailablePercent > 0 && (
-                        <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-[11px] font-semibold text-green-700">
-                          <BadgePercent size={13} />
-                          <span>SIN RECARGO</span>
-                          <span className="text-green-600">Ahorrás {formatPrice(cardSurchargePreviewAmount)}</span>
-                        </div>
-                      )}
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className={paymentRadioClass(form.payment_method === 'cash')}>
+                        <span className={paymentRadioDotClass(form.payment_method === 'cash')} />
+                      </span>
+                      <p className="text-sm font-semibold text-[#111111]">Efectivo / Transferencia / Crypto</p>
                     </div>
                   </div>
+
+                  <div className="mt-3.5 flex items-center gap-2 text-[11px] text-[#6B6560]">
+                    <Banknote size={14} className="shrink-0" />
+                    <span>Coordinación manual por WhatsApp o tienda</span>
+                  </div>
+                  {cardSurchargeAvailablePercent > 0 && (
+                    <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-[11px] font-semibold text-green-700">
+                      <BadgePercent size={13} className="shrink-0" />
+                      <span className="whitespace-nowrap">SIN RECARGO</span>
+                      <span className="text-green-600 whitespace-nowrap">Ahorrás {formatPrice(cardSurchargePreviewAmount)}</span>
+                    </div>
+                  )}
                 </button>
               </div>
             </motion.div>
