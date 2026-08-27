@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -38,6 +38,7 @@ export default function CompraEbayClient() {
   const [configLoading, setConfigLoading] = useState(true);
 
   const [url, setUrl] = useState('');
+  const quoterRef = useRef(null);
   const [quote, setQuote] = useState(null);
   const [quoting, setQuoting] = useState(false);
   const [quoteError, setQuoteError] = useState(null);
@@ -95,6 +96,29 @@ export default function CompraEbayClient() {
     }
   }, [url]);
 
+  /**
+   * Al agregar, la card de la cotización se desmonta y la columna se acorta de
+   * golpe. El navegador conserva el offset de scroll, así que la persona termina
+   * mirando el pie de página sin haber tocado nada. La devolvemos al campo del
+   * link, que es donde sigue el flujo: pegar la próxima publicación.
+   *
+   * Se llama antes de limpiar el estado para arrancar el scroll con el alto
+   * todavía intacto, y solo si el campo quedó fuera de pantalla: mover la
+   * página cuando la persona ya lo tiene a la vista molesta tanto como no
+   * moverla cuando no lo tiene.
+   */
+  function scrollToQuoter() {
+    const node = quoterRef.current;
+    if (!node) return;
+
+    // El navbar es fijo: si el borde superior quedó por encima de esa franja,
+    // el campo está tapado o directamente arriba del viewport.
+    const NAVBAR_HEIGHT = 96;
+    if (node.getBoundingClientRect().top >= NAVBAR_HEIGHT) return;
+
+    node.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   function handleAdd(quantity) {
     if (visibleItems.length >= maxItems) {
       toast.error(`El pedido no puede tener más de ${maxItems} publicaciones.`);
@@ -108,6 +132,7 @@ export default function CompraEbayClient() {
     }
 
     toast.success('Agregado al pedido');
+    scrollToQuoter();
     setQuote(null);
     setUrl('');
   }
@@ -210,7 +235,7 @@ export default function CompraEbayClient() {
         ) : (
           <div className="grid lg:grid-cols-[minmax(0,1fr)_360px] gap-6 items-start">
             {/* Columna izquierda: cotizador */}
-            <div className="space-y-5 min-w-0">
+            <div ref={quoterRef} className="space-y-5 min-w-0 scroll-mt-24">
               <QuoteForm
                 url={url}
                 onUrlChange={setUrl}

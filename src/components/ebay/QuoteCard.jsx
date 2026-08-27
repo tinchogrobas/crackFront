@@ -1,7 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Copy, ExternalLink, Info, Minus, Plus, Plus as PlusIcon, RotateCcw } from 'lucide-react';
+import { Check, Copy, ExternalLink, Info, Plus as PlusIcon, RotateCcw } from 'lucide-react';
+import QuantityStepper from '@/components/ebay/QuantityStepper';
 import { formatUsd } from '@/lib/formatUsd';
 
 /**
@@ -182,29 +183,16 @@ export default function QuoteCard({ quote, onAdd, onReset, maxQuantity = 10 }) {
 
         {/* Acciones */}
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <div className="flex items-center rounded-xl border border-[#E8E4DD] bg-white h-11">
-            <button
-              type="button"
-              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              disabled={effectiveQuantity <= 1}
-              aria-label="Quitar una unidad"
-              className="w-10 h-full grid place-items-center text-[#6B6560] hover:text-[#1A1A1A] disabled:opacity-30 transition-colors"
-            >
-              <Minus size={14} />
-            </button>
-            <span className="w-9 text-center text-sm font-bold text-[#1A1A1A] tabular-nums">
-              {effectiveQuantity}
-            </span>
-            <button
-              type="button"
-              onClick={() => setQuantity((q) => Math.min(maxAllowed, q + 1))}
-              disabled={effectiveQuantity >= maxAllowed}
-              aria-label="Agregar una unidad"
-              className="w-10 h-full grid place-items-center text-[#6B6560] hover:text-[#1A1A1A] disabled:opacity-30 transition-colors"
-            >
-              <Plus size={14} />
-            </button>
-          </div>
+          <QuantityStepper
+            value={effectiveQuantity}
+            onChange={setQuantity}
+            max={maxAllowed}
+            maxReasonText={
+              stockLimited
+                ? `En eBay quedan ${maxAllowed} ${maxAllowed === 1 ? 'unidad' : 'unidades'} de esta publicación.`
+                : `El máximo por publicación es ${maxAllowed}.`
+            }
+          />
 
           <button
             type="button"
