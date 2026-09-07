@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { subscribe } from '@/lib/api';
+import { trackNewsletterSignup } from '@/lib/analytics';
 import toast from 'react-hot-toast';
 import { Send } from 'lucide-react';
 
@@ -15,6 +16,7 @@ export default function Newsletter() {
     setLoading(true);
     try {
       const res = await subscribe(email.trim());
+      trackNewsletterSignup(email.trim());
       toast.success(res.message || 'Ya formas parte de la newsletter de CRACK.');
       setEmail('');
     } catch (err) {

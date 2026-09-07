@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { sendContact } from '@/lib/api';
+import { trackContactLead } from '@/lib/analytics';
 
 export default function ContactoPage() {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
@@ -14,6 +15,7 @@ export default function ContactoPage() {
     setSending(true);
     try {
       const res = await sendContact(form);
+      trackContactLead({ email: form.email, name: form.name, source: 'formulario-contacto' });
       toast.success(res.message || 'Mensaje enviado. Te respondemos pronto.');
       setForm({ name: '', email: '', message: '' });
     } catch {

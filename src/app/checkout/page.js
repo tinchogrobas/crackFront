@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useMemo, Suspense } from 'react';
+import { useState, useEffect, useMemo, useRef, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { imgProps } from '@/lib/imageProps';
@@ -8,6 +8,12 @@ import { useCartStore } from '@/store/cartStore';
 import { syncCartWithBackend } from '@/lib/cartSync';
 import { formatPrice } from '@/lib/formatPrice';
 import { createOrder, getPaymentConfig, validateDiscount } from '@/lib/api';
+import {
+  trackAddPaymentInfo,
+  trackAddShippingInfo,
+  trackBeginCheckout,
+  setUserData,
+} from '@/lib/analytics';
 import toast from 'react-hot-toast';
 import { Tag, AlertTriangle, Loader2, X, Truck, MapPin, CreditCard, Landmark, Banknote, BadgePercent, Store, Zap } from 'lucide-react';
 
@@ -386,6 +392,30 @@ function CheckoutContent() {
     return errors;
   };
 
+  /**
+   * Valor de los productos con el cupon ya aplicado, sin envio ni recargo de
+   * tarjeta. Es lo que GA4 y Meta esperan en `value`: la facturacion del
+   * catalogo. El envio va en su propio campo y el recargo no es ingreso.
+   *
+   * Se recalcula aca en vez de reusar `subtotalAfterCode` del cuerpo del render
+   * porque esas constantes se declaran despues del early return de carrito
+   * vacio y no existen en todos los caminos.
+   */
+  const productsValue = () => {
+    const subtotal = getSubtotal();
+    const off = discountPercent > 0 ? (subtotal * discountPercent) / 100 : (discountFixed || 0);
+    return Math.max(0, subtotal - off);
+  };
+
+  // begin_checkout una sola vez por visita al checkout.
+  const beginCheckoutSentRef = useRef(false);
+  useEffect(() => {
+    if (beginCheckoutSentRef.current || items.length === 0) return;
+    beginCheckoutSentRef.current = true;
+    trackBeginCheckout(items, { value: productsValue(), coupon: discountCode || undefined });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items.length]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (items.length === 0) return;
@@ -406,6 +436,27 @@ function CheckoutContent() {
       toast.error('Resolvé los problemas de stock antes de continuar');
       return;
     }
+
+    // Enhanced conversions: con estos datos Google recupera la conversion aun
+    // si se perdio la cookie en el ida y vuelta a Mercado Pago.
+    setUserData({
+      email: form.customer_email.trim(),
+      phone: form.customer_phone.trim(),
+      city: form.shipping_city.trim(),
+      region: form.shipping_province,
+      postalCode: form.shipping_zip.trim(),
+    });
+
+    const value = productsValue();
+    trackAddShippingInfo(items, {
+      value,
+      shippingTier: form.shipping_type === 'pickup' ? 'pickup_store' : form.shipping_delivery_method,
+    });
+    trackAddPaymentInfo(items, {
+      value,
+      paymentType: form.payment_method,
+      coupon: discountCode || undefined,
+    });
 
     setSubmitting(true);
     try {

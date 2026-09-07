@@ -12,6 +12,9 @@ import {
   truncate,
   resolveCategory,
   absoluteUrl,
+  buildShippingDetails,
+  buildReturnPolicy,
+  priceValidUntil,
 } from '@/lib/seo';
 
 export const revalidate = 60;
@@ -143,6 +146,18 @@ function BreadcrumbJsonLd({ crumbs }) {
   );
 }
 
+/**
+ * Misma regla que usa el feed de shopping: sellados y accesorios son nuevos,
+ * una carta Near Mint se declara nueva y cualquier estado jugado es usado.
+ */
+function isUsedCondition(conditionName, categoryName) {
+  const cat = String(categoryName || '').toLowerCase();
+  if (/sellad|sobre|booster|box|bundle|mystery|accesorio/.test(cat)) return false;
+  if (!conditionName) return false;
+  const c = String(conditionName).toLowerCase();
+  return !(/mint|nm|near mint|sealed|nuevo/.test(c) && !/played|jugad/.test(c));
+}
+
 function ProductJsonLd({ product }) {
   const canonical = `${SITE_URL}/tienda/${product.slug}`;
   const outOfStock = product.in_stock === false || product.stock_quantity === 0;
@@ -198,12 +213,23 @@ function ProductJsonLd({ product }) {
       url: canonical,
       priceCurrency: CURRENCY,
       price: price ? price.toFixed(2) : '0.00',
+      // Sin `priceValidUntil` Search Console reporta el producto como
+      // incompleto y el precio deja de mostrarse en la ficha enriquecida.
+      priceValidUntil: priceValidUntil(),
       availability: outOfStock
         ? 'https://schema.org/OutOfStock'
         : 'https://schema.org/InStock',
-      itemCondition: 'https://schema.org/NewCondition',
+      // Una carta suelta jugada no es "nueva". Declararlo mal es lo mismo que
+      // se corrige en el feed de Merchant Center (ver `lib/feeds.js`).
+      itemCondition: isUsedCondition(conditionName, categoryName)
+        ? 'https://schema.org/UsedCondition'
+        : 'https://schema.org/NewCondition',
       seller: { '@id': `${SITE_URL}#organization` },
       areaServed: { '@type': 'Country', name: 'Argentina' },
+      // Envío y devoluciones: Google los pide para dar la ficha enriquecida
+      // completa y para los listados gratuitos de Shopping.
+      shippingDetails: buildShippingDetails(),
+      hasMerchantReturnPolicy: buildReturnPolicy(),
     },
   };
 

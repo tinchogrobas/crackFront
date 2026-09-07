@@ -194,3 +194,78 @@ export function xmlResponseHeaders({ maxAgeSeconds = 3600 } = {}) {
 export function isSafeSlug(slug) {
   return typeof slug === 'string' && /^[a-zA-Z0-9_\-./]+$/.test(slug);
 }
+
+// ─── Datos del local físico ──────────────────────────────────────────────────
+
+/**
+ * Local de Saavedra. Va en el schema `Store` del layout: es lo que habilita las
+ * búsquedas locales ("cartas pokemon cerca mío", "tienda tcg saavedra") y lo
+ * que Google cruza con la ficha de Google Business Profile para validarla.
+ * Tiene que coincidir carácter por carácter con la ficha de GBP.
+ */
+export const BUSINESS = {
+  streetAddress: 'Deheza 2921, PB',
+  addressLocality: 'Saavedra, Ciudad Autónoma de Buenos Aires',
+  addressRegion: 'CABA',
+  postalCode: 'C1429EAY',
+  addressCountry: 'AR',
+  telephone: '+541150588131',
+  whatsapp: 'https://wa.me/541150588131',
+  mapUrl: 'https://maps.app.goo.gl/vTPfffMMNMbMLCyn8',
+  // Coordenadas de Deheza 2921, Saavedra. Verificar contra GBP antes de tocar.
+  latitude: -34.5457,
+  longitude: -58.4869,
+};
+
+// ─── Envíos y devoluciones para structured data y feeds ──────────────────────
+
+/**
+ * Google marca como "falta información" los `Product` sin envío ni devoluciones
+ * y los deja fuera de las fichas enriquecidas y de los listados gratuitos de
+ * Shopping. Estos dos bloques son la diferencia entre aparecer con precio y
+ * disponibilidad en la SERP o aparecer como un link pelado.
+ */
+export const SHIPPING_ARS = Number(process.env.NEXT_PUBLIC_FEED_SHIPPING_ARS || 0);
+
+export function buildShippingDetails() {
+  return {
+    '@type': 'OfferShippingDetails',
+    shippingRate: {
+      '@type': 'MonetaryAmount',
+      value: SHIPPING_ARS,
+      currency: CURRENCY,
+    },
+    shippingDestination: {
+      '@type': 'DefinedRegion',
+      addressCountry: COUNTRY,
+    },
+    deliveryTime: {
+      '@type': 'ShippingDeliveryTime',
+      handlingTime: { '@type': 'QuantitativeValue', minValue: 1, maxValue: 2, unitCode: 'DAY' },
+      transitTime: { '@type': 'QuantitativeValue', minValue: 2, maxValue: 7, unitCode: 'DAY' },
+    },
+  };
+}
+
+/** Art. 34 de la Ley 24.240: 10 días corridos de arrepentimiento. */
+export function buildReturnPolicy() {
+  return {
+    '@type': 'MerchantReturnPolicy',
+    applicableCountry: COUNTRY,
+    returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+    merchantReturnDays: 10,
+    returnMethod: 'https://schema.org/ReturnByMail',
+    returnFees: 'https://schema.org/ReturnShippingFees',
+  };
+}
+
+/**
+ * Google Search Console avisa `priceValidUntil` faltante en cada producto.
+ * Los precios se recalculan con el tipo de cambio, así que una fecha fija
+ * mentiría: se emite una ventana corta y rodante.
+ */
+export function priceValidUntil(days = 30) {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}

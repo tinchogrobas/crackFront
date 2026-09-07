@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, ChevronLeft, ChevronRight, Award, Truck, BadgeCheck, PackageCheck, ChevronRight as ChevronSep } from 'lucide-react';
@@ -10,6 +10,7 @@ import QuantitySelector from '@/components/ui/QuantitySelector';
 import { getPaymentConfig } from '@/lib/api';
 import { initProductZoom } from '@/lib/productZoom';
 import { imgProps } from '@/lib/imageProps';
+import { trackViewItem, trackAddToCart } from '@/lib/analytics';
 import toast from 'react-hot-toast';
 
 export default function ProductDetailClient({ product }) {
@@ -34,6 +35,15 @@ export default function ProductDetailClient({ product }) {
   useEffect(() => {
     setSuggestedIndex(0);
   }, [product?.id]);
+
+  // view_item: uno solo por producto. Es el evento con el que Meta arma las
+  // audiencias de retargeting; repetirlo por cada re-render las infla.
+  const viewedProductRef = useRef(null);
+  useEffect(() => {
+    if (!product?.id || viewedProductRef.current === product.id) return;
+    viewedProductRef.current = product.id;
+    trackViewItem(product);
+  }, [product]);
 
   useEffect(() => {
     const cleanup = initProductZoom();
@@ -89,8 +99,10 @@ export default function ProductDetailClient({ product }) {
 
   const handleAddToCart = () => {
     const success = addToCart(product, quantity);
-    if (success) openCart();
-    else toast.error(inStock ? 'Stock máximo alcanzado' : 'Sin stock');
+    if (success) {
+      trackAddToCart(product, quantity);
+      openCart();
+    } else toast.error(inStock ? 'Stock máximo alcanzado' : 'Sin stock');
   };
 
   return (
@@ -388,6 +400,7 @@ export default function ProductDetailClient({ product }) {
                           e.stopPropagation();
                           const ok = addToCart(activeSuggested, 1);
                           if (ok) {
+                            trackAddToCart(activeSuggested, 1);
                             toast.success('Agregado al carrito');
                           } else {
                             toast.error('Stock máximo alcanzado');

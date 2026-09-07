@@ -5,6 +5,16 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Toaster } from 'react-hot-toast';
 import MaintenancePage from '@/components/MaintenancePage';
+import AnalyticsScripts from '@/components/analytics/AnalyticsScripts';
+import ConsentBanner from '@/components/analytics/ConsentBanner';
+import {
+  ANALYTICS_ENABLED,
+  GA4_ID,
+  GOOGLE_ADS_ID,
+  GTM_ID,
+  META_PIXEL_ID,
+  consentBootstrapScript,
+} from '@/lib/analytics.config';
 import {
   SITE_URL,
   SITE_NAME,
@@ -14,6 +24,7 @@ import {
   DEFAULT_OG_IMAGE,
   SOCIAL,
   CONTACT,
+  BUSINESS,
 } from '@/lib/seo';
 
 const inter = Inter({
@@ -152,6 +163,46 @@ function OrganizationJsonLd() {
     },
   };
 
+  /**
+   * Local físico de Saavedra.
+   *
+   * `OnlineStore` describe la tienda web; esto describe el negocio con dirección
+   * y horarios, que es lo que Google necesita para el paquete local (el mapa con
+   * las tres fichas arriba de los resultados orgánicos) y para cruzar el sitio
+   * con la ficha de Google Business Profile. Los datos tienen que ser idénticos
+   * a los de la ficha, si no Google los descarta por inconsistentes.
+   */
+  const store = {
+    '@context': 'https://schema.org',
+    '@type': 'Store',
+    '@id': `${SITE_URL}#store`,
+    name: SITE_NAME,
+    parentOrganization: { '@id': `${SITE_URL}#organization` },
+    url: SITE_URL,
+    image: DEFAULT_OG_IMAGE,
+    telephone: BUSINESS.telephone,
+    email: CONTACT.email,
+    priceRange: '$$',
+    currenciesAccepted: 'ARS',
+    paymentAccepted: 'Mercado Pago, Transferencia, Efectivo, Crypto',
+    hasMap: BUSINESS.mapUrl,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: BUSINESS.streetAddress,
+      addressLocality: BUSINESS.addressLocality,
+      addressRegion: BUSINESS.addressRegion,
+      postalCode: BUSINESS.postalCode,
+      addressCountry: BUSINESS.addressCountry,
+    },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: BUSINESS.latitude,
+      longitude: BUSINESS.longitude,
+    },
+    areaServed: { '@type': 'Country', name: CONTACT.country },
+    sameAs: Object.values(SOCIAL).filter(Boolean),
+  };
+
   return (
     <>
       <script
@@ -161,6 +212,10 @@ function OrganizationJsonLd() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(store) }}
       />
     </>
   );
@@ -257,6 +312,21 @@ export default async function RootLayout({ children }) {
         <link rel="shortcut icon" href="/favicon/favicon.ico" />
         <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png" />
         <link rel="manifest" href="/favicon/site.webmanifest" />
+
+        {/* Preconnect a los dominios de tags: ahorra el DNS + TLS del primer
+            hit y evita que el pixel arrastre el LCP. Condicionados, porque un
+            preconnect a un dominio que nunca se pide es un handshake al pedo. */}
+        {GTM_ID || GA4_ID || GOOGLE_ADS_ID ? (
+          <link rel="preconnect" href="https://www.googletagmanager.com" />
+        ) : null}
+        {META_PIXEL_ID ? <link rel="preconnect" href="https://connect.facebook.net" /> : null}
+
+        {/* Consent Mode v2 — TIENE que correr antes que cualquier tag. Si los
+            defaults llegan después de gtag, Google ya mandó el primer hit sin
+            señal de consentimiento y no aplica el modelado de conversiones. */}
+        {ANALYTICS_ENABLED ? (
+          <script dangerouslySetInnerHTML={{ __html: consentBootstrapScript() }} />
+        ) : null}
       </head>
       <body
         className={
@@ -269,6 +339,9 @@ export default async function RootLayout({ children }) {
           <MaintenancePage message={siteConfig.maintenance_message} />
         ) : (
           <>
+            {/* Los tags de marketing no se cargan en mantenimiento: no hay nada
+                que medir y ensuciaría las sesiones del reporte. */}
+            <AnalyticsScripts />
             <OrganizationJsonLd />
             <Navbar
               showTopBanner={siteConfig.show_top_banner}
@@ -290,6 +363,7 @@ export default async function RootLayout({ children }) {
                 },
               }}
             />
+            <ConsentBanner />
           </>
         )}
       </body>

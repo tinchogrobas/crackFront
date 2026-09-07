@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { Minus, Plus, X, ShoppingBag } from 'lucide-react';
@@ -7,9 +7,23 @@ import { imgProps } from '@/lib/imageProps';
 import { syncCartWithBackend } from '@/lib/cartSync';
 import { getProductMaxQuantity, useCartStore } from '@/store/cartStore';
 import { formatPrice } from '@/lib/formatPrice';
+import { trackRemoveFromCart, trackViewCart } from '@/lib/analytics';
 
 export default function CarritoPage() {
   const items = useCartStore((s) => s.items);
+  // Una sola vista de carrito por visita a /carrito.
+  const viewCartSentRef = useRef(false);
+  useEffect(() => {
+    if (viewCartSentRef.current || !items.length) return;
+    viewCartSentRef.current = true;
+    trackViewCart(items);
+  }, [items]);
+
+  const removeItem = (id) => {
+    const item = useCartStore.getState().items.find((i) => i.id === id);
+    if (item) trackRemoveFromCart(item);
+    removeFromCart(id);
+  };
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const removeFromCart = useCartStore((s) => s.removeFromCart);
   const getSubtotal = useCartStore((s) => s.getSubtotal);
@@ -107,12 +121,12 @@ export default function CarritoPage() {
                 )}
               </div>
               <div className="flex flex-col items-end gap-2">
-                <button onClick={() => removeFromCart(item.id)} className="text-[#6B6560]/40 hover:text-red-500 transition-colors">
+                <button onClick={() => removeItem(item.id)} className="text-[#6B6560]/40 hover:text-red-500 transition-colors">
                   <X size={16} />
                 </button>
                 {issue && (
                   <button
-                    onClick={() => removeFromCart(item.id)}
+                    onClick={() => removeItem(item.id)}
                     className="text-[11px] font-semibold text-red-600 underline hover:no-underline"
                   >
                     Quitar

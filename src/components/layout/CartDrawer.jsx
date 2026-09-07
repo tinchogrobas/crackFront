@@ -11,6 +11,7 @@ import { syncCartWithBackend } from '@/lib/cartSync';
 import { getProductMaxQuantity, useCartStore } from '@/store/cartStore';
 import { formatPrice } from '@/lib/formatPrice';
 import { validateDiscount } from '@/lib/api';
+import { trackRemoveFromCart, trackViewCart } from '@/lib/analytics';
 
 function formatExpiryDate(isoDate) {
   if (!isoDate) return null;
@@ -21,6 +22,19 @@ function formatExpiryDate(isoDate) {
 
 export default function CartDrawer({ isOpen, onClose }) {
   const items = useCartStore((s) => s.items);
+  // view_cart al abrir el drawer, no en cada render: el drawer se monta con la
+  // pagina y sin esto reportaria una vista de carrito por navegacion.
+  useEffect(() => {
+    if (!isOpen) return;
+    trackViewCart(useCartStore.getState().items);
+  }, [isOpen]);
+
+  const removeItem = (id) => {
+    // Se lee del store antes de borrar: despues ya no esta el item para medirlo.
+    const item = useCartStore.getState().items.find((i) => i.id === id);
+    if (item) trackRemoveFromCart(item);
+    removeFromCart(id);
+  };
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const removeFromCart = useCartStore((s) => s.removeFromCart);
   const getSubtotal = useCartStore((s) => s.getSubtotal);
@@ -203,7 +217,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                       </div>
                       <div className="flex flex-col items-end gap-2">
                         <span
-                          onClick={() => removeFromCart(item.id)}
+                          onClick={() => removeItem(item.id)}
                           style={{ cursor: 'pointer', display: 'flex' }}
                           aria-label="Eliminar producto del carrito"
                           className="text-[#6B6560]/50 hover:text-[#C8972E] transition-colors p-1"
@@ -218,7 +232,7 @@ export default function CartDrawer({ isOpen, onClose }) {
                         </span>
                         {issue && (
                           <button
-                            onClick={() => removeFromCart(item.id)}
+                            onClick={() => removeItem(item.id)}
                             className="text-[10px] font-semibold text-red-600 underline hover:no-underline"
                           >
                             Quitar

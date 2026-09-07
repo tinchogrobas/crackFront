@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { verifyMercadoPagoPayment } from '@/lib/api';
@@ -7,6 +7,7 @@ import { useCartStore } from '@/store/cartStore';
 import CheckoutStatusView from '@/components/checkout/CheckoutStatusView';
 import { invalidateNewArrivalsCache } from '@/components/home/NewProducts';
 import { invalidateFeaturedProductsCache } from '@/components/home/FeaturedProducts';
+import { hasTrackedPurchase, trackPurchase } from '@/lib/analytics';
 
 function invalidateHomeProductCaches() {
   invalidateNewArrivalsCache();
@@ -23,6 +24,39 @@ function ConfirmacionContent() {
   const mpStatus = (searchParams.get('status') || '').toLowerCase();
   const cashOrder = searchParams.get('cash') === '1';
   const clearCart = useCartStore((s) => s.clearCart);
+
+  /**
+   * Foto del carrito al entrar, antes de que `clearCart()` lo vacie.
+   *
+   * Es el unico lugar donde todavia estan los items comprados: el backend no
+   * devuelve el detalle de la orden en la verificacion, y sin items la
+   * conversion llegaria sin productos ni valor. Se toma en el primer render
+   * porque con Mercado Pago el cliente vuelve de un dominio externo y lo unico
+   * que sobrevive es el carrito persistido en localStorage.
+   */
+  const purchaseSnapshotRef = useRef(null);
+  if (purchaseSnapshotRef.current === null) {
+    const state = useCartStore.getState();
+    purchaseSnapshotRef.current = { items: state.items, value: state.getTotal() };
+  }
+
+  /**
+   * Dispara la conversion una sola vez por orden. `hasTrackedPurchase` la marca
+   * en sessionStorage: sin eso, un F5 en esta pantalla suma otra compra a Google
+   * Ads y a Meta, y el ROAS reportado deja de tener relacion con la realidad.
+   */
+  const firePurchase = (code) => {
+    const snapshot = purchaseSnapshotRef.current;
+    if (!code || !snapshot?.items?.length) return;
+    if (hasTrackedPurchase(code)) return;
+    trackPurchase({
+      transactionId: code,
+      items: snapshot.items,
+      value: snapshot.value,
+      coupon: useCartStore.getState().discountCode || undefined,
+      user: email ? { email } : undefined,
+    });
+  };
   const [verifying, setVerifying] = useState(!cashOrder);
   const [paymentVerified, setPaymentVerified] = useState(cashOrder);
   const [isPending, setIsPending] = useState(false);
@@ -39,6 +73,7 @@ function ConfirmacionContent() {
 
     if (cashOrder) {
       setVerifying(false);
+      firePurchase(orderCode);
       clearCart();
       invalidateHomeProductCaches();
       setIsPending(false);
@@ -73,6 +108,7 @@ function ConfirmacionContent() {
         if (data.paid) {
           setPaymentVerified(true);
           setIsPending(false);
+          firePurchase(data.order_code || orderCode);
           clearCart();
           invalidateHomeProductCaches();
         } else {

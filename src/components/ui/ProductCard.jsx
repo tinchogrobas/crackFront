@@ -6,9 +6,10 @@ import ConditionBadge from '@/components/ui/ConditionBadge';
 import { getProductMaxQuantity, useCartStore } from '@/store/cartStore';
 import { formatPrice } from '@/lib/formatPrice';
 import { imgProps } from '@/lib/imageProps';
+import { trackAddToCart, trackSelectItem } from '@/lib/analytics';
 import toast from 'react-hot-toast';
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, listName = 'Tienda', listIndex }) {
   const router = useRouter();
   const addToCart = useCartStore((s) => s.addToCart);
   const openCart = useCartStore((s) => s.openCart);
@@ -22,8 +23,17 @@ export default function ProductCard({ product }) {
       return;
     }
     const success = addToCart(product);
-    if (success) openCart();
-    else toast.error('Stock máximo alcanzado');
+    if (success) {
+      // Solo se mide el alta efectiva: un click bloqueado por stock no es una
+      // señal de intención de compra y le ensucia el modelo a las campañas.
+      trackAddToCart(product, 1);
+      openCart();
+    } else toast.error('Stock máximo alcanzado');
+  };
+
+  const goToProduct = () => {
+    trackSelectItem(product, listName, listIndex);
+    router.push(`/tienda/${product.slug}`);
   };
 
   const handleMouseMove = (e) => {
@@ -58,7 +68,7 @@ export default function ProductCard({ product }) {
   const subtitle = catalog?.set_name || categoryName;
 
   return (
-    <div onClick={() => router.push(`/tienda/${product.slug}`)} className="cursor-pointer group">
+    <div onClick={goToProduct} className="cursor-pointer group">
       <div
         ref={cardRef}
         onMouseMove={handleMouseMove}
@@ -122,7 +132,7 @@ export default function ProductCard({ product }) {
           <button onClick={handleAddToCart} disabled={!canAddToCart} className="w-9 h-9 bg-[#C8972E] text-white rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300 hover:bg-[#B8851F] shadow-md hover:shadow-lg hover:scale-105 disabled:opacity-40 disabled:translate-y-0 disabled:cursor-not-allowed">
             <ShoppingBag size={14} />
           </button>
-          <button onClick={(e) => { e.stopPropagation(); router.push(`/tienda/${product.slug}`); }} className="w-9 h-9 bg-white/90 backdrop-blur-sm text-[#1A1A1A] rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300 delay-75 hover:bg-white shadow-md border border-[#E8E4DD]/50">
+          <button onClick={(e) => { e.stopPropagation(); goToProduct(); }} className="w-9 h-9 bg-white/90 backdrop-blur-sm text-[#1A1A1A] rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-300 delay-75 hover:bg-white shadow-md border border-[#E8E4DD]/50">
             <Eye size={14} />
           </button>
         </div>

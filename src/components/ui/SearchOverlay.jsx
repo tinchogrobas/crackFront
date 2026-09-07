@@ -6,6 +6,7 @@ import { imgProps } from '@/lib/imageProps';
 import Link from 'next/link';
 import { searchProducts, getFeaturedProducts } from '@/lib/api';
 import { formatPrice } from '@/lib/formatPrice';
+import { trackSearch } from '@/lib/analytics';
 
 const POPULAR_LINKS = [
   { label: 'Singles', href: '/tienda?category=singles' },
@@ -115,6 +116,8 @@ export default function SearchOverlay({ isOpen, onClose }) {
   const goToSearch = (e) => {
     e.preventDefault();
     if (!query.trim()) return;
+    // Solo la busqueda confirmada, no cada tecla del autocomplete.
+    trackSearch(query.trim(), results.length);
     handleClose();
     router.push(`/tienda?search=${encodeURIComponent(query.trim())}`);
   };

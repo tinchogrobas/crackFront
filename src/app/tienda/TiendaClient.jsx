@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SlidersHorizontal, X, Search, ChevronDown } from 'lucide-react';
 import ProductCard from '@/components/ui/ProductCard';
+import { trackViewItemList } from '@/lib/analytics';
 import SkeletonCard from '@/components/ui/SkeletonCard';
 
 const sortOptions = [
@@ -61,6 +62,29 @@ export default function TiendaClient({ pageSize, initialData, initialFilters, op
   const categoriesList = options?.categoriesList || [];
   const conditions = options?.conditions || [];
   const certEntities = options?.certEntities || [];
+
+  /**
+   * Nombre de la lista para GA4. Con los filtros adentro, el reporte de
+   * rendimiento por lista muestra qué combinación convierte —"Slabs Pokémon"
+   * contra "Singles NM"— y no un único cajón "Tienda" que no dice nada.
+   */
+  const listName = useMemo(() => {
+    if (search) return `Búsqueda: ${search}`;
+    const parts = [...selectedCategories, ...selectedTcgs, ...selectedConditions, ...selectedCertEntities];
+    if (hasDiscount) parts.push('ofertas');
+    return parts.length ? `Tienda · ${parts.join(' · ')}` : 'Tienda';
+  }, [search, selectedCategories, selectedTcgs, selectedConditions, selectedCertEntities, hasDiscount]);
+
+  // Un solo view_item_list por combinación lista+página. Sin la firma, cada
+  // re-render por un filtro de UI volvería a impactar el mismo listado.
+  const lastListSignatureRef = useRef('');
+  useEffect(() => {
+    if (loading || !products.length) return;
+    const signature = `${listName}|${currentPage}|${products[0]?.id}`;
+    if (lastListSignatureRef.current === signature) return;
+    lastListSignatureRef.current = signature;
+    trackViewItemList(products, listName);
+  }, [products, listName, currentPage, loading]);
 
   useEffect(() => {
     skipNextSearchNavRef.current = true;
@@ -460,7 +484,7 @@ export default function TiendaClient({ pageSize, initialData, initialFilters, op
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
                   {products.map((p, i) => (
                     <motion.div key={p.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
-                      <ProductCard product={p} />
+                      <ProductCard product={p} listName={listName} listIndex={(currentPage - 1) * pageSize + i} />
                     </motion.div>
                   ))}
                 </motion.div>
