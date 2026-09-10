@@ -85,8 +85,8 @@ function CheckoutContent() {
     customer_name: '',
     customer_email: '',
     customer_phone: '',
-    shipping_type: 'delivery',
-    shipping_delivery_method: 'home',
+    shipping_type: '',
+    shipping_delivery_method: '',
     payment_method: 'mercadopago',
     shipping_address: '',
     shipping_city: '',
@@ -257,8 +257,13 @@ function CheckoutContent() {
           prev.shipping_delivery_method === 'branch_express' ||
           prev.shipping_delivery_method === 'home'
             ? prev.shipping_delivery_method
-            : 'home',
+            : '',
       };
+    });
+    setFieldErrors((prev) => {
+      const next = { ...prev };
+      delete next.shipping_type;
+      return next;
     });
   };
 
@@ -285,6 +290,7 @@ function CheckoutContent() {
     });
     setFieldErrors((prev) => {
       const next = { ...prev };
+      delete next.shipping_delivery_method;
       delete next.shipping_province;
       delete next.shipping_address;
       delete next.shipping_city;
@@ -351,6 +357,14 @@ function CheckoutContent() {
     }
 
     // Validación de campos de envío según modalidad
+    if (!form.shipping_type) {
+      errors.shipping_type = 'Elegí si querés envío o retiro en tienda.';
+    }
+
+    if (form.shipping_type === 'delivery' && !form.shipping_delivery_method) {
+      errors.shipping_delivery_method = 'Elegí una modalidad de envío.';
+    }
+
     if (form.shipping_type === 'delivery') {
       // Envío a domicilio
       if (form.shipping_delivery_method === 'home') {
@@ -588,7 +602,14 @@ function CheckoutContent() {
   const shippingMethod = form.shipping_type === 'pickup'
     ? 'pickup_store'
     : form.shipping_delivery_method;
-  const shippingPrice = form.shipping_type === 'pickup'
+  // El envio no existe hasta que el cliente elige: primero envio o retiro, y si
+  // es envio, la provincia y la modalidad. Antes de eso no se cobra ni se
+  // muestra ninguna fila de envio en el resumen.
+  const shippingChosen =
+    form.shipping_type === 'delivery' &&
+    Boolean(form.shipping_province) &&
+    Boolean(form.shipping_delivery_method);
+  const shippingPrice = !shippingChosen
     ? 0
     : (shippingMethod === 'home'
       ? Number(paymentConfig?.shipping_prices?.home?.[shippingZone]?.normal || 0)
@@ -703,26 +724,49 @@ function CheckoutContent() {
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
               <h2 className="text-sm font-bold tracking-[0.15em] text-[#1A1A1A] mb-6">ENVÍO</h2>
 
-              <div className="grid grid-cols-2 gap-2 rounded-2xl bg-[#F3F1EC] p-1.5 mb-6">
-                {['delivery', 'pickup'].map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => handleShippingTypeChange(type)}
-                    className={`flex items-center justify-center gap-2 rounded-xl border px-4 py-4 text-sm font-semibold transition-all ${
-                      form.shipping_type === type
-                        ? 'border-[#D9D3C7] bg-white text-[#111111] shadow-[0_6px_18px_rgba(17,17,17,0.06)]'
-                        : 'border-transparent bg-transparent text-[#3A3530] hover:bg-white/70'
-                    }`}
-                  >
-                    {type === 'delivery' ? <Truck size={18} strokeWidth={2.2} /> : <MapPin size={18} strokeWidth={2.2} />}
-                    <span>{type === 'delivery' ? 'Envío' : 'Retiro'}</span>
-                  </button>
-                ))}
+              {/* Dos tarjetas separadas y no un bloque único: con nada elegido
+                  tienen que leerse como dos opciones distintas para tocar. */}
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                {['delivery', 'pickup'].map((type) => {
+                  const selected = form.shipping_type === type;
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => handleShippingTypeChange(type)}
+                      className={`flex items-center justify-center gap-2.5 rounded-2xl border px-4 py-4 text-sm font-semibold transition-all ${
+                        selected
+                          ? 'border-[#C8972E] bg-[#FFFCF5] text-[#111111] shadow-[0_6px_16px_rgba(200,151,46,0.10)]'
+                          : 'border-[#E8E4DD] bg-white text-[#3A3530] hover:border-[#D4CFC6] hover:shadow-[0_10px_30px_rgba(17,17,17,0.06)]'
+                      }`}
+                    >
+                      <span className={paymentRadioClass(selected)}>
+                        <span className={paymentRadioDotClass(selected)} />
+                      </span>
+                      {type === 'delivery' ? <Truck size={18} strokeWidth={2.2} /> : <MapPin size={18} strokeWidth={2.2} />}
+                      <span>{type === 'delivery' ? 'Envío' : 'Retiro'}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="-mt-4 mb-6">
+                <FieldError field="shipping_type" />
               </div>
 
               <AnimatePresence mode="wait" initial={false}>
-                {form.shipping_type === 'delivery' ? (
+                {!form.shipping_type ? (
+                  <motion.div
+                    key="unset"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="rounded-xl border border-dashed border-[#D4CFC6] bg-[#FBFAF7] px-4 py-4 text-sm text-[#6B6560]">
+                      Elegí si querés recibir tu pedido con envío o retirarlo en la tienda.
+                    </div>
+                  </motion.div>
+                ) : form.shipping_type === 'delivery' ? (
                   <motion.div
                     key="delivery"
                     initial={{ opacity: 0, y: 6 }}
@@ -886,6 +930,7 @@ function CheckoutContent() {
                               );
                             })}
                           </div>
+                          <FieldError field="shipping_delivery_method" />
                         </>
                       ) : (
                         <div className="rounded-xl border border-dashed border-[#D4CFC6] bg-[#FBFAF7] px-4 py-4 text-sm text-[#6B6560]">
@@ -1150,10 +1195,12 @@ function CheckoutContent() {
                     <span className="text-[#B8851F]">+{formatPrice(cardSurchargeAmount)}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-sm">
-                  <span className="text-[#6B6560]">Costo de envío</span>
-                  <span className="text-[#1A1A1A]">{formatPrice(shippingPrice)}</span>
-                </div>
+                {shippingChosen && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-[#6B6560]">Costo de envío</span>
+                    <span className="text-[#1A1A1A]">{formatPrice(shippingPrice)}</span>
+                  </div>
+                )}
                 <div className="border-t border-[#E8E4DD] pt-3">
                   <div className="flex justify-between text-lg font-bold">
                     <span className="text-[#1A1A1A]">Total</span>
