@@ -619,12 +619,12 @@ function CheckoutContent() {
     const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name || '');
     if (!isImage && !isPdf) {
       setReceipt(null);
-      setReceiptError('El comprobante tiene que ser una imagen o un PDF.');
+      setReceiptError('El comprobante debe ser una imagen (JPG, PNG) o un PDF.');
       return;
     }
     if (file.size > MAX_RECEIPT_BYTES) {
       setReceipt(null);
-      setReceiptError('El archivo pesa más de 10 MB. Probá con una captura de pantalla.');
+      setReceiptError('El archivo supera los 10 MB. Adjuntá una versión más liviana.');
       return;
     }
 
@@ -645,7 +645,7 @@ function CheckoutContent() {
   /** Sube el comprobante y, solo si eso sale bien, crea la orden. */
   const confirmTransfer = async () => {
     if (!receipt) {
-      setReceiptError('Adjuntá el comprobante de la transferencia para confirmar.');
+      setReceiptError('Adjuntá el comprobante para confirmar tu pedido.');
       return;
     }
 
@@ -655,7 +655,7 @@ function CheckoutContent() {
       const uploaded = await uploadTransferReceipt(receipt);
       await submitOrder(uploaded);
     } catch (err) {
-      setReceiptError(err?.message || 'No pudimos guardar el comprobante. Probá de nuevo.');
+      setReceiptError(err?.message || 'No pudimos procesar el comprobante. Volvé a intentar.');
       setSubmitting(false);
     }
   };
@@ -726,6 +726,10 @@ function CheckoutContent() {
     { field: 'cbu', label: 'CBU / CVU', value: paymentConfig?.transfer?.cbu, copyable: true },
     { field: 'alias', label: 'Alias', value: paymentConfig?.transfer?.alias, copyable: true },
   ].filter((row) => Boolean((row.value || '').trim()));
+
+  // Sin cuenta cargada no se ofrece el método: es preferible no mostrarlo
+  // a mostrarlo y pedirle disculpas al comprador en mitad del checkout.
+  const transferAvailable = transferAccountRows.length > 0;
 
   const paymentRadioClass = (selected) => `mt-0.5 flex h-5 w-5 min-h-5 min-w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${selected ? 'border-[#C8972E] bg-[#FFF8E8]' : 'border-[#B7B0A6] bg-white'}`;
   const paymentRadioDotClass = (selected) => `h-2.5 w-2.5 rounded-full transition-colors ${selected ? 'bg-[#C8972E]' : 'bg-transparent'}`;
@@ -1099,7 +1103,7 @@ function CheckoutContent() {
 
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
               <h2 className="text-sm font-bold tracking-[0.15em] text-[#1A1A1A] mb-6">PAGO</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className={`grid grid-cols-1 gap-4 ${transferAvailable ? 'sm:grid-cols-2' : ''}`}>
                 <button
                   type="button"
                   onClick={() => updateForm('payment_method', 'mercadopago')}
@@ -1156,6 +1160,7 @@ function CheckoutContent() {
                   )}
                 </button>
 
+                {transferAvailable && (
                 <button
                   type="button"
                   onClick={() => updateForm('payment_method', 'transfer')}
@@ -1176,7 +1181,7 @@ function CheckoutContent() {
 
                   <div className="mt-3.5 flex items-center gap-2 text-[11px] text-[#6B6560]">
                     <Banknote size={14} className="shrink-0" />
-                    <span>Te mostramos el CBU y subís el comprobante</span>
+                    <span>Desde tu home banking o billetera virtual</span>
                   </div>
                   {cardSurchargeAvailablePercent > 0 && (
                     <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-[11px] font-semibold text-green-700">
@@ -1186,6 +1191,7 @@ function CheckoutContent() {
                     </div>
                   )}
                 </button>
+                )}
               </div>
             </motion.div>
           </div>
@@ -1369,7 +1375,7 @@ function CheckoutContent() {
                 <div>
                   <h3 className="text-sm font-bold tracking-[0.12em] text-[#1A1A1A]">PAGO POR TRANSFERENCIA</h3>
                   <p className="mt-1.5 text-[12px] text-[#6B6560]">
-                    Transferí {formatPrice(checkoutTotal)} a la cuenta y subí el comprobante.
+                    Transferí {formatPrice(checkoutTotal)} a la siguiente cuenta y adjuntá el comprobante para confirmar tu pedido.
                   </p>
                 </div>
                 <button
@@ -1409,13 +1415,13 @@ function CheckoutContent() {
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[12px] text-amber-800">
-                    Todavía no cargamos los datos de la cuenta. Escribinos y te los pasamos.
+                  <div className="rounded-xl border border-[#E8E4DD] bg-[#FBFAF7] px-4 py-3 text-[12px] text-[#6B6560]">
+                    Los datos de la cuenta no están disponibles en este momento. Volvé a intentar en unos minutos.
                   </div>
                 )}
 
                 <div>
-                  <p className="mb-2 text-[11px] uppercase tracking-[0.1em] text-[#6B6560]">Comprobante</p>
+                  <p className="mb-2 text-[11px] uppercase tracking-[0.1em] text-[#6B6560]">Comprobante de pago</p>
                   <label
                     htmlFor="transfer-receipt"
                     onDragOver={(e) => { e.preventDefault(); setReceiptDragging(true); }}
@@ -1439,7 +1445,7 @@ function CheckoutContent() {
                         ? 'Soltá el archivo acá'
                         : receipt
                         ? receipt.name
-                        : 'Subí la captura o el PDF de la transferencia'}
+                        : 'Adjuntá el comprobante de tu transferencia'}
                     </span>
                     <span className="shrink-0 rounded-lg bg-[#1A1A1A] px-3 py-1.5 text-[11px] font-semibold text-white">
                       {receipt ? 'Cambiar' : 'Elegir'}
@@ -1453,7 +1459,7 @@ function CheckoutContent() {
                     onChange={(e) => pickReceipt(e.target.files?.[0])}
                   />
                   <p className="mt-2 text-[11px] text-[#6B6560]">
-                    Imagen o PDF, hasta 10 MB. También podés arrastrarlo hasta acá.
+                    JPG, PNG o PDF, hasta 10 MB. También podés arrastrarlo hasta acá.
                   </p>
                   {receiptError && <p className="mt-2 text-[11px] text-red-500">{receiptError}</p>}
                 </div>
@@ -1463,17 +1469,17 @@ function CheckoutContent() {
                 <button
                   type="button"
                   onClick={confirmTransfer}
-                  disabled={submitting || !receipt}
+                  disabled={submitting || !receipt || !transferAccountRows.length}
                   className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#C8972E] py-4 text-[11px] font-bold tracking-[0.15em] text-white transition-all hover:bg-[#B8851F] active:scale-[0.98] disabled:opacity-50"
                 >
                   {submitting ? (
                     <><Loader2 size={14} className="animate-spin" /> CONFIRMANDO...</>
                   ) : (
-                    'CONFIRMAR COMPRA'
+                    'CONFIRMAR PEDIDO'
                   )}
                 </button>
                 <p className="mt-3 text-center text-[11px] text-[#6B6560]">
-                  Tu pedido queda apartado apenas confirmamos la transferencia.
+                  Al confirmar generamos tu orden. Verificamos la transferencia y te notificamos por email.
                 </p>
               </div>
             </motion.div>

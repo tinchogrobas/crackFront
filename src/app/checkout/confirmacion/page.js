@@ -145,23 +145,34 @@ function ConfirmacionContent() {
   }, [paymentId, externalReference, orderCode, transferOrder, clearCart, mpStatus, router]);
 
   const variant = verifying ? 'pending' : (paymentVerified ? 'success' : (isPending ? 'pending' : 'error'));
-  const title = verifying
+
+  // La transferencia tiene su propio texto: la orden existe y el comprobante
+  // esta cargado, pero el pago todavia no esta verificado. Decir "Aprobado"
+  // aca seria mentirle al comprador sobre algo que nadie miro todavia.
+  const title = transferOrder
+    ? 'ORDEN GENERADA'
+    : verifying
     ? 'VALIDANDO PAGO'
     : paymentVerified
     ? 'PEDIDO CONFIRMADO'
     : (isPending ? 'PAGO PENDIENTE' : 'PEDIDO RECIBIDO');
-  const statusLabel = verifying
+  const statusLabel = transferOrder
+    ? 'Estado: Verificando transferencia'
+    : verifying
     ? 'Estado: Verificando'
     : paymentVerified
     ? 'Estado: Aprobado'
     : (isPending ? 'Estado: En revision' : 'Estado: Validacion requerida');
+  const defaultMessage = transferOrder
+    ? 'Tu orden se generó exitosamente. Te notificaremos apenas verifiquemos la transferencia.'
+    : 'Estamos revisando tu pedido y te contactaremos a la brevedad para coordinar el envio.';
 
   return (
     <CheckoutStatusView
       variant={variant}
       title={title}
       statusLabel={statusLabel}
-      message={paymentMessage || 'Estamos revisando tu pedido y te contactaremos a la brevedad para coordinar el envio.'}
+      message={paymentMessage || defaultMessage}
       email={verifying ? '' : email}
       orderCode={verifying ? '' : orderCode}
       loadingText={verifying ? 'Verificando tu pago...' : ''}
