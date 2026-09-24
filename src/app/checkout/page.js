@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useCartStore } from '@/store/cartStore';
 import { syncCartWithBackend } from '@/lib/cartSync';
 import { formatPrice } from '@/lib/formatPrice';
-import { createOrder, getPaymentConfig, validateDiscount } from '@/lib/api';
+import { createOrder, getPaymentConfig, uploadTransferReceipt, validateDiscount } from '@/lib/api';
 import {
   trackAddPaymentInfo,
   trackAddShippingInfo,
@@ -15,7 +15,7 @@ import {
   setUserData,
 } from '@/lib/analytics';
 import toast from 'react-hot-toast';
-import { Tag, AlertTriangle, Loader2, X, Truck, MapPin, CreditCard, Landmark, Banknote, BadgePercent, Store, Zap } from 'lucide-react';
+import { Tag, AlertTriangle, Loader2, X, Truck, MapPin, CreditCard, Landmark, Banknote, BadgePercent, Store, Zap, Copy, Check, Upload, FileText } from 'lucide-react';
 
 const provinces = [
   'Buenos Aires', 'CABA', 'Catamarca', 'Chaco', 'Chubut', 'Córdoba', 'Corrientes', 'Entre Ríos',
@@ -101,6 +101,7 @@ function CheckoutContent() {
       branch: { ba: { normal: 0, express: 0 }, province: { normal: 0, express: 0 } },
       home: { ba: { normal: 0 }, province: { normal: 0 } },
     },
+    transfer: { bank: '', holder: '', cbu: '', alias: '' },
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -109,6 +110,14 @@ function CheckoutContent() {
   const [orderErrors, setOrderErrors] = useState([]); // mensajes de error del backend
   const [fieldErrors, setFieldErrors] = useState({}); // errores de validación por campo
   const [pickupMapOpen, setPickupMapOpen] = useState(false);
+  // Paso de transferencia: entre "confirmar la compra" y "existe la orden" hay
+  // un modal con los datos de la cuenta y el comprobante. La orden se crea
+  // recien cuando el archivo esta arriba.
+  const [transferModalOpen, setTransferModalOpen] = useState(false);
+  const [receipt, setReceipt] = useState(null);
+  const [receiptError, setReceiptError] = useState('');
+  const [receiptDragging, setReceiptDragging] = useState(false);
+  const [copiedField, setCopiedField] = useState('');
 
   const paymentId = searchParams.get('payment_id') || searchParams.get('collection_id');
   const externalReference = searchParams.get('external_reference') || searchParams.get('code');
@@ -472,6 +481,23 @@ function CheckoutContent() {
       coupon: discountCode || undefined,
     });
 
+    // Transferencia: la orden no se crea todavia. Primero el comprador ve la
+    // cuenta y sube el comprobante; el modal termina el trabajo.
+    if (form.payment_method === 'transfer') {
+      setReceiptError('');
+      setTransferModalOpen(true);
+      return;
+    }
+
+    await submitOrder();
+  };
+
+  /**
+   * Crea la orden. `receiptData` es lo que devolvio la subida del comprobante
+   * y solo viaja en las compras por transferencia.
+   */
+  const submitOrder = async (receiptData = null) => {
+    setOrderErrors([]);
     setSubmitting(true);
     try {
       const response = await createOrder({
@@ -520,6 +546,13 @@ function CheckoutContent() {
         shipping_province: form.shipping_province,
         shipping_zip: form.shipping_zip.trim(),
         discount_code: discountCode || '',
+        ...(receiptData
+          ? {
+              receipt_token: receiptData.token,
+              receipt_name: receiptData.name,
+              receipt_content_type: receiptData.content_type,
+            }
+          : {}),
         items: items.map((item) => ({ product_id: item.id, quantity: item.quantity })),
       });
 
@@ -535,7 +568,7 @@ function CheckoutContent() {
         return;
       }
 
-      router.push(`/checkout/confirmacion?order=${order.id}&code=${order.order_code}&email=${encodeURIComponent(order.customer_email)}&cash=1`);
+      router.push(`/checkout/confirmacion?order=${order.id}&code=${order.order_code}&email=${encodeURIComponent(order.customer_email)}&transfer=1`);
     } catch (err) {
       const data = err?.data;
       const errorMessages = [];
@@ -567,9 +600,62 @@ function CheckoutContent() {
 
       setOrderErrors(errorMessages);
       toast.error('No pudimos procesar tu pedido');
-      // Scroll al banner de error
+      // El banner de error vive arriba del formulario: si el modal sigue
+      // abierto, el comprador no lo ve nunca.
+      setTransferModalOpen(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const MAX_RECEIPT_BYTES = 10 * 1024 * 1024;
+
+  /** Valida el archivo del lado del navegador antes de gastar una subida. */
+  const pickReceipt = (file) => {
+    if (!file) return;
+
+    const isImage = (file.type || '').startsWith('image/');
+    const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name || '');
+    if (!isImage && !isPdf) {
+      setReceipt(null);
+      setReceiptError('El comprobante tiene que ser una imagen o un PDF.');
+      return;
+    }
+    if (file.size > MAX_RECEIPT_BYTES) {
+      setReceipt(null);
+      setReceiptError('El archivo pesa más de 10 MB. Probá con una captura de pantalla.');
+      return;
+    }
+
+    setReceiptError('');
+    setReceipt(file);
+  };
+
+  const copyTransferField = async (field, value) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedField(field);
+      setTimeout(() => setCopiedField(''), 2000);
+    } catch {
+      toast.error('No pudimos copiarlo. Seleccionalo a mano.');
+    }
+  };
+
+  /** Sube el comprobante y, solo si eso sale bien, crea la orden. */
+  const confirmTransfer = async () => {
+    if (!receipt) {
+      setReceiptError('Adjuntá el comprobante de la transferencia para confirmar.');
+      return;
+    }
+
+    setSubmitting(true);
+    setReceiptError('');
+    try {
+      const uploaded = await uploadTransferReceipt(receipt);
+      await submitOrder(uploaded);
+    } catch (err) {
+      setReceiptError(err?.message || 'No pudimos guardar el comprobante. Probá de nuevo.');
       setSubmitting(false);
     }
   };
@@ -632,6 +718,15 @@ function CheckoutContent() {
   const alternateTotal = form.payment_method === 'mercadopago'
     ? Math.max(0, subtotalAfterCode + shippingPrice)
     : Math.max(0, subtotalAfterCode + cardSurchargePreviewAmount + shippingPrice);
+  // Datos de la cuenta para el modal de transferencia. Vienen del admin, así
+  // que cambiar de banco no toca este archivo; las filas vacías no se muestran.
+  const transferAccountRows = [
+    { field: 'bank', label: 'Banco / billetera', value: paymentConfig?.transfer?.bank, copyable: false },
+    { field: 'holder', label: 'Titular', value: paymentConfig?.transfer?.holder, copyable: false },
+    { field: 'cbu', label: 'CBU / CVU', value: paymentConfig?.transfer?.cbu, copyable: true },
+    { field: 'alias', label: 'Alias', value: paymentConfig?.transfer?.alias, copyable: true },
+  ].filter((row) => Boolean((row.value || '').trim()));
+
   const paymentRadioClass = (selected) => `mt-0.5 flex h-5 w-5 min-h-5 min-w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${selected ? 'border-[#C8972E] bg-[#FFF8E8]' : 'border-[#B7B0A6] bg-white'}`;
   const paymentRadioDotClass = (selected) => `h-2.5 w-2.5 rounded-full transition-colors ${selected ? 'bg-[#C8972E]' : 'bg-transparent'}`;
 
@@ -1016,7 +1111,7 @@ function CheckoutContent() {
                 >
                   {/* Los logos viven en el renglón del título y no en una
                       columna aparte: así las descripciones ocupan el ancho de
-                      la card y entran en una línea, igual que en la de efectivo.
+                      la card y entran en una línea, igual que en la de transferencia.
                       Si no entran al lado del título, bajan solos a su renglón. */}
                   <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-3">
                     <div className="flex items-center gap-2">
@@ -1063,25 +1158,25 @@ function CheckoutContent() {
 
                 <button
                   type="button"
-                  onClick={() => updateForm('payment_method', 'cash')}
+                  onClick={() => updateForm('payment_method', 'transfer')}
                   className={`border rounded-lg px-4 py-3 text-left transition-all ${
-                    form.payment_method === 'cash'
+                    form.payment_method === 'transfer'
                       ? 'border-[#C8972E] bg-[#FFF8E8] text-[#1A1A1A] shadow-[0_8px_24px_rgba(200,151,46,0.14)]'
                       : 'border-[#E8E4DD] text-[#6B6560] hover:border-[#D4CFC6]'
                   }`}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-3">
                     <div className="flex items-center gap-2">
-                      <span className={paymentRadioClass(form.payment_method === 'cash')}>
-                        <span className={paymentRadioDotClass(form.payment_method === 'cash')} />
+                      <span className={paymentRadioClass(form.payment_method === 'transfer')}>
+                        <span className={paymentRadioDotClass(form.payment_method === 'transfer')} />
                       </span>
-                      <p className="text-sm font-semibold text-[#111111]">Efectivo / Transferencia / Crypto</p>
+                      <p className="text-sm font-semibold text-[#111111]">Transferencia bancaria</p>
                     </div>
                   </div>
 
                   <div className="mt-3.5 flex items-center gap-2 text-[11px] text-[#6B6560]">
                     <Banknote size={14} className="shrink-0" />
-                    <span>Coordinación manual por WhatsApp o tienda</span>
+                    <span>Te mostramos el CBU y subís el comprobante</span>
                   </div>
                   {cardSurchargeAvailablePercent > 0 && (
                     <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-[11px] font-semibold text-green-700">
@@ -1210,7 +1305,7 @@ function CheckoutContent() {
                     <div className="mt-1.5 flex justify-between text-[12px] text-[#6B6560]">
                       <span>
                         {form.payment_method === 'mercadopago'
-                          ? 'En efectivo, transferencia o crypto'
+                          ? 'Por transferencia bancaria'
                           : 'Con Mercado Pago / Tarjeta de Crédito'}
                       </span>
                       <span className="font-semibold">{formatPrice(alternateTotal)}</span>
@@ -1228,6 +1323,8 @@ function CheckoutContent() {
                   <><Loader2 size={14} className="animate-spin" /> PROCESANDO...</>
                 ) : stockChecking ? (
                   <><Loader2 size={14} className="animate-spin" /> VERIFICANDO...</>
+                ) : form.payment_method === 'transfer' ? (
+                  'CONTINUAR AL PAGO'
                 ) : (
                   'PAGAR AHORA'
                 )}
@@ -1242,6 +1339,147 @@ function CheckoutContent() {
           </motion.div>
         </form>
       </div>
+
+      {/* ── Modal de transferencia ──
+          Último paso de la compra: muestra la cuenta (que se edita desde el
+          admin, no vive en este archivo) y pide el comprobante. La orden se
+          crea al confirmar acá, no antes: si el comprador cierra el modal, no
+          queda ninguna orden a medias ni stock apartado. */}
+      <AnimatePresence>
+        {transferModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4"
+            onClick={() => !submitting && setTransferModalOpen(false)}
+            /* Soltar el archivo fuera de la caja no debe abrirlo en el navegador */
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => e.preventDefault()}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 24 }}
+              transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full sm:max-w-lg max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl bg-white shadow-[0_24px_60px_rgba(0,0,0,0.3)]"
+            >
+              <div className="flex items-start justify-between gap-4 border-b border-[#E8E4DD] px-6 py-5">
+                <div>
+                  <h3 className="text-sm font-bold tracking-[0.12em] text-[#1A1A1A]">PAGO POR TRANSFERENCIA</h3>
+                  <p className="mt-1.5 text-[12px] text-[#6B6560]">
+                    Transferí {formatPrice(checkoutTotal)} a la cuenta y subí el comprobante.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setTransferModalOpen(false)}
+                  disabled={submitting}
+                  className="shrink-0 rounded-full p-1.5 text-[#6B6560] transition-colors hover:bg-[#F5F2EC] hover:text-[#1A1A1A] disabled:opacity-40"
+                  aria-label="Cerrar"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="px-6 py-5 space-y-5">
+                {transferAccountRows.length > 0 ? (
+                  <div className="rounded-xl border border-[#E8E4DD] bg-[#FBFAF7] divide-y divide-[#E8E4DD]">
+                    {transferAccountRows.map((row) => (
+                      <div key={row.field} className="flex items-center justify-between gap-3 px-4 py-3">
+                        <div className="min-w-0">
+                          <p className="text-[10px] uppercase tracking-[0.1em] text-[#6B6560]">{row.label}</p>
+                          <p className="truncate text-sm font-semibold text-[#1A1A1A]">{row.value}</p>
+                        </div>
+                        {row.copyable && (
+                          <button
+                            type="button"
+                            onClick={() => copyTransferField(row.field, row.value)}
+                            className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-[#E8E4DD] bg-white px-2.5 py-1.5 text-[11px] font-semibold text-[#6B6560] transition-colors hover:border-[#C8972E] hover:text-[#1A1A1A]"
+                          >
+                            {copiedField === row.field ? (
+                              <><Check size={13} className="text-green-600" /> Copiado</>
+                            ) : (
+                              <><Copy size={13} /> Copiar</>
+                            )}
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[12px] text-amber-800">
+                    Todavía no cargamos los datos de la cuenta. Escribinos y te los pasamos.
+                  </div>
+                )}
+
+                <div>
+                  <p className="mb-2 text-[11px] uppercase tracking-[0.1em] text-[#6B6560]">Comprobante</p>
+                  <label
+                    htmlFor="transfer-receipt"
+                    onDragOver={(e) => { e.preventDefault(); setReceiptDragging(true); }}
+                    onDragLeave={() => setReceiptDragging(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setReceiptDragging(false);
+                      pickReceipt(e.dataTransfer?.files?.[0]);
+                    }}
+                    className={`flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed px-4 py-5 transition-colors ${
+                      receiptDragging
+                        ? 'border-[#C8972E] bg-[#FFF8E8]'
+                        : receipt
+                        ? 'border-green-300 bg-green-50'
+                        : 'border-[#E8E4DD] bg-white hover:border-[#D4CFC6]'
+                    }`}
+                  >
+                    {receipt ? <FileText size={18} className="shrink-0 text-green-600" /> : <Upload size={18} className="shrink-0 text-[#6B6560]" />}
+                    <span className={`min-w-0 flex-1 truncate text-sm ${receipt ? 'text-[#1A1A1A] font-medium' : 'text-[#6B6560]'}`}>
+                      {receiptDragging
+                        ? 'Soltá el archivo acá'
+                        : receipt
+                        ? receipt.name
+                        : 'Subí la captura o el PDF de la transferencia'}
+                    </span>
+                    <span className="shrink-0 rounded-lg bg-[#1A1A1A] px-3 py-1.5 text-[11px] font-semibold text-white">
+                      {receipt ? 'Cambiar' : 'Elegir'}
+                    </span>
+                  </label>
+                  <input
+                    id="transfer-receipt"
+                    type="file"
+                    accept="image/*,application/pdf"
+                    className="hidden"
+                    onChange={(e) => pickReceipt(e.target.files?.[0])}
+                  />
+                  <p className="mt-2 text-[11px] text-[#6B6560]">
+                    Imagen o PDF, hasta 10 MB. También podés arrastrarlo hasta acá.
+                  </p>
+                  {receiptError && <p className="mt-2 text-[11px] text-red-500">{receiptError}</p>}
+                </div>
+              </div>
+
+              <div className="border-t border-[#E8E4DD] px-6 py-5">
+                <button
+                  type="button"
+                  onClick={confirmTransfer}
+                  disabled={submitting || !receipt}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#C8972E] py-4 text-[11px] font-bold tracking-[0.15em] text-white transition-all hover:bg-[#B8851F] active:scale-[0.98] disabled:opacity-50"
+                >
+                  {submitting ? (
+                    <><Loader2 size={14} className="animate-spin" /> CONFIRMANDO...</>
+                  ) : (
+                    'CONFIRMAR COMPRA'
+                  )}
+                </button>
+                <p className="mt-3 text-center text-[11px] text-[#6B6560]">
+                  Tu pedido queda apartado apenas confirmamos la transferencia.
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

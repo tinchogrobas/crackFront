@@ -159,6 +159,38 @@ export async function createOrder(orderData) {
   });
 }
 
+/**
+ * Sube el comprobante de la transferencia y devuelve { token, name, content_type, size }.
+ *
+ * Va antes de crear la orden: ese `token` es lo que después habilita el alta.
+ * No pasa por `apiFetch` porque manda FormData, y ahí el navegador tiene que
+ * poner el Content-Type con su propio boundary.
+ */
+export async function uploadTransferReceipt(file) {
+  const body = new FormData();
+  body.append('file', file);
+
+  let res;
+  try {
+    res = await fetch(`${BASE_URL}/orders/receipt/`, { method: 'POST', body });
+  } catch {
+    throw Object.assign(
+      new Error('No pudimos conectarnos. Revisá tu conexión a internet y volvé a intentar.'),
+      { status: 0, data: {} }
+    );
+  }
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw Object.assign(new Error(error.detail || fallbackMessage(res.status)), {
+      status: res.status,
+      data: error,
+    });
+  }
+
+  return res.json();
+}
+
 export async function getPaymentConfig() {
   return apiFetch('/payments/config/');
 }

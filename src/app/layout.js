@@ -142,7 +142,7 @@ function OrganizationJsonLd() {
       addressCountry: 'AR',
     },
     currenciesAccepted: 'ARS',
-    paymentAccepted: 'Mercado Pago, Transferencia, Efectivo, Crypto',
+    paymentAccepted: 'Mercado Pago, Transferencia bancaria',
   };
 
   const website = {
@@ -184,7 +184,7 @@ function OrganizationJsonLd() {
     email: CONTACT.email,
     priceRange: '$$',
     currenciesAccepted: 'ARS',
-    paymentAccepted: 'Mercado Pago, Transferencia, Efectivo, Crypto',
+    paymentAccepted: 'Mercado Pago, Transferencia bancaria',
     hasMap: BUSINESS.mapUrl,
     address: {
       '@type': 'PostalAddress',

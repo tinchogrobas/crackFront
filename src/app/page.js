@@ -9,7 +9,7 @@ import { SITE_URL, SITE_NAME, DEFAULT_OG_IMAGE, GLOBAL_KEYWORDS } from '@/lib/se
 
 const title = `${SITE_NAME} — Cartas Pokémon TCG en Argentina`;
 const description =
-  'Comprá cartas Pokémon TCG en Argentina: singles, slabs PSA/BGS/CGC, sobres sellados, Mystery Packs y accesorios. Envíos a todo el país, pago seguro con Mercado Pago, transferencia o crypto.';
+  'Comprá cartas Pokémon TCG en Argentina: singles, slabs PSA/BGS/CGC, sobres sellados, Mystery Packs y accesorios. Envíos a todo el país, pago seguro con Mercado Pago o transferencia bancaria.';
 
 export const metadata = {
   title: { absolute: title },

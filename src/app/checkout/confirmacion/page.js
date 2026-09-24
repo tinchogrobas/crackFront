@@ -22,7 +22,7 @@ function ConfirmacionContent() {
   const paymentId = searchParams.get('payment_id');
   const externalReference = searchParams.get('external_reference');
   const mpStatus = (searchParams.get('status') || '').toLowerCase();
-  const cashOrder = searchParams.get('cash') === '1';
+  const transferOrder = searchParams.get('transfer') === '1';
   const clearCart = useCartStore((s) => s.clearCart);
 
   /**
@@ -57,13 +57,13 @@ function ConfirmacionContent() {
       user: email ? { email } : undefined,
     });
   };
-  const [verifying, setVerifying] = useState(!cashOrder);
-  const [paymentVerified, setPaymentVerified] = useState(cashOrder);
+  const [verifying, setVerifying] = useState(!transferOrder);
+  const [paymentVerified, setPaymentVerified] = useState(transferOrder);
   const [isPending, setIsPending] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState('');
 
   useEffect(() => {
-    if (!cashOrder && (mpStatus === 'rejected' || mpStatus === 'cancelled')) {
+    if (!transferOrder && (mpStatus === 'rejected' || mpStatus === 'cancelled')) {
       const params = new URLSearchParams();
       if (orderCode) params.set('code', orderCode);
       if (externalReference) params.set('external_reference', externalReference);
@@ -71,7 +71,7 @@ function ConfirmacionContent() {
       return;
     }
 
-    if (cashOrder) {
+    if (transferOrder) {
       setVerifying(false);
       firePurchase(orderCode);
       clearCart();
@@ -142,7 +142,7 @@ function ConfirmacionContent() {
 
     verifyPayment();
     return () => { cancelled = true; };
-  }, [paymentId, externalReference, orderCode, cashOrder, clearCart, mpStatus, router]);
+  }, [paymentId, externalReference, orderCode, transferOrder, clearCart, mpStatus, router]);
 
   const variant = verifying ? 'pending' : (paymentVerified ? 'success' : (isPending ? 'pending' : 'error'));
   const title = verifying

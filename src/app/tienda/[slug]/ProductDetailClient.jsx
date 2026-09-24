@@ -237,11 +237,11 @@ export default function ProductDetailClient({ product }) {
 
             {/* Price */}
             {(() => {
-              // El precio publicado es el precio en efectivo. Con Mercado Pago
-              // o tarjeta de crédito se suma el recargo configurado en el admin.
-              const cashPrice = parseFloat(product.final_price || product.price_ars || 0);
+              // El precio publicado es el precio por transferencia. Con Mercado
+              // Pago o tarjeta se suma el recargo configurado en el admin.
+              const transferPrice = parseFloat(product.final_price || product.price_ars || 0);
               const cardPrice = cardSurcharge.enabled && cardSurcharge.percent > 0
-                ? cashPrice * (1 + cardSurcharge.percent / 100)
+                ? transferPrice * (1 + cardSurcharge.percent / 100)
                 : null;
 
               return (
@@ -251,7 +251,7 @@ export default function ProductDetailClient({ product }) {
                       punto claro del gradiente. */}
                   <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
                     <span className="text-[34px] sm:text-[38px] font-black leading-none tracking-[-0.03em] text-[#2F2A25]">
-                      {formatPrice(cashPrice)}
+                      {formatPrice(transferPrice)}
                     </span>
                     {hasDiscount && (
                       <>
@@ -259,7 +259,7 @@ export default function ProductDetailClient({ product }) {
                         <span className="inline-flex items-center rounded-full bg-[#C8972E]/10 px-2.5 py-1 text-[11px] font-bold tracking-wide text-[#B8851F]">-{product.discount_percent}%</span>
                       </>
                     )}
-                    <span className="text-[13px] font-medium text-[#6B6560]">en efectivo, transferencia o crypto</span>
+                    <span className="text-[13px] font-medium text-[#6B6560]">por transferencia bancaria</span>
                   </div>
 
                   {cardPrice && inStock && (
