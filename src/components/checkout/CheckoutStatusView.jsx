@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Copy, Check, Clock3, CircleX } from 'lucide-react';
 
+// variants
 const VARIANTS = {
   success: {
     iconWrap: 'bg-[#C8972E]/10 border-[#C8972E]/30',
