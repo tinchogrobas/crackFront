@@ -73,9 +73,9 @@ export default function FeaturedProducts() {
           <div>
             <div className="flex items-center gap-3 mb-1.5">
               <div className="w-6 h-px bg-[#C8972E]" />
-              <p className="text-[10px] tracking-[0.3em] text-[#C8972E] uppercase font-medium">Ofertas</p>
+              <p className="text-[10px] tracking-[0.3em] text-[#C8972E] uppercase font-medium">Distinción</p>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-[-0.02em] text-[#1A1A1A]">En descuento</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-[-0.02em] text-[#1A1A1A]">Lo más Exclusivo</h2>
           </div>
           <Link href="/tienda?has_discount=true" className="hidden sm:inline text-[12px] text-[#6B6560] hover:text-[#C8972E] transition-colors border-b border-[#E8E4DD] hover:border-[#C8972E]/40 pb-0.5">
             Ver todo →
