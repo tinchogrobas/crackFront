@@ -588,3 +588,256 @@ details.accordion[open] .icon-minus { display: block; }
     transition: none;
   }
 }
+
+/* =========================================================
+   Megamenú de Tienda (desktop) — réplica del hover del tema
+   Broadcast, ver mockup/megamenu-sellado.html.
+   Los delays en cascada los pone TiendaMegaMenu.jsx inline.
+   ========================================================= */
+:root {
+  --mm-ease: cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.mm-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-bottom: 1px solid #e8e4dd;
+  box-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  /* cierre: fade de 0.2s y recién al final se apaga la visibilidad */
+  transition: opacity 0.2s var(--mm-ease), visibility 0s linear 0.2s;
+}
+.mm-dropdown.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.2s var(--mm-ease), visibility 0s;
+}
+
+.mm-inner {
+  display: flex;
+  gap: 40px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
+/* ---- Columna de links (cascada) ---- */
+.mm-links {
+  flex: 0 0 220px;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 0;
+}
+.mm-group + .mm-group {
+  margin-top: 22px;
+}
+.mm-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #b5aea6;
+  margin-bottom: 10px;
+}
+.mm-link {
+  display: block;
+  padding: 6px 0;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a847e;
+  /* cerrado: 5px arriba e invisible, SIN transición → la cascada arranca de cero */
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: none;
+}
+.is-visible .mm-link {
+  opacity: 1;
+  transform: translateY(0);
+  transition: transform 0.15s var(--mm-ease), opacity 0.35s var(--mm-ease), color 0.25s var(--mm-ease);
+}
+.mm-link:hover,
+.mm-link:focus-visible {
+  color: #1a1a1a;
+}
+
+/* ---- Bloques con imagen ---- */
+.mm-blocks {
+  flex: 1 1 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  padding: 32px 0;
+}
+.mm-image {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  max-height: calc(100vh - 200px);
+  background: radial-gradient(110% 80% at 50% 35%, #fbfaf7 0%, #f1ede6 70%);
+  border: 1px solid #ece7df;
+  opacity: 0;
+  transition: opacity 0.75s var(--mm-ease), border-color 0.4s var(--mm-ease);
+}
+.is-visible .mm-image {
+  opacity: 1;
+}
+.mm-image:hover {
+  border-color: rgba(200, 151, 46, 0.45);
+}
+/* Área de la foto: deja abajo el lugar del título para que nunca se pisen */
+.mm-image-wrapper {
+  position: absolute;
+  inset: 0 0 84px;
+  padding: 28px 32px 8px;
+  transform: scale(1.06);
+  transform-origin: center bottom;
+  transition: transform 0.75s var(--mm-ease);
+}
+/* al abrir: zoom-out lento 1.06 → 1 en 1.5s, lo que da el efecto "smooth" */
+.is-visible .mm-image-wrapper {
+  transform: scale(1);
+  transition: transform 1.5s var(--mm-ease);
+}
+/* al cerrar, sin delay escalonado */
+.mm-dropdown:not(.is-visible) .mm-image,
+.mm-dropdown:not(.is-visible) .mm-image-wrapper {
+  transition-delay: 0s !important;
+}
+/* hover: zoom-in lento y leve, la foto no se sale de su lugar */
+.mm-image:hover .mm-image-wrapper {
+  transform: scale(1.03) !important;
+  transition: transform 2s var(--mm-ease) !important;
+  transition-delay: 0s !important;
+}
+.mm-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 12px 18px rgba(26, 26, 26, 0.18));
+}
+.mm-caption {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 18px;
+}
+.mm-title {
+  font-family: var(--font-bebas), var(--font-inter), sans-serif;
+  font-size: 32px;
+  line-height: 1;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: #1a1a1a;
+}
+
+/* ---- Lupa: mismas piezas que el megamenú ---- */
+.search-link {
+  display: block;
+  padding: 6px 0;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a847e;
+  transition: color 0.25s var(--mm-ease);
+}
+.search-link:hover,
+.search-link:focus-visible {
+  color: #1a1a1a;
+}
+.search-card {
+  display: block;
+  width: 100%;
+}
+.search-card__media {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  /* en pantallas bajas se achata antes que obligar a scrollear */
+  max-height: calc(100dvh - 330px);
+  min-height: 180px;
+  overflow: hidden;
+  background: radial-gradient(110% 80% at 50% 35%, #fbfaf7 0%, #f1ede6 70%);
+  border: 1px solid #ece7df;
+}
+.search-card:hover .search-card__media {
+  border-color: rgba(200, 151, 46, 0.45);
+}
+.search-card__media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 10%;
+  filter: drop-shadow(0 12px 18px rgba(26, 26, 26, 0.18));
+  transition: transform 2s var(--mm-ease);
+}
+.search-card:hover .search-card__media img {
+  transform: scale(1.03);
+}
+.search-card__body {
+  padding-top: 10px;
+}
+.search-card__category {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #b5aea6;
+}
+.search-card__name {
+  margin-top: 3px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a1a;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition: color 0.25s var(--mm-ease);
+}
+.search-card:hover .search-card__name {
+  color: #c8972e;
+}
+.search-card__price {
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+/* ---- Oscurece la página detrás ---- */
+.mm-underlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s 0.1s, visibility 0s linear 0.4s;
+}
+.mm-underlay.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s 0.1s, visibility 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mm-link,
+  .is-visible .mm-link,
+  .mm-image-wrapper,
+  .is-visible .mm-image-wrapper,
+  .mm-image:hover .mm-image-wrapper {
+    transform: none !important;
+  }
+}

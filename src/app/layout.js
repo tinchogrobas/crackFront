@@ -7,6 +7,8 @@ import { Toaster } from 'react-hot-toast';
 import MaintenancePage from '@/components/MaintenancePage';
 import AnalyticsScripts from '@/components/analytics/AnalyticsScripts';
 import ConsentBanner from '@/components/analytics/ConsentBanner';
+import { getMegaMenuData } from '@/lib/megaMenu';
+import FloatingContact from '@/components/layout/FloatingContact';
 import {
   ANALYTICS_ENABLED,
   GA4_ID,
@@ -295,7 +297,8 @@ async function isAdminBypassValid() {
 }
 
 export default async function RootLayout({ children }) {
-  const siteConfig = await getSiteConfig();
+  // En paralelo: el megamenú viene del Data Cache casi siempre, no suma espera.
+  const [siteConfig, megaMenu] = await Promise.all([getSiteConfig(), getMegaMenuData()]);
   let isMaintenance = !siteConfig.is_active;
   if (isMaintenance && (await isAdminBypassValid())) {
     isMaintenance = false;
@@ -346,11 +349,15 @@ export default async function RootLayout({ children }) {
             <Navbar
               showTopBanner={siteConfig.show_top_banner}
               topBannerMessage={siteConfig.top_banner_message}
+              megaMenu={megaMenu}
             />
             <main className="min-h-screen pt-8">{children}</main>
             <Footer />
+            <FloatingContact />
             <Toaster
               position="bottom-right"
+              // Arriba del botón de WhatsApp, que ocupa la esquina.
+              containerStyle={{ bottom: 96 }}
               toastOptions={{
                 duration: 2500,
                 style: {

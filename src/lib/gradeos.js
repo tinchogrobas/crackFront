@@ -6,7 +6,7 @@
  * corta el mensaje en el primer carácter que no sea ASCII.
  */
 
-const WHATSAPP_PHONE = '541150588131';
+import { WHATSAPP_PHONE } from './social';
 
 export const GRADEOS_MESSAGE =
   'Hola CRACKTCG, estoy interesado en el servicio de certificación de mis cartas.';

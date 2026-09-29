@@ -6,15 +6,20 @@ import Image from 'next/image';
 import { ShoppingBag, Menu, X, Search, LogOut } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import CartDrawer from './CartDrawer';
+import TiendaMegaMenu from './TiendaMegaMenu';
 import SearchOverlay from '@/components/ui/SearchOverlay';
 import { GRADEOS_WHATSAPP_URL } from '@/lib/gradeos';
 
 const DEFAULT_BANNER_MESSAGE = 'Envíos a todo el país — 15% OFF con código CRACK15';
 
-export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAULT_BANNER_MESSAGE }) {
+export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAULT_BANNER_MESSAGE, megaMenu = null }) {
   const ANNOUNCEMENT_BAR_HEIGHT = 36;
   const NAVBAR_TOP_GAP = 0;
   const [scrolled, setScrolled] = useState(false);
+  // Megamenú de Tienda: `primed` difiere la descarga de las imágenes hasta que
+  // el mouse entra al navbar, así no se bajan en cada carga de página.
+  const [megaOpen, setMegaOpen] = useState(false);
+  const [megaPrimed, setMegaPrimed] = useState(false);
   const [logoUnavailable, setLogoUnavailable] = useState(false);
   const cartOpen = useCartStore((s) => s.isCartOpen);
   const openCart = useCartStore((s) => s.openCart);
@@ -49,6 +54,8 @@ export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAUL
     { href: GRADEOS_WHATSAPP_URL, label: 'Gradeos', external: true },
     { href: '/contacto', label: 'Contacto' },
   ];
+  // Con el megamenú abierto el navbar toma el estilo claro, igual que al scrollear.
+  const light = scrolled || megaOpen;
   const bannerMessage = (topBannerMessage || DEFAULT_BANNER_MESSAGE).trim();
   const navTop = showTopBanner ? ANNOUNCEMENT_BAR_HEIGHT + NAVBAR_TOP_GAP : 0;
 
@@ -76,14 +83,17 @@ export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAUL
       {/* Main navbar */}
       <nav
         className={`fixed left-0 right-0 z-50 transition-all duration-500 border-b ${
-          scrolled
+          megaOpen
+            ? 'bg-white border-[#E8E4DD]'
+            : scrolled
             ? 'bg-white/95 backdrop-blur-2xl border-[#E8E4DD] shadow-md'
             : 'bg-[#1a1a1a]/70 backdrop-blur-md border-[#C8972E]/30'
         }`}
         style={{ top: `${navTop}px` }}
+        onPointerEnter={() => setMegaPrimed(true)}
       >
         {/* Gold accent glow below navbar */}
-        <div className={`absolute top-full left-0 right-0 transition-opacity duration-500 ${scrolled ? 'opacity-0' : 'opacity-100'} pointer-events-none`}>
+        <div className={`absolute top-full left-0 right-0 transition-opacity duration-500 ${light ? 'opacity-0' : 'opacity-100'} pointer-events-none`}>
           <div className="h-[2px] bg-gradient-to-r from-transparent via-[#C8972E] to-transparent" />
           <div className="h-[6px] bg-gradient-to-r from-transparent via-[#C8972E]/50 to-transparent blur-sm" />
           <div className="h-[10px] bg-gradient-to-r from-transparent via-[#C8972E]/20 to-transparent blur-md" />
@@ -96,7 +106,7 @@ export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAUL
               <button
                 onClick={() => setMobileMenuOpen(true)}
                 className={`lg:hidden transition-colors ${
-                  scrolled
+                  light
                     ? 'text-[#1A1A1A]/60 hover:text-[#1A1A1A]'
                     : 'text-white/70 hover:text-[#C8972E]'
                 }`}
@@ -106,16 +116,33 @@ export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAUL
               <div className="hidden lg:flex items-center gap-8">
                 {navLinks.map((link) => {
                   const linkClass = `text-[13px] font-semibold uppercase tracking-[0.12em] transition-colors duration-300 relative group ${
-                    scrolled
+                    light
                       ? 'text-[#6B6560] hover:text-[#1A1A1A]'
                       : 'text-white/90 hover:text-[#C8972E]'
                   }`;
+                  const underline = (
+                    <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-[#C8972E] group-hover:w-full transition-all duration-300" />
+                  );
                   const content = (
                     <>
                       {link.label}
-                      <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-[#C8972E] group-hover:w-full transition-all duration-300" />
+                      {underline}
                     </>
                   );
+
+                  if (link.href === '/tienda' && megaMenu) {
+                    return (
+                      <TiendaMegaMenu
+                        key={link.href}
+                        data={megaMenu}
+                        open={megaOpen}
+                        primed={megaPrimed}
+                        onOpenChange={setMegaOpen}
+                        linkClassName={linkClass}
+                        underline={underline}
+                      />
+                    );
+                  }
 
                   return link.external ? (
                     <a
@@ -147,7 +174,7 @@ export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAUL
                     priority
                     sizes="(min-width: 640px) 160px, 132px"
                     className={`object-contain transition-opacity duration-500 ease-out ${
-                      scrolled ? 'opacity-0' : 'opacity-100'
+                      light ? 'opacity-0' : 'opacity-100'
                     }`}
                     onError={() => setLogoUnavailable(true)}
                   />
@@ -158,7 +185,7 @@ export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAUL
                     priority
                     sizes="(min-width: 640px) 160px, 132px"
                     className={`object-contain transition-opacity duration-500 ease-out ${
-                      scrolled ? 'opacity-100' : 'opacity-0'
+                      light ? 'opacity-100' : 'opacity-0'
                     }`}
                     onError={() => setLogoUnavailable(true)}
                   />
@@ -166,7 +193,7 @@ export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAUL
               ) : (
                 <span
                   className={`font-display text-xl sm:text-2xl font-bold tracking-[0.3em] transition-all duration-300 ${
-                    scrolled
+                    light
                       ? 'text-[#1A1A1A] hover:text-[#C8972E]'
                       : 'text-white hover:text-[#C8972E] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]'
                   }`}
@@ -184,7 +211,7 @@ export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAUL
                   aria-label="Salir del modo administrador"
                   title="Salir del modo administrador"
                   className={`flex items-center gap-1.5 text-[10px] sm:text-[11px] tracking-[0.18em] uppercase font-semibold transition-colors ${
-                    scrolled
+                    light
                       ? 'text-[#C8972E] hover:text-[#1A1A1A]'
                       : 'text-[#C8972E] hover:text-white'
                   }`}
@@ -197,7 +224,7 @@ export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAUL
                 onClick={() => setSearchOpen(true)}
                 aria-label="Abrir búsqueda"
                 className={`transition-colors ${
-                  scrolled
+                  light
                     ? 'text-[#6B6560] hover:text-[#1A1A1A]'
                     : 'text-white/90 hover:text-[#C8972E] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]'
                 }`}
@@ -207,7 +234,7 @@ export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAUL
               <button
                 onClick={openCart}
                 className={`transition-colors relative ${
-                  scrolled
+                  light
                     ? 'text-[#6B6560] hover:text-[#1A1A1A]'
                     : 'text-white/90 hover:text-[#C8972E] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]'
                 }`}
@@ -224,8 +251,10 @@ export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAUL
         </div>
       </nav>
 
+      <div className={`mm-underlay hidden lg:block ${megaOpen ? 'is-visible' : ''}`} aria-hidden="true" />
+
       <CartDrawer isOpen={cartOpen} onClose={closeCart} />
-      <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+      <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} menu={megaMenu} />
 
       {/* Mobile menu */}
       <AnimatePresence>

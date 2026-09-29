@@ -8,16 +8,58 @@ import { searchProducts, getFeaturedProducts } from '@/lib/api';
 import { formatPrice } from '@/lib/formatPrice';
 import { trackSearch } from '@/lib/analytics';
 
-const POPULAR_LINKS = [
-  { label: 'Singles', href: '/tienda?category=singles' },
-  { label: 'Slabs', href: '/tienda?category=slabs' },
-  { label: 'Sellados', href: '/tienda?category=sellados' },
-  { label: 'Accesorios', href: '/tienda?category=accesorios' },
-  { label: 'Mystery Packs', href: '/tienda?category=mystery-packs' },
-  { label: 'Ver todo', href: '/tienda' },
+// Atajos de la columna izquierda. A propósito NO repiten TCG ni categorías
+// (eso ya está en el megamenú de Tienda): son filtros que el menú no tiene.
+const EXPLORE_LINKS = [
+  { name: 'Ofertas', href: '/tienda?has_discount=true' },
+  { name: 'Últimos ingresos', href: '/tienda' },
 ];
 
-export default function SearchOverlay({ isOpen, onClose }) {
+// Si el layout no pudo traer las certificadoras, salen las principales.
+const FALLBACK_CERTIFICATIONS = ['BGS', 'CGC', 'PSA'].map((abbr) => ({
+  name: abbr,
+  href: `/tienda?category=slabs&certification_entity=${abbr}`,
+}));
+
+// Mismo tamaño que los bloques del megamenú: columna de 220px + grilla de 3.
+const CARD_SIZES = '(max-width: 768px) 50vw, 26vw';
+
+const categoryName = (product) =>
+  typeof product.category === 'object' ? product.category?.name : product.category;
+
+/**
+ * Card de producto con el mismo lenguaje que los bloques del megamenú de
+ * Tienda (.mm-image): fondo crema, borde fino, foto contenida y zoom lento.
+ */
+function SearchCard({ product, delay, sizes, onSelect, cardRef, className = '', role }) {
+  return (
+    <button
+      ref={cardRef}
+      onClick={() => onSelect(product.slug)}
+      className={`lupita-item search-card text-left ${className}`}
+      style={{ transitionDelay: delay }}
+      role={role}
+    >
+      <div className="lupita-image search-card__media" style={{ transitionDelay: delay }}>
+        {product.image_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img {...imgProps(product.image_url, 'card', { sizes })} alt={product.name} />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Search size={20} className="text-[#6B6560]/15" />
+          </div>
+        )}
+      </div>
+      <div className="search-card__body">
+        <p className="search-card__category">{categoryName(product)}</p>
+        <p className="search-card__name">{product.name}</p>
+        <p className="search-card__price">{formatPrice(product.final_price || product.price_ars)}</p>
+      </div>
+    </button>
+  );
+}
+
+export default function SearchOverlay({ isOpen, onClose, menu = null }) {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
@@ -49,7 +91,7 @@ export default function SearchOverlay({ isOpen, onClose }) {
   useEffect(() => {
     setLoadingPopular(true);
     getFeaturedProducts()
-      .then((data) => setPopularProducts(data.slice(0, 4)))
+      .then((data) => setPopularProducts(data.slice(0, 3)))
       .catch(() => {})
       .finally(() => setLoadingPopular(false));
   }, []);
@@ -131,8 +173,13 @@ export default function SearchOverlay({ isOpen, onClose }) {
   const showEmpty = hasQuery && !loading && results.length === 0;
   const showInitial = !hasQuery;
 
-  const categoryName = (product) =>
-    typeof product.category === 'object' ? product.category.name : product.category;
+  const linkGroups = [
+    { title: 'Explorar', links: EXPLORE_LINKS },
+    {
+      title: 'Slabs por certificadora',
+      links: menu?.certifications?.length ? menu.certifications : FALLBACK_CERTIFICATIONS,
+    },
+  ];
 
   return (
     <>
@@ -152,7 +199,7 @@ export default function SearchOverlay({ isOpen, onClose }) {
         aria-modal="true"
         aria-label="Búsqueda"
       >
-        <div className="bg-[#FAFAF7] border-b border-[#E8E4DD] shadow-xl relative">
+        <div className="bg-white border-b border-[#E8E4DD] shadow-xl relative">
           <button
             onClick={handleClose}
             className="lupita-item absolute top-4 right-5 sm:right-8 text-[#6B6560] hover:text-[#1A1A1A] transition-colors z-10"
@@ -161,11 +208,11 @@ export default function SearchOverlay({ isOpen, onClose }) {
           >
             <X size={20} />
           </button>
-          <div className="w-full max-w-[1200px] mx-auto px-5 sm:px-8 pt-5 pb-6">
+          <div className="w-full max-w-[1400px] mx-auto px-5 sm:px-8 pt-5 pb-8">
             {/* Search form */}
             <form
               onSubmit={goToSearch}
-              className="lupita-item flex items-center border-b-2 border-[#C8972E]/40 focus-within:border-[#C8972E] pb-2 gap-3 mb-5 transition-colors"
+              className="lupita-item flex items-center border-b border-[#E8E4DD] focus-within:border-[#C8972E] pb-3 gap-3 mb-7 pr-10 transition-colors"
               style={{ transitionDelay: '50ms' }}
             >
               <Search size={20} className="text-[#C8972E] flex-shrink-0" />
@@ -175,7 +222,7 @@ export default function SearchOverlay({ isOpen, onClose }) {
                 value={query}
                 onChange={handleChange}
                 placeholder="Buscar productos..."
-                className="flex-1 bg-transparent outline-none text-[20px] sm:text-[28px] font-[family-name:var(--font-bebas)] font-extrabold text-[#1A1A1A] placeholder:text-[#6B6560]/30 tracking-wide"
+                className="flex-1 min-w-0 bg-transparent outline-none text-[24px] sm:text-[34px] leading-none font-[family-name:var(--font-bebas)] font-extrabold uppercase text-[#1A1A1A] placeholder:text-[#1A1A1A]/20 tracking-[0.02em] [&::-webkit-search-cancel-button]:appearance-none"
                 aria-label="Buscar productos"
                 aria-autocomplete="list"
                 aria-controls="search-results"
@@ -197,53 +244,51 @@ export default function SearchOverlay({ isOpen, onClose }) {
               </div>
             </form>
 
-            {/* Results area */}
-            <div
-              id="search-results"
-              className="max-h-[calc(100dvh-280px)] overflow-y-auto hide-scrollbar"
-              role="region"
-              aria-live="polite"
-              aria-label="Resultados de búsqueda"
-            >
-              {/* Loading state */}
-              {loading && hasQuery && (
-                <div className="flex items-center justify-center py-10">
-                  <Loader2 size={24} className="animate-spin text-[#C8972E]/50" />
-                </div>
-              )}
-
-              {/* Initial state - popular content */}
-              {showInitial && (
-                <div className="grid grid-cols-1 md:grid-cols-[minmax(0,0.5fr)_minmax(0,3.5fr)] gap-5 md:gap-8">
-                  {/* Sidebar - popular links */}
+            {/* Misma grilla que el megamenú de Tienda: atajos a la izquierda
+                y tres bloques del mismo tamaño a la derecha. */}
+            <div className="flex flex-col md:flex-row gap-6 md:gap-10">
+              <nav
+                aria-label="Atajos de la tienda"
+                className={`md:flex-[0_0_220px] gap-x-6 ${hasQuery ? 'hidden md:block' : 'grid grid-cols-2 md:block'}`}
+              >
+                {linkGroups.map((group, groupIndex) => (
                   <div
-                    className="lupita-item"
-                    style={{ transitionDelay: '100ms' }}
+                    key={group.title}
+                    className={`lupita-item ${groupIndex > 0 ? 'md:mt-[22px]' : ''}`}
+                    style={{ transitionDelay: `${100 + groupIndex * 50}ms` }}
                   >
-                    <h3 className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#C8972E] mb-3">
-                      Populares
-                    </h3>
-                    <ul className="flex flex-col gap-1.5">
-                      {POPULAR_LINKS.map((link) => (
+                    <h3 className="mm-eyebrow">{group.title}</h3>
+                    <ul>
+                      {group.links.map((link) => (
                         <li key={link.href}>
-                          <Link
-                            href={link.href}
-                            onClick={handleLinkClick}
-                            className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#6B6560] hover:text-[#1A1A1A] transition-colors no-underline block py-0.5"
-                          >
-                            {link.label}
+                          <Link href={link.href} onClick={handleLinkClick} className="search-link">
+                            {link.name}
                           </Link>
                         </li>
                       ))}
                     </ul>
                   </div>
+                ))}
+              </nav>
 
-                  {/* Popular products */}
-                  <div>
-                    <h3
-                      className="lupita-item text-[11px] font-bold uppercase tracking-[0.15em] text-[#C8972E] mb-3"
-                      style={{ transitionDelay: '150ms' }}
-                    >
+              <div
+                id="search-results"
+                className="flex-1 min-w-0 max-h-[calc(100dvh-150px)] overflow-y-auto hide-scrollbar"
+                role="region"
+                aria-live="polite"
+                aria-label="Resultados de búsqueda"
+              >
+                {/* Loading state */}
+                {loading && hasQuery && (
+                  <div className="flex items-center justify-center py-10">
+                    <Loader2 size={24} className="animate-spin text-[#C8972E]/50" />
+                  </div>
+                )}
+
+                {/* Productos populares */}
+                {showInitial && (
+                  <>
+                    <h3 className="lupita-item mm-eyebrow" style={{ transitionDelay: '150ms' }}>
                       Productos populares
                     </h3>
                     {loadingPopular ? (
@@ -251,138 +296,70 @@ export default function SearchOverlay({ isOpen, onClose }) {
                         <Loader2 size={20} className="animate-spin text-[#C8972E]/30" />
                       </div>
                     ) : (
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        {popularProducts.map((product, idx) => {
-                          const delay = `${200 + idx * 50}ms`;
-                          return (
-                            <button
-                              key={product.id}
-                              onClick={() => goToProduct(product.slug)}
-                              className={`lupita-item text-left group/card ${idx >= 2 ? 'hidden md:block' : ''}`}
-                              style={{ transitionDelay: delay }}
-                            >
-                              <div
-                                className="lupita-image aspect-square bg-[#F5F1EA] rounded-lg relative overflow-hidden border border-[#E8E4DD]/60"
-                                style={{ transitionDelay: delay }}
-                              >
-                                {product.image_url ? (
-                                  // eslint-disable-next-line @next/next/no-img-element
-                                  <img
-                                    {...imgProps(product.image_url, 'card', { sizes: '(max-width: 640px) 50vw, 25vw' })}
-                                    alt={product.name}
-                                    className="absolute inset-0 w-full h-full object-contain p-3 group-hover/card:scale-105 transition-transform duration-300"
-                                  />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center">
-                                    <Search size={20} className="text-[#6B6560]/15" />
-                                  </div>
-                                )}
-                              </div>
-                              <div className="pt-2 px-0.5">
-                                <p className="text-[12px] font-semibold text-[#1A1A1A] truncate group-hover/card:text-[#C8972E] transition-colors">
-                                  {product.name}
-                                </p>
-                                <p className="text-[10px] uppercase tracking-[0.1em] text-[#6B6560]/60 truncate">
-                                  {categoryName(product)}
-                                </p>
-                                <p className="text-[13px] font-bold text-[#C8972E] mt-0.5">
-                                  {formatPrice(product.final_price || product.price_ars)}
-                                </p>
-                              </div>
-                            </button>
-                          );
-                        })}
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+                        {popularProducts.map((product, idx) => (
+                          <SearchCard
+                            key={product.id}
+                            product={product}
+                            delay={`${200 + idx * 100}ms`}
+                            sizes={CARD_SIZES}
+                            onSelect={goToProduct}
+                            className={idx >= 2 ? 'hidden md:block' : ''}
+                          />
+                        ))}
                       </div>
                     )}
-                  </div>
-                </div>
-              )}
+                  </>
+                )}
 
-              {/* Search results */}
-              {showResults && (
-                <div>
-                  <h3
-                    className="lupita-item text-[11px] font-bold uppercase tracking-[0.15em] text-[#C8972E] mb-3"
-                    style={{ transitionDelay: '100ms' }}
-                  >
-                    Productos
-                  </h3>
-                  <div
-                    className="grid grid-cols-4 gap-3 snap-y snap-mandatory overflow-y-auto hide-scrollbar overscroll-contain"
-                    style={rowHeight ? { maxHeight: `${rowHeight}px` } : undefined}
-                  >
-                    {results.slice(0, 8).map((product, idx) => {
-                      const delay = `${150 + idx * 50}ms`;
-                      return (
-                        <button
-                          key={product.id}
-                          ref={idx === 0 ? setFirstCardEl : undefined}
-                          onClick={() => goToProduct(product.slug)}
-                          className="lupita-item text-left group/card snap-start"
-                          style={{ transitionDelay: delay }}
-                          role="option"
-                        >
-                          <div
-                            className="lupita-image aspect-square bg-[#F5F1EA] rounded-lg relative overflow-hidden border border-[#E8E4DD]/60"
-                            style={{ transitionDelay: delay }}
-                          >
-                            {product.image_url ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
-                                {...imgProps(product.image_url, 'card')}
-                                alt={product.name}
-                                className="absolute inset-0 w-full h-full object-contain p-3 group-hover/card:scale-105 transition-transform duration-300"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <Search size={20} className="text-[#6B6560]/15" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="pt-2 px-0.5">
-                            <p className="text-[12px] font-semibold text-[#1A1A1A] truncate group-hover/card:text-[#C8972E] transition-colors">
-                              {product.name}
-                            </p>
-                            <p className="text-[10px] uppercase tracking-[0.1em] text-[#6B6560]/60 truncate">
-                              {categoryName(product)}
-                            </p>
-                            <p className="text-[13px] font-bold text-[#C8972E] mt-0.5">
-                              {formatPrice(product.final_price || product.price_ars)}
-                            </p>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Link to full results */}
-                  <div
-                    className="lupita-item mt-5 pt-4 border-t border-[#E8E4DD] text-center"
-                    style={{
-                      transitionDelay: `${150 + Math.min(results.length, 8) * 50}ms`,
-                    }}
-                  >
-                    <button
-                      onClick={goToSearch}
-                      className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[#6B6560] hover:text-[#C8972E] transition-colors"
+                {/* Search results: una fila de 3 a la vista, el resto con scroll por fila */}
+                {showResults && (
+                  <>
+                    <h3 className="lupita-item mm-eyebrow" style={{ transitionDelay: '100ms' }}>
+                      Productos
+                    </h3>
+                    <div
+                      className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 snap-y snap-mandatory overflow-y-auto hide-scrollbar overscroll-contain"
+                      style={rowHeight ? { maxHeight: `${rowHeight}px` } : undefined}
                     >
-                      Ver todos los resultados para &quot;{query}&quot; →
-                    </button>
-                  </div>
-                </div>
-              )}
+                      {results.slice(0, 9).map((product, idx) => (
+                        <SearchCard
+                          key={product.id}
+                          product={product}
+                          delay={`${150 + idx * 50}ms`}
+                          sizes={CARD_SIZES}
+                          onSelect={goToProduct}
+                          cardRef={idx === 0 ? setFirstCardEl : undefined}
+                          className="snap-start"
+                          role="option"
+                        />
+                      ))}
+                    </div>
 
-              {/* Empty state */}
-              {showEmpty && (
-                <div
-                  className="lupita-item text-center py-10"
-                  style={{ transitionDelay: '100ms' }}
-                >
-                  <p className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#6B6560]/50">
-                    No se encontraron resultados para &quot;{query}&quot;
-                  </p>
-                </div>
-              )}
+                    {/* Link to full results */}
+                    <div
+                      className="lupita-item mt-5 pt-4 border-t border-[#E8E4DD] text-center"
+                      style={{ transitionDelay: `${150 + Math.min(results.length, 9) * 50}ms` }}
+                    >
+                      <button
+                        onClick={goToSearch}
+                        className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#8a847e] hover:text-[#1A1A1A] transition-colors"
+                      >
+                        Ver todos los resultados para &quot;{query}&quot; →
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {/* Empty state */}
+                {showEmpty && (
+                  <div className="lupita-item text-center py-10" style={{ transitionDelay: '100ms' }}>
+                    <p className="text-[13px] font-bold uppercase tracking-[0.1em] text-[#8a847e]">
+                      No se encontraron resultados para &quot;{query}&quot;
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
