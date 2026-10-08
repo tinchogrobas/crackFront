@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingBag, Menu, X, Search, LogOut } from 'lucide-react';
+import { ShoppingBag, Menu, X, Search, LogOut, CircleUserRound } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import CartDrawer from './CartDrawer';
 import TiendaMegaMenu from './TiendaMegaMenu';
@@ -231,6 +231,18 @@ export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAUL
               >
                 <Search size={22} />
               </button>
+              <Link
+                href="/cuenta"
+                aria-label="Mi cuenta"
+                title="Mi cuenta"
+                className={`transition-colors ${
+                  light
+                    ? 'text-[#6B6560] hover:text-[#1A1A1A]'
+                    : 'text-white/90 hover:text-[#C8972E] drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]'
+                }`}
+              >
+                <CircleUserRound size={22} />
+              </Link>
               <button
                 onClick={openCart}
                 className={`transition-colors relative ${
@@ -299,6 +311,14 @@ export default function Navbar({ showTopBanner = true, topBannerMessage = DEFAUL
                 <Search size={18} />
                 <span className="text-[13px] font-semibold uppercase tracking-[0.12em]">Buscar</span>
               </button>
+              <Link
+                href="/cuenta"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2 -mt-4 mb-8 text-[#6B6560] hover:text-[#1A1A1A] transition-colors"
+              >
+                <CircleUserRound size={18} />
+                <span className="text-[13px] font-semibold uppercase tracking-[0.12em]">Mi cuenta</span>
+              </Link>
               <div className="flex flex-col gap-6">
                 {navLinks.map((link, i) => (
                   <motion.div

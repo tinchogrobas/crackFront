@@ -11,6 +11,7 @@ import { getPaymentConfig } from '@/lib/api';
 import { initProductZoom } from '@/lib/productZoom';
 import { imgProps } from '@/lib/imageProps';
 import { trackViewItem, trackAddToCart } from '@/lib/analytics';
+import { attributesOf, finishLabel, isInformativeFinish, isSpecialFinish, languageOf } from '@/lib/productTraits';
 import toast from 'react-hot-toast';
 
 export default function ProductDetailClient({ product }) {
@@ -61,7 +62,12 @@ export default function ProductDetailClient({ product }) {
   const formattedGrade = rawGrade != null && rawGrade !== ''
     ? (Number.isFinite(Number(rawGrade)) ? (Number(rawGrade) % 1 === 0 ? String(parseInt(rawGrade, 10)) : String(Number(rawGrade))) : rawGrade)
     : null;
-  const hasBadges = Boolean(certEntity || conditionName);
+  // Acabado especial (Reverse Holo, 1st Edition...) y particularidades de la
+  // unidad (Firmada, Alterada...): cambian qué es la carta, así que van arriba.
+  const specialFinish = isSpecialFinish(product.finish) ? finishLabel(product.finish) : null;
+  const unitAttributes = attributesOf(product);
+  const language = languageOf(product);
+  const hasBadges = Boolean(certEntity || conditionName || specialFinish || unitAttributes.length);
   // Datos de la carta del catálogo (TCGplayer): expansión, número, rareza e
   // idioma. Llegan anidados en el producto, no hay que pedirlos aparte.
   const catalog = product.catalog;
@@ -198,6 +204,16 @@ export default function ProductDetailClient({ product }) {
                 {conditionName && (
                   <ConditionBadge conditionName={conditionName} />
                 )}
+                {specialFinish && (
+                  <span className="inline-flex items-center text-[11px] bg-[#C8972E]/10 text-[#8A6417] border border-[#C8972E]/30 px-3 py-1.5 rounded-full font-bold tracking-wide">
+                    {specialFinish}
+                  </span>
+                )}
+                {unitAttributes.map((label) => (
+                  <span key={label} className="inline-flex items-center text-[11px] bg-white text-[#2F2A25] border border-[#E8E4DD] px-3 py-1.5 rounded-full font-semibold tracking-wide">
+                    {label}
+                  </span>
+                ))}
               </div>
             )}
 
@@ -212,14 +228,15 @@ export default function ProductDetailClient({ product }) {
                 {[
                   ['Número', catalog.number],
                   ['Rareza', catalog.rarity && catalog.rarity !== 'None' ? catalog.rarity : null],
-                  ['Idioma', catalog.language ? (catalog.language === 'ja' ? 'Japonés' : 'Inglés') : null],
+                  ['Idioma', language ? language.label : null],
+                  ['Detalle', isInformativeFinish(product.finish) ? finishLabel(product.finish) : null],
                 ].filter(([, value]) => value).map(([label, value]) => (
                   <div key={label}>
                     <dt className="text-[11px] tracking-[0.16em] text-[#5F5A54] uppercase mb-1.5">{label}</dt>
                     {label === 'Idioma' ? (
                       <dd className="flex items-center gap-2 text-[14px] font-semibold text-[#2F2A25]">
                         <img
-                          src={catalog.language === 'ja' ? '/flags/flag-jp.svg' : '/flags/flag-en.svg'}
+                          src={language.flag}
                           alt={value}
                           width={20}
                           height={15}

@@ -3,6 +3,8 @@
  * Todos los precios vienen en ARS desde el servidor (price_usd * exchange_rate).
  */
 
+import { CUSTOMER_TOKEN_HEADER, getCustomerToken } from './customerApi';
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
 /**
@@ -27,8 +29,8 @@ async function apiFetch(path, options = {}) {
   let res;
   try {
     res = await fetch(`${BASE_URL}${path}`, {
-      headers: { 'Content-Type': 'application/json', ...options.headers },
       ...options,
+      headers: { 'Content-Type': 'application/json', ...options.headers },
     });
   } catch {
     // El servidor no contestó: sin internet, caído o CORS.
@@ -153,8 +155,12 @@ export async function createOrder(orderData) {
     payload.frontend_origin = window.location.origin;
   }
 
+  // Con la sesión abierta, la orden queda en la cuenta del comprador.
+  const customerToken = await getCustomerToken();
+
   return apiFetch('/orders/', {
     method: 'POST',
+    headers: customerToken ? { [CUSTOMER_TOKEN_HEADER]: customerToken } : {},
     body: JSON.stringify(payload),
   });
 }

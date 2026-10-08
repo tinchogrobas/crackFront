@@ -66,7 +66,12 @@ export async function generateMetadata({ searchParams }) {
 
   // Filtros CSV (múltiples valores) NO son canónicos → apuntan a /tienda base
   const isCsv = (v) => typeof v === 'string' && v.includes(',');
-  const hasCsvFilter = isCsv(category) || isCsv(tcg) || isCsv(condition) || isCsv(certEntity);
+  // Idioma, acabado y particularidades tampoco: son combinaciones del usuario,
+  // no páginas para indexar.
+  const hasTraitFilter = Boolean(
+    toSingleValue(resolvedParams?.language) || toSingleValue(resolvedParams?.finish) || toSingleValue(resolvedParams?.attribute),
+  );
+  const hasCsvFilter = isCsv(category) || isCsv(tcg) || isCsv(condition) || isCsv(certEntity) || hasTraitFilter;
 
   // Canonical: solo filtros "evergreen" de valor único + paginación reciben su propia canonical.
   // Orden canónico fijo: category → tcg → condition → certification_entity → has_discount → page
@@ -148,6 +153,9 @@ export default async function TiendaPage({ searchParams }) {
   const minPrice = toSingleValue(searchParams?.min_price);
   const maxPrice = toSingleValue(searchParams?.max_price);
   const hasDiscount = ['1', 'true', 'yes'].includes(toSingleValue(searchParams?.has_discount).toLowerCase());
+  const selectedLanguages = parseCsv(toSingleValue(searchParams?.language)).map((value) => value.toLowerCase());
+  const selectedFinishes = parseCsv(toSingleValue(searchParams?.finish));
+  const selectedAttributes = parseCsv(toSingleValue(searchParams?.attribute));
   const requestedPage = Number.parseInt(toSingleValue(searchParams?.page) || '1', 10);
   const currentPage = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
 
@@ -163,6 +171,9 @@ export default async function TiendaPage({ searchParams }) {
   if (minPrice) productQs.set('min_price', minPrice);
   if (maxPrice) productQs.set('max_price', maxPrice);
   if (hasDiscount) productQs.set('has_discount', 'true');
+  if (selectedLanguages.length) productQs.set('language', selectedLanguages.join(','));
+  if (selectedFinishes.length) productQs.set('finish', selectedFinishes.join(','));
+  if (selectedAttributes.length) productQs.set('attribute', selectedAttributes.join(','));
 
   // Stock must be fresh after checkout returns; avoid stale cached product lists.
   const productsData = await serverApiFetch(`/products/?${productQs.toString()}`, {
@@ -191,6 +202,9 @@ export default async function TiendaPage({ searchParams }) {
         minPrice,
         maxPrice,
         hasDiscount,
+        selectedLanguages,
+        selectedFinishes,
+        selectedAttributes,
       }}
       options={{
         tcgs,

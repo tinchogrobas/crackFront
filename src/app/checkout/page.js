@@ -15,6 +15,9 @@ import {
   setUserData,
 } from '@/lib/analytics';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
+import { useSession } from '@/components/account/SessionProvider';
+import { getAddresses } from '@/lib/customerApi';
 import { Tag, AlertTriangle, Loader2, X, Truck, MapPin, CreditCard, Landmark, Banknote, BadgePercent, Store, Zap, Copy, Check, Upload, FileText } from 'lucide-react';
 
 const provinces = [
@@ -239,6 +242,45 @@ function CheckoutContent() {
     loadPaymentConfig();
     return () => { cancelled = true; };
   }, []);
+
+  // Con la sesión abierta se completan los datos que el comprador ya tiene en
+  // su cuenta. Solo los campos vacíos, y una sola vez: nunca pisa lo que tipeó.
+  const { status: sessionStatus, profile } = useSession();
+  const prefilledRef = useRef(false);
+  const [savedAddresses, setSavedAddresses] = useState([]);
+  useEffect(() => {
+    if (!profile || prefilledRef.current) return;
+    prefilledRef.current = true;
+    const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ');
+    setForm((prev) => ({
+      ...prev,
+      customer_name: prev.customer_name || fullName,
+      customer_email: prev.customer_email || profile.email,
+      customer_phone: prev.customer_phone || profile.phone,
+    }));
+    getAddresses().then(setSavedAddresses).catch(() => {});
+  }, [profile]);
+
+  // Al elegir envío a domicilio o a sucursal, se completa con la dirección
+  // guardada de ese tipo. Cambiar de modalidad limpia los campos (ver
+  // handleDeliveryMethodChange), así que esto vuelve a correr con la que toca.
+  useEffect(() => {
+    const method = form.shipping_delivery_method;
+    const kind = method === 'home' ? 'home' : method === 'branch_normal' || method === 'branch_express' ? 'branch' : null;
+    if (!kind || form.shipping_address || form.shipping_city || form.shipping_zip) return;
+    const sameKind = savedAddresses.filter((a) => a.kind === kind);
+    const address = sameKind.find((a) => a.is_default) || sameKind[0];
+    if (!address) return;
+    setForm((prev) => ({
+      ...prev,
+      shipping_address: address.address,
+      shipping_city: address.city,
+      shipping_province: address.province,
+      shipping_zip: address.zip_code,
+    }));
+    // Solo cuando cambia la modalidad o llegan las direcciones: si el
+    // comprador borra un campo a mano, no se le vuelve a completar.
+  }, [form.shipping_delivery_method, savedAddresses]);
 
   const updateForm = (field, value) => {
     setForm((f) => ({ ...f, [field]: value }));
@@ -800,7 +842,19 @@ function CheckoutContent() {
           {/* ── Datos del comprador ── */}
           <div className="lg:col-span-2 space-y-8">
             <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              <h2 className="text-sm font-bold tracking-[0.15em] text-[#1A1A1A] mb-6">DATOS DE CONTACTO</h2>
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 mb-6">
+                <h2 className="text-sm font-bold tracking-[0.15em] text-[#1A1A1A]">DATOS DE CONTACTO</h2>
+                {sessionStatus === 'anonymous' && (
+                  <Link href="/cuenta?next=/checkout" className="text-[13px] text-[#6B6560] hover:text-[#1A1A1A] transition-colors">
+                    ¿Tenés cuenta? <span className="font-semibold text-[#C8972E]">Ingresá</span>
+                  </Link>
+                )}
+                {sessionStatus === 'authenticated' && profile && (
+                  <p className="text-[13px] text-[#6B6560]">
+                    Comprando con tu cuenta <span className="text-[#1A1A1A] font-medium">{profile.email}</span>
+                  </p>
+                )}
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
                   <label className={labelClass}>Nombre completo *</label>

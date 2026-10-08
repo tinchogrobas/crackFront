@@ -7,6 +7,7 @@ import { SlidersHorizontal, X, Search, ChevronDown } from 'lucide-react';
 import ProductCard from '@/components/ui/ProductCard';
 import { trackViewItemList } from '@/lib/analytics';
 import SkeletonCard from '@/components/ui/SkeletonCard';
+import { ATTRIBUTES, FINISH_FILTERS, LANGUAGES } from '@/lib/productTraits';
 
 const sortOptions = [
   { value: '-created_at', label: 'Mas nuevos' },
@@ -57,6 +58,9 @@ export default function TiendaClient({ pageSize, initialData, initialFilters, op
   const [minPrice, setMinPrice] = useState(initialFilters.minPrice || '');
   const [maxPrice, setMaxPrice] = useState(initialFilters.maxPrice || '');
   const [hasDiscount, setHasDiscount] = useState(Boolean(initialFilters.hasDiscount));
+  const [selectedLanguages, setSelectedLanguages] = useState(initialFilters.selectedLanguages || []);
+  const [selectedFinishes, setSelectedFinishes] = useState(initialFilters.selectedFinishes || []);
+  const [selectedAttributes, setSelectedAttributes] = useState(initialFilters.selectedAttributes || []);
 
   const tcgs = options?.tcgs || [];
   const categoriesList = options?.categoriesList || [];
@@ -70,10 +74,11 @@ export default function TiendaClient({ pageSize, initialData, initialFilters, op
    */
   const listName = useMemo(() => {
     if (search) return `Búsqueda: ${search}`;
-    const parts = [...selectedCategories, ...selectedTcgs, ...selectedConditions, ...selectedCertEntities];
+    const parts = [...selectedCategories, ...selectedTcgs, ...selectedConditions, ...selectedCertEntities,
+      ...selectedLanguages, ...selectedFinishes, ...selectedAttributes];
     if (hasDiscount) parts.push('ofertas');
     return parts.length ? `Tienda · ${parts.join(' · ')}` : 'Tienda';
-  }, [search, selectedCategories, selectedTcgs, selectedConditions, selectedCertEntities, hasDiscount]);
+  }, [search, selectedCategories, selectedTcgs, selectedConditions, selectedCertEntities, selectedLanguages, selectedFinishes, selectedAttributes, hasDiscount]);
 
   // Un solo view_item_list por combinación lista+página. Sin la firma, cada
   // re-render por un filtro de UI volvería a impactar el mismo listado.
@@ -99,6 +104,9 @@ export default function TiendaClient({ pageSize, initialData, initialFilters, op
     setSelectedCategories(initialFilters.selectedCategories || []);
     setSelectedConditions(initialFilters.selectedConditions || []);
     setSelectedCertEntities(initialFilters.selectedCertEntities || []);
+    setSelectedLanguages(initialFilters.selectedLanguages || []);
+    setSelectedFinishes(initialFilters.selectedFinishes || []);
+    setSelectedAttributes(initialFilters.selectedAttributes || []);
 
     const incomingMin = initialFilters.minPrice || '';
     const incomingMax = initialFilters.maxPrice || '';
@@ -142,7 +150,8 @@ export default function TiendaClient({ pageSize, initialData, initialFilters, op
     return left.localeCompare(right);
   }), [conditions]);
 
-  const activeCount = selectedTcgs.length + selectedCategories.length + selectedConditions.length + selectedCertEntities.length + (minPrice ? 1 : 0) + (maxPrice ? 1 : 0) + (hasDiscount ? 1 : 0);
+  const activeCount = selectedTcgs.length + selectedCategories.length + selectedConditions.length + selectedCertEntities.length
+    + selectedLanguages.length + selectedFinishes.length + selectedAttributes.length + (minPrice ? 1 : 0) + (maxPrice ? 1 : 0) + (hasDiscount ? 1 : 0);
   const visibleStart = total === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const visibleEnd = total === 0 ? 0 : visibleStart + products.length - 1;
 
@@ -158,6 +167,9 @@ export default function TiendaClient({ pageSize, initialData, initialFilters, op
     if (nextState.minPrice) params.set('min_price', nextState.minPrice);
     if (nextState.maxPrice) params.set('max_price', nextState.maxPrice);
     if (nextState.hasDiscount) params.set('has_discount', 'true');
+    if (nextState.selectedLanguages.length) params.set('language', nextState.selectedLanguages.join(','));
+    if (nextState.selectedFinishes.length) params.set('finish', nextState.selectedFinishes.join(','));
+    if (nextState.selectedAttributes.length) params.set('attribute', nextState.selectedAttributes.join(','));
     if (nextState.currentPage > 1) params.set('page', String(nextState.currentPage));
 
     return params.toString();
@@ -180,6 +192,9 @@ export default function TiendaClient({ pageSize, initialData, initialFilters, op
       minPrice,
       maxPrice,
       hasDiscount,
+      selectedLanguages,
+      selectedFinishes,
+      selectedAttributes,
       currentPage: bounded,
     });
     router.prefetch(nextUrl);
@@ -196,6 +211,9 @@ export default function TiendaClient({ pageSize, initialData, initialFilters, op
       minPrice,
       maxPrice,
       hasDiscount,
+      selectedLanguages,
+      selectedFinishes,
+      selectedAttributes,
       currentPage,
       ...override,
     };
@@ -258,7 +276,7 @@ export default function TiendaClient({ pageSize, initialData, initialFilters, op
     if (totalPages <= 1) return;
     if (currentPage < totalPages) prefetchPage(currentPage + 1);
     if (currentPage > 1) prefetchPage(currentPage - 1);
-  }, [currentPage, totalPages, search, ordering, selectedTcgs, selectedCategories, selectedConditions, selectedCertEntities, minPrice, maxPrice, hasDiscount]);
+  }, [currentPage, totalPages, search, ordering, selectedTcgs, selectedCategories, selectedConditions, selectedCertEntities, selectedLanguages, selectedFinishes, selectedAttributes, minPrice, maxPrice, hasDiscount]);
 
   const toggleValue = (arr, setArr, value, key) => {
     const next = arr.includes(value) ? arr.filter((item) => item !== value) : [...arr, value];
@@ -297,6 +315,9 @@ export default function TiendaClient({ pageSize, initialData, initialFilters, op
     setSelectedCategories([]);
     setSelectedConditions([]);
     setSelectedCertEntities([]);
+    setSelectedLanguages([]);
+    setSelectedFinishes([]);
+    setSelectedAttributes([]);
     setMinPrice('');
     setMaxPrice('');
     lastPriceNavRef.current = { min: '', max: '' };
@@ -308,6 +329,9 @@ export default function TiendaClient({ pageSize, initialData, initialFilters, op
       selectedCategories: [],
       selectedConditions: [],
       selectedCertEntities: [],
+      selectedLanguages: [],
+      selectedFinishes: [],
+      selectedAttributes: [],
       minPrice: '',
       maxPrice: '',
       hasDiscount: false,
@@ -361,6 +385,28 @@ export default function TiendaClient({ pageSize, initialData, initialFilters, op
               </div>
             )}
           </div>
+        ))}
+      </Section>
+
+      {/* Idioma de la carta impresa (no el del set: hay cartas en español de sets en inglés). */}
+      <Section title="Idioma">
+        {Object.entries(LANGUAGES).map(([code, { label, flag }]) => (
+          <div key={code} className="flex items-center gap-2">
+            <Check label={label} checked={selectedLanguages.includes(code)} onChange={() => toggleValue(selectedLanguages, setSelectedLanguages, code, 'selectedLanguages')} />
+            <img src={flag} alt="" width={16} height={12} className="w-4 h-3 rounded-[2px] object-cover ring-1 ring-black/5 shrink-0" />
+          </div>
+        ))}
+      </Section>
+
+      <Section title="Detalle">
+        {FINISH_FILTERS.map(({ value, label }) => (
+          <Check key={value} label={label} checked={selectedFinishes.includes(value)} onChange={() => toggleValue(selectedFinishes, setSelectedFinishes, value, 'selectedFinishes')} />
+        ))}
+      </Section>
+
+      <Section title="Particularidades">
+        {ATTRIBUTES.map(([field, label]) => (
+          <Check key={field} label={label} checked={selectedAttributes.includes(field)} onChange={() => toggleValue(selectedAttributes, setSelectedAttributes, field, 'selectedAttributes')} />
         ))}
       </Section>
 

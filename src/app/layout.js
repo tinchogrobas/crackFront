@@ -9,6 +9,7 @@ import AnalyticsScripts from '@/components/analytics/AnalyticsScripts';
 import ConsentBanner from '@/components/analytics/ConsentBanner';
 import { getMegaMenuData } from '@/lib/megaMenu';
 import FloatingContact from '@/components/layout/FloatingContact';
+import { SessionProvider } from '@/components/account/SessionProvider';
 import {
   ANALYTICS_ENABLED,
   GA4_ID,
@@ -341,7 +342,7 @@ export default async function RootLayout({ children }) {
         {isMaintenance ? (
           <MaintenancePage message={siteConfig.maintenance_message} />
         ) : (
-          <>
+          <SessionProvider>
             {/* Los tags de marketing no se cargan en mantenimiento: no hay nada
                 que medir y ensuciaría las sesiones del reporte. */}
             <AnalyticsScripts />
@@ -371,7 +372,7 @@ export default async function RootLayout({ children }) {
               }}
             />
             <ConsentBanner />
-          </>
+          </SessionProvider>
         )}
       </body>
     </html>

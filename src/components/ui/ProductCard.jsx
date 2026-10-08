@@ -7,6 +7,7 @@ import { getProductMaxQuantity, useCartStore } from '@/store/cartStore';
 import { formatPrice } from '@/lib/formatPrice';
 import { imgProps } from '@/lib/imageProps';
 import { trackAddToCart, trackSelectItem } from '@/lib/analytics';
+import { attributesOf, finishLabel, isSpecialFinish, languageOf } from '@/lib/productTraits';
 import toast from 'react-hot-toast';
 
 export default function ProductCard({ product, listName = 'Tienda', listIndex }) {
@@ -66,6 +67,13 @@ export default function ProductCard({ product, listName = 'Tienda', listIndex })
   // se lee mejor partido en título y subtítulo.
   const title = catalog ? `${catalog.name}${catalog.number ? ` ${catalog.number}` : ''}` : product.name;
   const subtitle = catalog?.set_name || categoryName;
+  // Idioma real de la carta y lo que la distingue de otra copia (Reverse Holo,
+  // 1st Edition, Firmada...). El título sale del catálogo, así que se dice aparte.
+  const language = languageOf(product);
+  const traits = [
+    isSpecialFinish(product.finish) ? finishLabel(product.finish) : null,
+    ...attributesOf(product),
+  ].filter(Boolean);
 
   return (
     <div onClick={goToProduct} className="cursor-pointer group">
@@ -113,13 +121,13 @@ export default function ProductCard({ product, listName = 'Tienda', listIndex })
           </span>
         ) : null}
 
-        {/* Idioma — solo si la carta está en el catálogo. Chip de bandera con la proporción real (4:3), no forzada a cuadrado */}
-        {catalog && (
+        {/* Idioma de la carta. Chip de bandera con la proporción real (4:3), no forzada a cuadrado */}
+        {language && (
           <span className={`absolute left-3 z-10 ${hasDiscount ? 'top-10' : 'top-3'}`}>
             <img
-              src={catalog.language === 'ja' ? '/flags/flag-jp.svg' : '/flags/flag-en.svg'}
-              alt={catalog.language === 'ja' ? 'Japonés' : 'Inglés'}
-              title={catalog.language === 'ja' ? 'Japonés' : 'Inglés'}
+              src={language.flag}
+              alt={language.label}
+              title={language.label}
               width={20}
               height={15}
               className="w-6 h-[18px] rounded-[4px] object-cover shadow-sm ring-1 ring-black/5 border border-white/80"
@@ -144,6 +152,9 @@ export default function ProductCard({ product, listName = 'Tienda', listIndex })
       <div className="mt-3.5 space-y-1 px-0.5">
         <p className="text-[10px] text-[#C8972E]/70 uppercase tracking-[0.15em] font-medium truncate" title={subtitle}>{subtitle}</p>
         <h3 className="text-[13px] font-semibold text-[#1A1A1A]/75 truncate group-hover:text-[#1A1A1A] transition-colors duration-300" title={product.name}>{title}</h3>
+        {traits.length > 0 && (
+          <p className="text-[10.5px] font-semibold text-[#B8851F] truncate" title={traits.join(' · ')}>{traits.join(' · ')}</p>
+        )}
         <div className="flex items-center gap-2 pt-0.5">
           {hasDiscount ? (
             <>
