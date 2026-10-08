@@ -108,7 +108,7 @@ export default function LoginForm({ next = '/cuenta/pedidos' }) {
             Iniciar sesión<span className="text-[#C8972E]">.</span>
           </h1>
           <p className="text-[14px] text-[#6B6560] mt-2 mb-8">
-            Seguí tus pedidos y comprá más rápido. Si no tenés cuenta, se crea sola.
+            Seguí tus pedidos y comprá más rápido. Iniciá sesión con Google y seguí tus pedidos fácilmente.
           </p>
 
           <button
