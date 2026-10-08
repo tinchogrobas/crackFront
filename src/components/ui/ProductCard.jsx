@@ -152,8 +152,13 @@ export default function ProductCard({ product, listName = 'Tienda', listIndex })
       <div className="mt-3.5 space-y-1 px-0.5">
         <p className="text-[10px] text-[#C8972E]/70 uppercase tracking-[0.15em] font-medium truncate" title={subtitle}>{subtitle}</p>
         <h3 className="text-[13px] font-semibold text-[#1A1A1A]/75 truncate group-hover:text-[#1A1A1A] transition-colors duration-300" title={product.name}>{title}</h3>
-        {traits.length > 0 && (
+        {/* La línea va siempre, vacía si no hay detalles: si no, las tarjetas
+            con Reverse/Firmada quedan una línea más altas y los precios de
+            una misma fila no se alinean. */}
+        {traits.length > 0 ? (
           <p className="text-[10.5px] font-semibold text-[#B8851F] truncate" title={traits.join(' · ')}>{traits.join(' · ')}</p>
+        ) : (
+          <p className="text-[10.5px]" aria-hidden="true">&nbsp;</p>
         )}
         <div className="flex items-center gap-2 pt-0.5">
           {hasDiscount ? (
