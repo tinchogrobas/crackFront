@@ -11,7 +11,9 @@
  * categorías que haya y los bloques sin imagen.
  */
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+import { internalApiHeaders } from './internalApi';
+
+const BASE_URL =process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
 // Las categorías casi no cambian; el ranking de precios sí, con cada venta.
 const REVALIDATE_CATEGORIES = 60 * 30;
@@ -39,6 +41,7 @@ async function fetchJson(path, revalidate) {
     const res = await fetch(`${BASE_URL}${path}`, {
       next: { revalidate },
       signal: controller.signal,
+      headers: internalApiHeaders(),
     });
     if (!res.ok) return null;
     return await res.json();

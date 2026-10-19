@@ -8,6 +8,7 @@ import MaintenancePage from '@/components/MaintenancePage';
 import AnalyticsScripts from '@/components/analytics/AnalyticsScripts';
 import ConsentBanner from '@/components/analytics/ConsentBanner';
 import { getMegaMenuData } from '@/lib/megaMenu';
+import { internalApiHeaders } from '@/lib/internalApi';
 import FloatingContact from '@/components/layout/FloatingContact';
 import { SessionProvider } from '@/components/account/SessionProvider';
 import {
@@ -240,6 +241,7 @@ async function getSiteConfig() {
     const res = await fetch(`${BASE_URL}/site-config/`, {
       cache: 'no-store',
       signal: controller.signal,
+      headers: internalApiHeaders(),
     });
 
     clearTimeout(timeoutId);
@@ -284,7 +286,7 @@ async function isAdminBypassValid() {
     const res = await fetch(`${BASE_URL}/auth/me/`, {
       cache: 'no-store',
       signal: controller.signal,
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token}`, ...internalApiHeaders() },
     });
 
     clearTimeout(timeoutId);

@@ -1,4 +1,5 @@
 import TiendaClient from './TiendaClient';
+import { internalApiHeaders } from '@/lib/internalApi';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:8000/api/v1';
 const PAGE_SIZE = 12;
@@ -24,9 +25,10 @@ function unwrapList(data) {
 }
 
 async function serverApiFetch(path, { revalidateSeconds = 0 } = {}) {
-  const fetchOptions = revalidateSeconds > 0
+  const cacheOptions = revalidateSeconds > 0
     ? { next: { revalidate: revalidateSeconds } }
     : { cache: 'no-store' };
+  const fetchOptions = { ...cacheOptions, headers: internalApiHeaders() };
 
   const response = await fetch(`${API_BASE_URL}${path}`, fetchOptions);
 

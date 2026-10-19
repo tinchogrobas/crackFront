@@ -2,6 +2,7 @@
  * Single source of truth para datos SEO globales del sitio.
  * Todo lo estático (nombre, URL, datos de negocio, keywords base) vive acá.
  */
+import { internalApiHeaders } from './internalApi';
 
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://crack-front-rho.vercel.app';
@@ -80,7 +81,7 @@ export async function serverFetch(path, { revalidateSeconds = 0, timeoutMs = 800
 
   const init = {
     signal: controller.signal,
-    headers: { Accept: 'application/json' },
+    headers: { Accept: 'application/json', ...internalApiHeaders() },
     ...(revalidateSeconds > 0
       ? { next: { revalidate: revalidateSeconds } }
       : { cache: 'no-store' }),
